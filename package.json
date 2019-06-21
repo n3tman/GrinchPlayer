@@ -1,7 +1,7 @@
 {
 	"name": "grinch-player",
 	"productName": "Grinch Player",
-	"version": "0.0.0",
+	"version": "0.1.0",
 	"description": "Technoprank player, soundboard",
 	"license": "MIT",
 	"author": {
@@ -13,7 +13,7 @@
 		"test": "npm run lint",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --linux --windows",
+		"dist": "electron-builder --windows",
 		"release": "np"
 	},
 	"dependencies": {
@@ -35,7 +35,7 @@
 			"node",
 			"browser"
 		],
-        "space": 4
+		"space": 4
 	},
 	"np": {
 		"publish": false,
