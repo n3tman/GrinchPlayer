@@ -4,10 +4,7 @@ const {app, Menu, shell} = require('electron');
 const {
     is,
     appMenu,
-    aboutMenuItem,
-    openUrlMenuItem,
-    openNewGitHubIssue,
-    debugInfo
+    aboutMenuItem
 } = require('electron-util');
 const config = require('./config');
 
@@ -15,34 +12,7 @@ const showPreferences = () => {
     // Show the app's preferences here
 };
 
-const helpSubmenu = [
-    openUrlMenuItem({
-        label: 'Website',
-        url: 'https://github.com/sindresorhus/electron-boilerplate'
-    }),
-    openUrlMenuItem({
-        label: 'Source Code',
-        url: 'https://github.com/sindresorhus/electron-boilerplate'
-    }),
-    {
-        label: 'Report an Issue…',
-        click() {
-            const body = `
-<!-- Please succinctly describe your issue and steps to reproduce it. -->
-
-
----
-
-${debugInfo()}`;
-
-            openNewGitHubIssue({
-                user: 'sindresorhus',
-                repo: 'electron-boilerplate',
-                body
-            });
-        }
-    }
-];
+const helpSubmenu = [];
 
 if (!is.macos) {
     helpSubmenu.push(
