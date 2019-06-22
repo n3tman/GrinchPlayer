@@ -1,7 +1,7 @@
 {
 	"name": "grinch-player",
 	"productName": "Grinch Player",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"description": "Плеер для технопранков",
 	"license": "MIT",
 	"author": {
@@ -50,11 +50,11 @@
 			"browser"
 		],
 		"space": 4,
-        "esnext ": false,
-        "rules": {
-            "prefer-arrow-callback": 0,
-            "prefer-const": 0
-        }
+		"esnext ": false,
+		"rules": {
+			"prefer-arrow-callback": 0,
+			"prefer-const": 0
+		}
 	},
 	"np": {
 		"publish": false,
