@@ -1,43 +1,122 @@
-html,
-body {
-    padding: 0;
-    margin: 0;
-    background: white;
+// ------------------ //
+//  Imports
+// ------------------ //
+@import "node_modules/bulmaswatch/superhero/variables";
+
+// restoring default from Bulma
+$family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
+$bulmaswatch-import-font: false;
+
+@import "node_modules/bulma/bulma";
+
+@import "node_modules/bulmaswatch/superhero/overrides";
+
+// fixing font paths
+$fa-font-path: "node_modules/fork-awesome/fonts";
+
+@import "node_modules/fork-awesome/scss/fork-awesome";
+
+// ------------------ //
+//  Layout
+// ------------------ //
+
+html, body {
+    overflow-y: hidden;
+    height: 100%;
 }
 
-/* Use OS default fonts */
-body {
-    font-family: -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen-Sans,
-    Ubuntu,
-    Cantarell,
-    'Helvetica Neue',
-    sans-serif,
-    'Apple Color Emoji',
-    'Segoe UI Emoji',
-    'Segoe UI Symbol';
-    text-rendering: optimizeLegibility;
-    font-feature-settings: 'liga', 'clig', 'kern';
+.main {
+    height: calc(100% - 3rem);
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
 }
 
-header {
-    position: absolute;
-    width: 500px;
-    height: 250px;
-    top: 50%;
-    left: 50%;
-    margin-top: -125px;
-    margin-left: -250px;
+// ------------------ //
+//  Global
+// ------------------ //
+
+.title {
     text-align: center;
 }
 
-header h1 {
-    font-size: 60px;
-    font-weight: 200;
-    margin: 0;
-    padding: 0;
-    opacity: 0.7;
+// ------------------ //
+//  Utilities
+// ------------------ //
+
+.drag {
+    -webkit-app-region: drag;
+}
+
+.no-drag {
+    -webkit-app-region: no-drag;
+}
+
+// ------------------ //
+//  Navbar
+// ------------------ //
+
+.navbar {
+    padding: 4px;
+    min-height: $size-1;
+    height: $size-1;
+}
+
+.navbar-brand {
+    & {
+        min-height: $size-3;
+    }
+
+    .text {
+        font-weight: bold;
+        margin-left: $size-small;
+    }
+}
+
+.navbar-item {
+    & {
+        font-size: $size-medium;
+        padding: 0 $size-small;
+    }
+
+    &.about {
+        color: $success;
+        margin: 0 $size-medium;
+    }
+
+    i {
+        margin-right: 0.6rem;
+        font-size: $size-large;
+    }
+
+    .author {
+        font-weight: bold;
+    }
+}
+
+.navbar-end {
+    .navbar-item {
+        padding: 0;
+    }
+
+    .buttons {
+        margin-bottom: -6px;
+    }
+
+    .button {
+        background: transparent;
+        border: 0;
+        opacity: 0.7;
+        margin: 0 !important;
+    }
+
+    .button:hover {
+        opacity: 1;
+        background: $grey-darker;
+    }
+
+    i {
+        margin: 0;
+    }
 }

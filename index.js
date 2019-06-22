@@ -1,13 +1,11 @@
 'use strict';
 const path = require('path');
-const {app, BrowserWindow, Menu} = require('electron');
+const {app, BrowserWindow} = require('electron');
 /// const {autoUpdater} = require('electron-updater');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
-const config = require('./config');
-const menu = require('./menu');
 
 unhandled();
 debug();
@@ -27,15 +25,23 @@ app.setAppUserModelId('com.niknik.GrinchPlayer');
 // 	autoUpdater.checkForUpdates();
 // }
 
-// Prevent window from being garbage collected
+// Prevent variables from being garbage collected
 let mainWindow;
 
 const createMainWindow = async () => {
+    const appName = app.getName() + ' v' + app.getVersion();
+    const iconPath = path.join(__dirname, 'static/icon-64.png');
+
     const win = new BrowserWindow({
-        title: app.getName(),
+        title: appName,
         show: false,
-        width: 600,
-        height: 400
+        frame: false,
+        icon: iconPath,
+        width: 1600,
+        height: 1200,
+        webPreferences: {
+            nodeIntegration: true
+        }
     });
 
     win.on('ready-to-show', () => {
@@ -82,8 +88,5 @@ app.on('activate', () => {
 
 (async () => {
     await app.whenReady();
-    Menu.setApplicationMenu(menu);
     mainWindow = await createMainWindow();
-
-    console.log(config.get('favoriteAnimal'));
 })();
