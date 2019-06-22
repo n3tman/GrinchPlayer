@@ -14,7 +14,8 @@
 		"start": "electron .",
 		"pack": "electron-builder --dir",
 		"dist": "electron-builder --windows",
-		"release": "np"
+		"release": "np",
+        "sass": "node-sass index.scss index.css"
 	},
 	"dependencies": {
 		"electron-context-menu": "^0.12.1",
@@ -34,6 +35,7 @@
 		"eslint-plugin-no-use-extend-native": "^0.4.0",
 		"eslint-plugin-promise": "^4.1.1",
 		"eslint-plugin-unicorn": "^9.1.0",
+		"node-sass": "^4.12.0",
 		"np": "^5.0.3",
 		"xo": "^0.24.0"
 	},
@@ -51,8 +53,8 @@
 	"build": {
 		"appId": "com.niknik.GrinchPlayer",
 		"nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true
-        }
+			"oneClick": false,
+			"allowToChangeInstallationDirectory": true
+		}
 	}
 }
