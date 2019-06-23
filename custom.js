@@ -3,25 +3,52 @@
 'use strict';
 
 const {remote, shell} = require('electron');
+const hp = require('howler');
 const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
 const config = require('./config');
+
+const fixedClass = 'has-navbar-fixed-bottom';
+let howlDb = [];
+let howlIndex = -1;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 
-function toggleEditMode() {
-    const $body = $('body');
-    const fixedClass = 'has-navbar-fixed-bottom';
+// Check current mode
+function isEditMode() {
+    return $('body').hasClass(fixedClass);
+}
 
-    $body.toggleClass(fixedClass);
+// Toggle edit mode
+function toggleEditMode() {
+    $('body').toggleClass(fixedClass);
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
-    if ($body.hasClass(fixedClass)) {
+    if (isEditMode()) {
         $('.draggable').draggable({grid: [10, 10]}).resizable({grid: [10, 10]});
     } else {
         $('.draggable').draggable('destroy').resizable('destroy');
+    }
+}
+
+// Add a sound block
+function addSoundBlock(text, soundPath) {
+    const id = howlDb.length + 1;
+    const html = '<a class="button is-dark draggable ui-widget-content" data-id="' + id + '"><span class="text">' + text + '</a></span>';
+    $(html).appendTo('#main')
+        .height(function () {
+            return Math.ceil(this.offsetHeight / 10) * 10;
+        })
+        .draggable({grid: [10, 10]}).resizable({grid: [10, 10]});
+
+    if (soundPath) {
+        howlDb.push(
+            new hp.Howl({
+                src: ['./dist/sounds/привет.mp3']
+            })
+        );
     }
 }
 
@@ -64,13 +91,22 @@ $(function () {
         toggleEditMode();
     });
 
-    $('#block-add').click(function () {
-        const html = '<a class="button is-dark draggable ui-widget-content"><span class="text">' + ryba() + '</a></span>';
-        $(html).appendTo('#main')
-            .height(function () {
-                return Math.ceil(this.offsetHeight / 10) * 10;
-            })
-            .draggable({grid: [10, 10]}).resizable({grid: [10, 10]});
+    $('#add-block').click(function () {
+        addSoundBlock(ryba(), true);
+    });
+
+    // Audio
+    $('#main').on('click', '.draggable', function () {
+        if (!isEditMode()) {
+            const id = this.dataset.id - 1;
+
+            if (howlIndex > -1) {
+                howlDb[howlIndex].stop();
+            }
+
+            howlDb[id].play();
+            howlIndex = id;
+        }
     });
 
     // Debug

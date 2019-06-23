@@ -28,6 +28,7 @@
 		"electron-util": "^0.12.0",
 		"fork-awesome": "^1.1.7",
 		"hotkeys-js": "^3.6.11",
+		"howler": "^2.1.2",
 		"jquery": "^3.4.1",
 		"jquery-ui-dist": "^1.12.1"
 	},
@@ -55,7 +56,8 @@
 		"esnext ": false,
 		"rules": {
 			"prefer-arrow-callback": 0,
-			"prefer-const": 0
+			"prefer-const": 0,
+            "unicorn/prevent-abbreviations": 0
 		}
 	},
 	"np": {
