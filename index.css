@@ -12777,7 +12777,7 @@ html, body {
 }
 
 .navbar {
-  padding: 4px;
+  padding: 4px 4px 0;
   min-height: 3rem;
   height: 3rem;
 }
@@ -12810,7 +12810,7 @@ html, body {
   padding: 0;
 }
 .navbar-end .buttons {
-  margin-bottom: -6px;
+  margin-bottom: 0;
 }
 .navbar-end .button {
   background: transparent;

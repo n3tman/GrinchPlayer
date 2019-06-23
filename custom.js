@@ -2,7 +2,7 @@
 
 'use strict';
 
-const {remote} = require('electron');
+const {remote, shell} = require('electron');
 const config = require('./config');
 
 window.$ = require('jquery');
@@ -26,6 +26,14 @@ $(function () {
 
     $('#win-close').click(function () {
         window.close();
+    });
+
+    $('#youtube').click(function () {
+        shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
+    });
+
+    $('#discord').click(function () {
+        shell.openExternal('https://discord.gg/EEkpKp2');
     });
 
     console.log(config.get('favoriteAnimal'));

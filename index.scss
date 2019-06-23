@@ -58,7 +58,7 @@ html, body {
 // ------------------ //
 
 .navbar {
-    padding: 4px;
+    padding: 4px 4px 0;
     min-height: $size-1;
     height: $size-1;
 }
@@ -101,7 +101,7 @@ html, body {
     }
 
     .buttons {
-        margin-bottom: -6px;
+        margin-bottom: 0;
     }
 
     .button {
