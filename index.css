@@ -12831,6 +12831,13 @@ body.has-navbar-fixed-bottom {
   bottom: -4rem;
   transition: bottom 0.5s;
 }
+.navbar.level .button {
+  margin: 0 0.75rem;
+  font-size: 1rem;
+}
+.navbar.level .button .fa {
+  margin-right: 0.5rem;
+}
 .navbar.level .edit {
   width: 3rem;
   height: 3rem;
@@ -12840,9 +12847,11 @@ body.has-navbar-fixed-bottom {
   border: 2px solid #4E5D6C;
   border-bottom: 0;
   border-right: 0;
+  margin: 0;
 }
 .navbar.level .edit .fa {
   font-size: 1.5rem;
+  margin: 0;
 }
 
 .has-navbar-fixed-bottom .navbar.level {

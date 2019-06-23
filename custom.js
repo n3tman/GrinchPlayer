@@ -3,6 +3,8 @@
 'use strict';
 
 const {remote, shell} = require('electron');
+const {dialog} = require('electron').remote;
+const path = require('path');
 const hp = require('howler');
 const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
@@ -46,7 +48,7 @@ function addSoundBlock(text, soundPath) {
     if (soundPath) {
         howlDb.push(
             new hp.Howl({
-                src: ['./dist/sounds/привет.mp3']
+                src: [soundPath]
             })
         );
     }
@@ -91,8 +93,22 @@ $(function () {
         toggleEditMode();
     });
 
+    // Test block
     $('#add-block').click(function () {
-        addSoundBlock(ryba(), true);
+        addSoundBlock(ryba(), './dist/sounds/привет.mp3');
+    });
+
+    // Block from audio file
+    $('#add-sound').click(function () {
+        dialog.showOpenDialog({
+            properties: ['openFile'],
+            filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
+        }, function (files) {
+            if (files !== undefined) {
+                const parsed = path.parse(files[0]);
+                addSoundBlock(parsed.name, files[0]);
+            }
+        });
     });
 
     // Audio

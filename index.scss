@@ -133,6 +133,15 @@ body.has-navbar-fixed-bottom {
         transition: bottom 0.5s;
     }
 
+    .button {
+        margin: 0 $size-small;
+        font-size: $size-6;
+    }
+
+    .button .fa {
+        margin-right: 0.5rem;
+    }
+
     .edit {
         width: 3rem;
         height: 3rem;
@@ -142,10 +151,12 @@ body.has-navbar-fixed-bottom {
         border: 2px solid $border;
         border-bottom: 0;
         border-right: 0;
+        margin: 0;
     }
 
     .edit .fa {
         font-size: $size-large;
+        margin: 0;
     }
 }
 
