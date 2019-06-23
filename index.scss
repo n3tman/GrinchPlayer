@@ -16,6 +16,8 @@ $fa-font-path: "node_modules/fork-awesome/fonts";
 
 @import "node_modules/fork-awesome/scss/fork-awesome";
 
+@import "node_modules/jquery-ui-dist/jquery-ui.css";
+
 // ------------------ //
 //  Layout
 // ------------------ //
@@ -23,14 +25,6 @@ $fa-font-path: "node_modules/fork-awesome/fonts";
 html, body {
     overflow-y: hidden;
     height: 100%;
-}
-
-.main {
-    height: calc(100% - 3rem);
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
 }
 
 // ------------------ //
@@ -54,16 +48,16 @@ html, body {
 }
 
 // ------------------ //
-//  Navbar
+//  Navbar Top
 // ------------------ //
 
-.navbar {
+.navbar.top {
     padding: 4px 4px 0;
     min-height: $size-1;
     height: $size-1;
 }
 
-.navbar-brand {
+.navbar.top .navbar-brand {
     & {
         min-height: $size-3;
     }
@@ -74,10 +68,9 @@ html, body {
     }
 }
 
-.navbar-item {
+.navbar.top .navbar-item {
     & {
         font-size: $size-medium;
-        padding: 0 $size-small;
     }
 
     &.about {
@@ -95,7 +88,7 @@ html, body {
     }
 }
 
-.navbar-end {
+.navbar.top .navbar-end {
     .navbar-item {
         padding: 0;
     }
@@ -118,5 +111,50 @@ html, body {
 
     i {
         margin: 0;
+    }
+}
+
+// ------------------ //
+//  Navbar Bottom
+// ------------------ //
+
+body.has-navbar-fixed-bottom {
+    padding-bottom: 4rem;
+}
+
+.navbar.level {
+    height: 4rem;
+}
+
+// ------------------ //
+//  Main Block
+// ------------------ //
+
+.main {
+    & {
+        height: calc(100% - 3rem);
+        position: relative;
+        background-image:
+            linear-gradient($grey-dark 1px, transparent 1px),
+            linear-gradient(90deg, $grey-dark 1px, transparent 1px);
+        background-size: 10px 10px;
+    }
+
+    .draggable {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 200px;
+        height: auto;
+        overflow: hidden;
+        white-space: normal;
+        box-sizing: content-box;
+        padding: 0;
+        border: 0;
+    }
+
+    .draggable .text {
+        padding: 5px;
+        line-height: normal;
     }
 }

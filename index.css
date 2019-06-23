@@ -1,5 +1,6 @@
 @charset "UTF-8";
 /*! bulma.io v0.7.5 | MIT License | github.com/jgthms/bulma */
+@import "node_modules/jquery-ui-dist/jquery-ui.css";
 @keyframes spinAround {
   from {
     transform: rotate(0deg);
@@ -12756,14 +12757,6 @@ html, body {
   height: 100%;
 }
 
-.main {
-  height: calc(100% - 3rem);
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  justify-content: center;
-}
-
 .title {
   text-align: center;
 }
@@ -12776,54 +12769,84 @@ html, body {
   -webkit-app-region: no-drag;
 }
 
-.navbar {
+.navbar.top {
   padding: 4px 4px 0;
   min-height: 3rem;
   height: 3rem;
 }
 
-.navbar-brand {
+.navbar.top .navbar-brand {
   min-height: 2rem;
 }
-.navbar-brand .text {
+.navbar.top .navbar-brand .text {
   font-weight: bold;
   margin-left: 0.75rem;
 }
 
-.navbar-item {
+.navbar.top .navbar-item {
   font-size: 1.25rem;
-  padding: 0 0.75rem;
 }
-.navbar-item.about {
+.navbar.top .navbar-item.about {
   color: #5cb85c;
   margin: 0 1.25rem;
 }
-.navbar-item i {
+.navbar.top .navbar-item i {
   margin-right: 0.6rem;
   font-size: 1.5rem;
 }
-.navbar-item .author {
+.navbar.top .navbar-item .author {
   font-weight: bold;
 }
 
-.navbar-end .navbar-item {
+.navbar.top .navbar-end .navbar-item {
   padding: 0;
 }
-.navbar-end .buttons {
+.navbar.top .navbar-end .buttons {
   margin-bottom: 0;
 }
-.navbar-end .button {
+.navbar.top .navbar-end .button {
   background: transparent;
   border: 0;
   opacity: 0.7;
   margin: 0 !important;
 }
-.navbar-end .button:hover {
+.navbar.top .navbar-end .button:hover {
   opacity: 1;
   background: #1f2d3b;
 }
-.navbar-end i {
+.navbar.top .navbar-end i {
   margin: 0;
+}
+
+body.has-navbar-fixed-bottom {
+  padding-bottom: 4rem;
+}
+
+.navbar.level {
+  height: 4rem;
+}
+
+.main {
+  height: calc(100% - 3rem);
+  position: relative;
+  background-image: linear-gradient(#2B3E50 1px, transparent 1px), linear-gradient(90deg, #2B3E50 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+.main .draggable {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 200px;
+  height: auto;
+  overflow: hidden;
+  white-space: normal;
+  box-sizing: content-box;
+  padding: 0;
+  border: 0;
+}
+.main .draggable .text {
+  padding: 5px;
+  line-height: normal;
 }
 
 /*# sourceMappingURL=index.css.map */

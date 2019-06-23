@@ -6,8 +6,9 @@
     <script src="custom.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
-<body>
-<nav class="navbar" role="navigation" aria-label="main navigation">
+<body class="has-navbar-fixed-bottom">
+
+<nav class="navbar top" role="navigation" aria-label="main navigation">
     <div class="navbar-brand drag">
         <div class="navbar-item">
             <img src="static/icon-64.png" alt="Grinch Player">
@@ -46,10 +47,13 @@
     </div>
 </nav>
 
-<main class="container main">
-    <h1 class="title">Grinch Player</h1>
-    <p class="subtitle">Плеер для технопранков</p>
-    <p class="has-text-centered"><i class="fa fa-3x fa-phone-square"></i></p>
-</main>
+<main class="main" id="main"></main>
+
+<nav class="level navbar is-fixed-bottom">
+    <p class="level-item has-text-centered">
+        <a class="button" id="addblock">Добавить блок</a>
+    </p>
+</nav>
+
 </body>
 </html>
