@@ -118,12 +118,45 @@ html, body {
 //  Navbar Bottom
 // ------------------ //
 
+body {
+    transition: padding-bottom 0.5s;
+}
+
 body.has-navbar-fixed-bottom {
     padding-bottom: 4rem;
 }
 
 .navbar.level {
-    height: 4rem;
+    & {
+        height: 4rem;
+        bottom: -4rem;
+        transition: bottom 0.5s;
+    }
+
+    .edit {
+        width: 3rem;
+        height: 3rem;
+        position: absolute;
+        top: -3rem;
+        right: 0;
+        border: 2px solid $border;
+        border-bottom: 0;
+        border-right: 0;
+    }
+
+    .edit .fa {
+        font-size: $size-large;
+    }
+}
+
+.has-navbar-fixed-bottom .navbar.level {
+    & {
+        bottom: 0;
+    }
+
+    .edit {
+        color: $green;
+    }
 }
 
 // ------------------ //
@@ -134,9 +167,8 @@ body.has-navbar-fixed-bottom {
     & {
         height: calc(100% - 3rem);
         position: relative;
-        background-image:
-            linear-gradient($grey-dark 1px, transparent 1px),
-            linear-gradient(90deg, $grey-dark 1px, transparent 1px);
+        background-image: linear-gradient($grey-dark 1px, transparent 1px),
+        linear-gradient(90deg, $grey-dark 1px, transparent 1px);
         background-size: 10px 10px;
     }
 

@@ -12818,12 +12818,38 @@ html, body {
   margin: 0;
 }
 
+body {
+  transition: padding-bottom 0.5s;
+}
+
 body.has-navbar-fixed-bottom {
   padding-bottom: 4rem;
 }
 
 .navbar.level {
   height: 4rem;
+  bottom: -4rem;
+  transition: bottom 0.5s;
+}
+.navbar.level .edit {
+  width: 3rem;
+  height: 3rem;
+  position: absolute;
+  top: -3rem;
+  right: 0;
+  border: 2px solid #4E5D6C;
+  border-bottom: 0;
+  border-right: 0;
+}
+.navbar.level .edit .fa {
+  font-size: 1.5rem;
+}
+
+.has-navbar-fixed-bottom .navbar.level {
+  bottom: 0;
+}
+.has-navbar-fixed-bottom .navbar.level .edit {
+  color: #5cb85c;
 }
 
 .main {
