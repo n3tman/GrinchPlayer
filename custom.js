@@ -49,7 +49,22 @@ function addSoundBlock(text, soundPath) {
         .height(function () {
             return Math.ceil(this.offsetHeight / 10) * 10;
         })
-        .draggable({grid: [10, 10]}).resizable({grid: [10, 10]});
+        .draggable({grid: [10, 10]}).resizable({grid: [10, 10]})
+        .mousedown(function (e) {
+            if (e.which === 3 && isEditMode()) {
+                const $target = $(e.currentTarget).find('.ui-resizable-se');
+                const posX = $target.offset().left + 8;
+                const posY = $target.offset().top + 8;
+
+                $target.trigger({
+                    type: 'mouseover', which: 1,
+                    pageX: posX, pageY: posY
+                }).trigger({
+                    type: 'mousedown', which: 1,
+                    pageX: posX, pageY: posY
+                });
+            }
+        });
 
     if (soundPath) {
         howlDb.push(
