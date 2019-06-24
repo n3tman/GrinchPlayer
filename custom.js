@@ -1,4 +1,4 @@
-/* global window, $ */
+/* global window, $, requestAnimationFrame */
 
 'use strict';
 
@@ -9,10 +9,12 @@ const hp = require('howler');
 const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
 const config = require('./config');
+const _ = require('lodash');
 
 const fixedClass = 'has-navbar-fixed-bottom';
 let howlDb = [];
 let howlIndex = -1;
+let $currentBlock;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -38,7 +40,11 @@ function toggleEditMode() {
 // Add a sound block
 function addSoundBlock(text, soundPath) {
     const id = howlDb.length + 1;
-    const html = '<a class="button is-dark draggable ui-widget-content" data-id="' + id + '"><span class="text">' + text + '</a></span>';
+
+    const html = '<a class="button is-dark draggable ui-widget-content"' +
+        'data-id="' + id + '"><div class="overlay"></div>' +
+        '<span class="text">' + text + '</span></a>';
+
     $(html).appendTo('#main')
         .height(function () {
             return Math.ceil(this.offsetHeight / 10) * 10;
@@ -48,12 +54,34 @@ function addSoundBlock(text, soundPath) {
     if (soundPath) {
         howlDb.push(
             new hp.Howl({
-                src: [soundPath]
+                src: [soundPath],
+                onplay: function () {
+                    requestAnimationFrame(updateAudioStep);
+                }
             })
         );
     }
 }
 
+// Sets width of audio overlay
+function setAudioOverlay(width) {
+    $currentBlock.find('.overlay').width(width);
+}
+
+// Update block audio animation
+function updateAudioStep() {
+    const sound = howlDb[howlIndex];
+    const seek = sound.seek() || 0;
+    const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
+
+    setAudioOverlay(width);
+
+    if (sound.playing()) {
+        requestAnimationFrame(updateAudioStep);
+    }
+}
+
+// Main action on document.ready
 $(function () {
     let window = remote.getCurrentWindow();
 
@@ -118,10 +146,12 @@ $(function () {
 
             if (howlIndex > -1) {
                 howlDb[howlIndex].stop();
+                setAudioOverlay(0);
             }
 
             howlDb[id].play();
             howlIndex = id;
+            $currentBlock = $(this);
         }
     });
 

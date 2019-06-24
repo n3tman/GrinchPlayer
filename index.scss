@@ -194,10 +194,20 @@ body.has-navbar-fixed-bottom {
         box-sizing: content-box;
         padding: 0;
         border: 0;
+        z-index: 1;
     }
 
     .draggable .text {
         padding: 5px;
         line-height: normal;
+    }
+
+    .draggable .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 0;
+        background-color: rgba($blue, 0.4);
     }
 }
