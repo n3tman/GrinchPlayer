@@ -1,7 +1,7 @@
 {
 	"name": "grinch-player",
 	"productName": "GrinchPlayer",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"description": "Технопранк-плеер",
 	"license": "MIT",
 	"author": {
@@ -66,8 +66,8 @@
 	},
 	"build": {
 		"appId": "com.Nik.GrinchPlayer",
-        "win": {
-            "target": "portable"
-        }
+		"win": {
+			"target": "portable"
+		}
 	}
 }
