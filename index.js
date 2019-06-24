@@ -1,7 +1,6 @@
 'use strict';
 const path = require('path');
 const {app, BrowserWindow} = require('electron');
-/// const {autoUpdater} = require('electron-updater');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
@@ -12,18 +11,10 @@ debug();
 contextMenu();
 
 // Note: Must match `build.appId` in package.json
-app.setAppUserModelId('com.niknik.GrinchPlayer');
+app.setAppUserModelId('com.Nik.GrinchPlayer');
 
-// Uncomment this before publishing your first version.
-// It's commented out as it throws an error if there are no published versions.
-// if (!is.development) {
-// 	const FOUR_HOURS = 1000 * 60 * 60 * 4;
-// 	setInterval(() => {
-// 		autoUpdater.checkForUpdates();
-// 	}, FOUR_HOURS);
-//
-// 	autoUpdater.checkForUpdates();
-// }
+// Set userData to current folder (portable app)
+app.setPath('userData', process.env.PORTABLE_EXECUTABLE_DIR + '/' + app.getName());
 
 // Prevent variables from being garbage collected
 let mainWindow;
@@ -58,21 +49,6 @@ const createMainWindow = async () => {
 
     return win;
 };
-
-// Prevent multiple instances of the app
-if (!app.requestSingleInstanceLock()) {
-    app.quit();
-}
-
-app.on('second-instance', () => {
-    if (mainWindow) {
-        if (mainWindow.isMinimized()) {
-            mainWindow.restore();
-        }
-
-        mainWindow.show();
-    }
-});
 
 app.on('window-all-closed', () => {
     if (!is.macos) {

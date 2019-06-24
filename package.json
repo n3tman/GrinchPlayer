@@ -1,6 +1,6 @@
 {
 	"name": "grinch-player",
-	"productName": "Grinch Player",
+	"productName": "GrinchPlayer",
 	"version": "0.2.1",
 	"description": "Технопранк-плеер",
 	"license": "MIT",
@@ -24,14 +24,14 @@
 		"electron-debug": "^3.0.0",
 		"electron-store": "^3.3.0",
 		"electron-unhandled": "^2.2.0",
-		"electron-updater": "^4.0.6",
 		"electron-util": "^0.12.0",
 		"fork-awesome": "^1.1.7",
 		"hotkeys-js": "^3.6.11",
 		"howler": "^2.1.2",
 		"jquery": "^3.4.1",
 		"jquery-ui-dist": "^1.12.1",
-		"lodash": "^4.17.11"
+		"lodash": "^4.17.11",
+		"ryba-js": "0.0.9"
 	},
 	"devDependencies": {
 		"electron": "^5.0.4",
@@ -45,7 +45,6 @@
 		"eslint-plugin-unicorn": "^9.1.0",
 		"node-sass": "^4.12.0",
 		"np": "^5.0.3",
-		"ryba-js": "0.0.9",
 		"xo": "^0.24.0"
 	},
 	"xo": {
@@ -66,10 +65,9 @@
 		"releaseDraft": false
 	},
 	"build": {
-		"appId": "com.niknik.GrinchPlayer",
-		"nsis": {
-			"oneClick": false,
-			"allowToChangeInstallationDirectory": true
-		}
+		"appId": "com.Nik.GrinchPlayer",
+        "win": {
+            "target": "portable"
+        }
 	}
 }

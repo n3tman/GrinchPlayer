@@ -1,4 +1,4 @@
-# Grinch Player
+# GrinchPlayer
 
 > Технопранк-плеер для троллинга звуками
 

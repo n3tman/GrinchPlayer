@@ -8,8 +8,8 @@ const path = require('path');
 const hp = require('howler');
 const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
-const config = require('./config');
 const _ = require('lodash');
+const config = require('./config');
 
 const fixedClass = 'has-navbar-fixed-bottom';
 let howlDb = [];
@@ -70,7 +70,7 @@ function addSoundBlock(text, soundPath) {
         howlDb.push(
             new hp.Howl({
                 src: [soundPath],
-                onplay: function () {
+                onplay() {
                     requestAnimationFrame(updateAudioStep);
                 }
             })
