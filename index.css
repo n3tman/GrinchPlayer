@@ -12883,6 +12883,7 @@ body.has-navbar-fixed-bottom {
 .main .draggable .text {
   padding: 5px;
   line-height: normal;
+  z-index: 1;
 }
 .main .draggable .overlay {
   position: absolute;

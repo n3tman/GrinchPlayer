@@ -153,6 +153,16 @@ $(function () {
             howlIndex = id;
             $currentBlock = $(this);
         }
+    }).on('contextmenu', function () {
+        const sound = howlDb[howlIndex];
+
+        if (!isEditMode() && sound) {
+            if (sound.playing()) {
+                sound.pause();
+            } else if (sound.seek() > 0) {
+                sound.play();
+            }
+        }
     });
 
     // Debug
