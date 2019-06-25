@@ -98,18 +98,17 @@ function isCollision(target) {
 
 // Automatically move block to free space
 function autoPosition(block) {
-    if (isCollision(block)) {
+    while (isCollision(block)) {
         block.style.top = block.offsetTop + 10 + 'px';
 
         if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
             block.style.top = 10 + 'px';
             block.style.left = block.offsetLeft + 210 + 'px';
         }
-
-        autoPosition(block);
     }
 
-    return false;
+    const id = block.dataset.id;
+    console.log('Positioned: ' + id);
 }
 
 // Add a sound block
