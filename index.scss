@@ -23,7 +23,7 @@ $fa-font-path: "node_modules/fork-awesome/fonts";
 // ------------------ //
 
 html, body {
-    overflow-y: hidden;
+    overflow: hidden;
     height: 100%;
 }
 
@@ -124,7 +124,7 @@ body {
 }
 
 body.has-navbar-fixed-bottom {
-    padding-bottom: 4rem;
+    padding-bottom: 0;
 }
 
 .navbar.level {
@@ -132,6 +132,7 @@ body.has-navbar-fixed-bottom {
         height: 4rem;
         bottom: -4rem;
         transition: bottom 0.5s;
+        background-color: rgba($navbar-background-color, 0.5);
     }
 
     .button {
@@ -196,6 +197,7 @@ body.has-navbar-fixed-bottom {
         padding: 0;
         border: 0;
         z-index: 1;
+        opacity: 0;
     }
 
     .draggable .text {

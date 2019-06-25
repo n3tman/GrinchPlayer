@@ -59,12 +59,56 @@ function getRectWithOffset(element) {
     const rect = element.getBoundingClientRect();
     return {
         left: rect.left,
-        top: rect.top - 50,
+        top: rect.top,
         right: rect.right,
-        bottom: rect.bottom - 50,
+        bottom: rect.bottom,
         width: rect.width,
         height: rect.height
     };
+}
+
+// Check block for collision with others
+function isCollision(target) {
+    if (blockDb.length) {
+        const rect = target.getBoundingClientRect();
+        const targetId = parseInt(target.dataset.id, 10);
+
+        let collision = false;
+        for (let i = 0; i < blockDb.length; i++) {
+            if (targetId !== i) {
+                const block = blockDb[i];
+
+                collision = rect.right >= block.rect.left &&
+                    rect.left <= block.rect.right &&
+                    rect.bottom >= block.rect.top &&
+                    rect.top <= block.rect.bottom;
+
+                if (collision) {
+                    break;
+                }
+            }
+        }
+
+        return collision;
+    }
+
+    return false;
+}
+
+// Automatically move block to free space
+function autoPosition(block) {
+    if (isCollision(block)) {
+        block.style.top = block.offsetTop + 10 + 'px';
+
+        if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
+            block.style.top = 10 + 'px';
+            block.style.left = block.offsetLeft + 210 + 'px';
+        }
+
+        autoPosition(block);
+    }
+
+    return false;
 }
 
 // Add a sound block
@@ -72,7 +116,7 @@ function addSoundBlock(text, soundPath) {
     const id = blockDb.length;
 
     const html = '<a class="button is-dark draggable ui-widget-content"' +
-        'data-id="' + id + '"><div class="overlay"></div>' +
+        ' data-id="' + id + '"><div class="overlay"></div>' +
         '<span class="text">' + text + '</span></a>';
 
     $(html).appendTo('#main').height(function () {
@@ -80,7 +124,10 @@ function addSoundBlock(text, soundPath) {
     });
 
     const element = document.querySelector('[data-id="' + id + '"]');
+    autoPosition(element);
+
     const rect = getRectWithOffset(element);
+    $(element).fadeTo('fast', 1);
 
     initDraggable($(element)).mousedown(function (e) {
         if (e.which === 3 && isEditMode()) {
