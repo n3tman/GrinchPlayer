@@ -150,6 +150,7 @@ function addSoundBlock(text, soundPath) {
         rect: rect,
         howl: new hp.Howl({
             src: [soundPath],
+            preload: false,
             onplay: function () {
                 requestAnimationFrame(updateAudioStep);
             }
@@ -230,6 +231,9 @@ $(function () {
 
     // Add block from single or multiple files
     $('#add-sound').click(function () {
+        const $main = $('#main');
+        $main.addClass('is-loading');
+
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
             filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
@@ -237,15 +241,22 @@ $(function () {
             if (files !== undefined) {
                 addFileBlocks(files);
             }
+
+            $main.removeClass('is-loading');
         });
     });
 
     // Add block from single or multiple files
     $('#add-folder').click(function () {
+        const $main = $('#main');
+        $main.addClass('is-loading');
+
         dialog.showOpenDialog({
             properties: ['openDirectory', 'multiSelections']
         }, function (dirs) {
             if (dirs !== undefined) {
+                console.log('Start: ' + new Date().toLocaleTimeString());
+
                 dirs.forEach(function (dir) {
                     const files = fg.sync('**/*.{mp3,wav,ogg,flac}', {
                         cwd: dir,
@@ -256,6 +267,9 @@ $(function () {
                     addFileBlocks(files);
                 });
             }
+
+            $main.removeClass('is-loading');
+            console.log('Finish: ' + new Date().toLocaleTimeString());
         });
     });
 
@@ -269,7 +283,7 @@ $(function () {
                 setAudioOverlay(0);
             }
 
-            blockDb[id].howl.play();
+            blockDb[id].howl.load().play();
             blockIndex = id;
             $currentBlock = $(this);
         }

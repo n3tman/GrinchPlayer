@@ -185,6 +185,26 @@ body.has-navbar-fixed-bottom {
         background-size: 10px 10px;
     }
 
+    &.is-loading {
+        & {
+            background-color: $background;
+            opacity: 0.7;
+            z-index: 100;
+        }
+
+        &:after {
+            @include loader;
+            position: absolute;
+            top: calc(50% - 2.5em);
+            left: calc(50% - 2.5em);
+            width: 5em;
+            height: 5em;
+            border-width: 0.4em;
+            zoom: 2;
+            z-index: 100;
+        }
+    }
+
     .draggable {
         position: absolute;
         top: 10px;
