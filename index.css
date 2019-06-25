@@ -12771,12 +12771,12 @@ html, body {
 
 .navbar.top {
   padding: 4px 4px 0;
-  min-height: 3rem;
-  height: 3rem;
+  min-height: 50px;
+  height: 50px;
 }
 
 .navbar.top .navbar-brand {
-  min-height: 2rem;
+  min-height: 0;
 }
 .navbar.top .navbar-brand .text {
   font-weight: bold;
@@ -12809,6 +12809,7 @@ html, body {
   border: 0;
   opacity: 0.7;
   margin: 0 !important;
+  height: 50px;
 }
 .navbar.top .navbar-end .button:hover {
   opacity: 1;
@@ -12862,7 +12863,7 @@ body.has-navbar-fixed-bottom {
 }
 
 .main {
-  height: calc(100% - 3rem);
+  height: calc(100% - 50px);
   position: relative;
   background-image: linear-gradient(#2B3E50 1px, transparent 1px), linear-gradient(90deg, #2B3E50 1px, transparent 1px);
   background-size: 10px 10px;

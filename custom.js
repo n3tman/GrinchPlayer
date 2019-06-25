@@ -1,4 +1,4 @@
-/* global window, $, requestAnimationFrame */
+/* global window, document, $, requestAnimationFrame */
 
 'use strict';
 
@@ -12,8 +12,8 @@ const _ = require('lodash');
 const config = require('./config');
 
 const fixedClass = 'has-navbar-fixed-bottom';
-let howlDb = [];
-let howlIndex = -1;
+let blockDb = [];
+let blockIndex = -1;
 let $currentBlock;
 
 window.$ = require('jquery');
@@ -31,51 +31,82 @@ function toggleEditMode() {
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
     if (isEditMode()) {
-        $('.draggable').draggable({grid: [10, 10]}).resizable({grid: [10, 10]});
+        initDraggable($('.draggable'));
     } else {
         $('.draggable').draggable('destroy').resizable('destroy');
     }
 }
 
+// Initialize draggable/resizable block
+function initDraggable($elements) {
+    return $elements.draggable({
+        grid: [10, 10],
+        stop: function (e) {
+            const id = e.target.dataset.id;
+            blockDb[id].rect = getRectWithOffset(e.target);
+        }
+    }).resizable({
+        grid: [10, 10],
+        stop: function (e) {
+            const id = e.target.dataset.id;
+            blockDb[id].rect = getRectWithOffset(e.target);
+        }
+    });
+}
+
+// Get block position, compensate navbar
+function getRectWithOffset(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+        left: rect.left,
+        top: rect.top - 50,
+        right: rect.right,
+        bottom: rect.bottom - 50,
+        width: rect.width,
+        height: rect.height
+    };
+}
+
 // Add a sound block
 function addSoundBlock(text, soundPath) {
-    const id = howlDb.length + 1;
+    const id = blockDb.length;
 
     const html = '<a class="button is-dark draggable ui-widget-content"' +
         'data-id="' + id + '"><div class="overlay"></div>' +
         '<span class="text">' + text + '</span></a>';
 
-    $(html).appendTo('#main')
-        .height(function () {
-            return Math.ceil(this.offsetHeight / 10) * 10;
-        })
-        .draggable({grid: [10, 10]}).resizable({grid: [10, 10]})
-        .mousedown(function (e) {
-            if (e.which === 3 && isEditMode()) {
-                const $target = $(e.currentTarget).find('.ui-resizable-se');
-                const posX = $target.offset().left + 8;
-                const posY = $target.offset().top + 8;
+    $(html).appendTo('#main').height(function () {
+        return Math.ceil(this.offsetHeight / 10) * 10;
+    });
 
-                $target.trigger({
-                    type: 'mouseover', which: 1,
-                    pageX: posX, pageY: posY
-                }).trigger({
-                    type: 'mousedown', which: 1,
-                    pageX: posX, pageY: posY
-                });
+    const element = document.querySelector('[data-id="' + id + '"]');
+    const rect = getRectWithOffset(element);
+
+    initDraggable($(element)).mousedown(function (e) {
+        if (e.which === 3 && isEditMode()) {
+            const $target = $(e.currentTarget).find('.ui-resizable-se');
+            const posX = $target.offset().left + 8;
+            const posY = $target.offset().top + 8;
+
+            $target.trigger({
+                type: 'mouseover', which: 1,
+                pageX: posX, pageY: posY
+            }).trigger({
+                type: 'mousedown', which: 1,
+                pageX: posX, pageY: posY
+            });
+        }
+    });
+
+    blockDb.push({
+        rect: rect,
+        howl: new hp.Howl({
+            src: [soundPath],
+            onplay: function () {
+                requestAnimationFrame(updateAudioStep);
             }
-        });
-
-    if (soundPath) {
-        howlDb.push(
-            new hp.Howl({
-                src: [soundPath],
-                onplay() {
-                    requestAnimationFrame(updateAudioStep);
-                }
-            })
-        );
-    }
+        })
+    });
 }
 
 // Sets width of audio overlay
@@ -85,7 +116,7 @@ function setAudioOverlay(width) {
 
 // Update block audio animation
 function updateAudioStep() {
-    const sound = howlDb[howlIndex];
+    const sound = blockDb[blockIndex].howl;
     const seek = sound.seek() || 0;
     const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
@@ -157,25 +188,27 @@ $(function () {
     // Audio
     $('#main').on('click', '.draggable', function () {
         if (!isEditMode()) {
-            const id = this.dataset.id - 1;
+            const id = this.dataset.id;
 
-            if (howlIndex > -1) {
-                howlDb[howlIndex].stop();
+            if (blockIndex > -1) {
+                blockDb[blockIndex].howl.stop();
                 setAudioOverlay(0);
             }
 
-            howlDb[id].play();
-            howlIndex = id;
+            blockDb[id].howl.play();
+            blockIndex = id;
             $currentBlock = $(this);
         }
     }).on('contextmenu', function () {
-        const sound = howlDb[howlIndex];
+        const sound = blockDb[blockIndex];
 
         if (!isEditMode() && sound) {
-            if (sound.playing()) {
-                sound.pause();
-            } else if (sound.seek() > 0) {
-                sound.play();
+            const howl = sound.howl;
+
+            if (howl.playing()) {
+                howl.pause();
+            } else if (howl.seek() > 0) {
+                howl.play();
             }
         }
     });

@@ -53,13 +53,13 @@ html, body {
 
 .navbar.top {
     padding: 4px 4px 0;
-    min-height: $size-1;
-    height: $size-1;
+    min-height: 50px;
+    height: 50px;
 }
 
 .navbar.top .navbar-brand {
     & {
-        min-height: $size-3;
+        min-height: 0;
     }
 
     .text {
@@ -102,6 +102,7 @@ html, body {
         border: 0;
         opacity: 0.7;
         margin: 0 !important;
+        height: 50px;
     }
 
     .button:hover {
@@ -176,7 +177,7 @@ body.has-navbar-fixed-bottom {
 
 .main {
     & {
-        height: calc(100% - 3rem);
+        height: calc(100% - 50px);
         position: relative;
         background-image: linear-gradient($grey-dark 1px, transparent 1px),
         linear-gradient(90deg, $grey-dark 1px, transparent 1px);
