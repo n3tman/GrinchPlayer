@@ -9,6 +9,7 @@ const hp = require('howler');
 const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
+const fg = require('fast-glob');
 const config = require('./config');
 
 const fixedClass = 'has-navbar-fixed-bottom';
@@ -174,6 +175,14 @@ function updateAudioStep() {
     }
 }
 
+// Add multiple files as blocks
+function addFileBlocks(files) {
+    files.forEach(function (file) {
+        const parsed = path.parse(file);
+        addSoundBlock(parsed.name, file);
+    });
+}
+
 // Main action on document.ready
 $(function () {
     let window = remote.getCurrentWindow();
@@ -219,15 +228,33 @@ $(function () {
         addSoundBlock(ryba(), './dist/sounds/привет.mp3');
     });
 
-    // Block from audio file
+    // Add block from single or multiple files
     $('#add-sound').click(function () {
         dialog.showOpenDialog({
-            properties: ['openFile'],
+            properties: ['openFile', 'multiSelections'],
             filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
         }, function (files) {
             if (files !== undefined) {
-                const parsed = path.parse(files[0]);
-                addSoundBlock(parsed.name, files[0]);
+                addFileBlocks(files);
+            }
+        });
+    });
+
+    // Add block from single or multiple files
+    $('#add-folder').click(function () {
+        dialog.showOpenDialog({
+            properties: ['openDirectory', 'multiSelections']
+        }, function (dirs) {
+            if (dirs !== undefined) {
+                dirs.forEach(function (dir) {
+                    const files = fg.sync('**/*.{mp3,wav,ogg,flac}', {
+                        cwd: dir,
+                        onlyFiles: true,
+                        absolute: true
+                    });
+
+                    addFileBlocks(files);
+                });
             }
         });
     });
