@@ -14,7 +14,8 @@ const config = require('./config');
 
 const fixedClass = 'has-navbar-fixed-bottom';
 let blockDb = [];
-let blockIndex = -1;
+let lastPlayedIndex = -1;
+let lastAddedIndex = -1;
 let $currentBlock;
 
 window.$ = require('jquery');
@@ -70,15 +71,13 @@ function getRectWithOffset(element) {
 
 // Check block for collision with others
 function isCollision(target) {
-    if (blockDb.length) {
+    if (blockDb.length > 0) {
         const rect = target.getBoundingClientRect();
-        const targetId = parseInt(target.dataset.id, 10);
+        const targetId = Number(target.dataset.id);
 
         let collision = false;
-        for (let i = 0; i < blockDb.length; i++) {
-            if (targetId !== i) {
-                const block = blockDb[i];
-
+        for (let block of blockDb) {
+            if (blockDb[targetId] !== block) {
                 collision = rect.right >= block.rect.left &&
                     rect.left <= block.rect.right &&
                     rect.bottom >= block.rect.top &&
@@ -97,22 +96,25 @@ function isCollision(target) {
 }
 
 // Automatically move block to free space
-function autoPosition(block) {
-    while (isCollision(block)) {
+function autoPosition(block, batch) {
+    if (batch && lastAddedIndex > -1) {
+        const lastRect = blockDb[lastAddedIndex].rect;
+        block.style.left = lastRect.left + 'px';
+        block.style.top = lastRect.bottom - 50 + 'px';
+    }
+
+    do {
         block.style.top = block.offsetTop + 10 + 'px';
 
         if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
             block.style.top = 10 + 'px';
             block.style.left = block.offsetLeft + 210 + 'px';
         }
-    }
-
-    const id = block.dataset.id;
-    console.log('Positioned: ' + id);
+    } while (isCollision(block));
 }
 
 // Add a sound block
-function addSoundBlock(text, soundPath) {
+function addSoundBlock(text, soundPath, batch) {
     const id = blockDb.length;
 
     const html = '<a class="button is-dark draggable ui-widget-content"' +
@@ -124,7 +126,11 @@ function addSoundBlock(text, soundPath) {
     });
 
     const element = document.querySelector('[data-id="' + id + '"]');
-    autoPosition(element);
+    autoPosition(element, batch);
+
+    if (batch) {
+        lastAddedIndex = id;
+    }
 
     const rect = getRectWithOffset(element);
     $(element).fadeTo('fast', 1);
@@ -164,7 +170,7 @@ function setAudioOverlay(width) {
 
 // Update block audio animation
 function updateAudioStep() {
-    const sound = blockDb[blockIndex].howl;
+    const sound = blockDb[lastPlayedIndex].howl;
     const seek = sound.seek() || 0;
     const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
@@ -176,10 +182,10 @@ function updateAudioStep() {
 }
 
 // Add multiple files as blocks
-function addFileBlocks(files) {
+function addFileBlocks(files, batch) {
     files.forEach(function (file) {
         const parsed = path.parse(file);
-        addSoundBlock(parsed.name, file);
+        addSoundBlock(parsed.name, file, batch);
     });
 }
 
@@ -238,7 +244,9 @@ $(function () {
             filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
         }, function (files) {
             if (files !== undefined) {
-                addFileBlocks(files);
+                const batch = (files.length > 5);
+                addFileBlocks(files, batch);
+                lastAddedIndex = -1;
             }
 
             $main.removeClass('is-loading');
@@ -254,8 +262,6 @@ $(function () {
             properties: ['openDirectory', 'multiSelections']
         }, function (dirs) {
             if (dirs !== undefined) {
-                console.log('Start: ' + new Date().toLocaleTimeString());
-
                 dirs.forEach(function (dir) {
                     const files = fg.sync('**/*.{mp3,wav,ogg,flac}', {
                         cwd: dir,
@@ -263,12 +269,13 @@ $(function () {
                         absolute: true
                     });
 
-                    addFileBlocks(files);
+                    addFileBlocks(files, true);
                 });
+
+                lastAddedIndex = -1;
             }
 
             $main.removeClass('is-loading');
-            console.log('Finish: ' + new Date().toLocaleTimeString());
         });
     });
 
@@ -277,17 +284,17 @@ $(function () {
         if (!isEditMode()) {
             const id = this.dataset.id;
 
-            if (blockIndex > -1) {
-                blockDb[blockIndex].howl.stop();
+            if (lastPlayedIndex > -1) {
+                blockDb[lastPlayedIndex].howl.stop();
                 setAudioOverlay(0);
             }
 
             blockDb[id].howl.load().play();
-            blockIndex = id;
+            lastPlayedIndex = id;
             $currentBlock = $(this);
         }
     }).on('contextmenu', function () {
-        const sound = blockDb[blockIndex];
+        const sound = blockDb[lastPlayedIndex];
 
         if (!isEditMode() && sound) {
             const howl = sound.howl;
