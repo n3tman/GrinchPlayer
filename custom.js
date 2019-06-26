@@ -78,10 +78,10 @@ function isCollision(target) {
         let collision = false;
         for (let block of blockDb) {
             if (blockDb[targetId] !== block) {
-                collision = rect.right >= block.rect.left &&
-                    rect.left <= block.rect.right &&
-                    rect.bottom >= block.rect.top &&
-                    rect.top <= block.rect.bottom;
+                collision = rect.right > block.rect.left &&
+                    rect.left < block.rect.right &&
+                    rect.bottom > block.rect.top &&
+                    rect.top < block.rect.bottom;
 
                 if (collision) {
                     break;
@@ -100,7 +100,7 @@ function autoPosition(block, batch) {
     if (batch && lastAddedIndex > -1) {
         const lastRect = blockDb[lastAddedIndex].rect;
         block.style.left = lastRect.left + 'px';
-        block.style.top = lastRect.bottom - 50 + 'px';
+        block.style.top = lastRect.bottom - 60 + 'px';
     }
 
     do {
@@ -108,7 +108,7 @@ function autoPosition(block, batch) {
 
         if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
             block.style.top = 10 + 'px';
-            block.style.left = block.offsetLeft + 210 + 'px';
+            block.style.left = block.offsetLeft + 200 + 'px';
         }
     } while (isCollision(block));
 }
@@ -155,6 +155,7 @@ function addSoundBlock(text, soundPath, batch) {
         rect: rect,
         howl: new hp.Howl({
             src: [soundPath],
+            html5: true,
             preload: false,
             onplay: function () {
                 requestAnimationFrame(updateAudioStep);
