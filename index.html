@@ -47,19 +47,58 @@
     </div>
 </nav>
 
-<main class="main" id="main"></main>
+<div class="wrapper">
+    <main class="main" id="main"></main>
 
-<nav class="level navbar is-fixed-bottom">
-    <p class="level-item has-text-centered">
-        <a class="button" id="add-block"><i class="fa fa-code"></i> Рыба</a>
-        <a class="button" id="add-sound"><i class="fa fa-file-o"></i> Файлы</a>
-        <a class="button" id="add-folder"><i class="fa fa-folder-o"></i> Папки</a>
+    <nav class="level navbar">
+        <div class="level-left">
+            <button class="button is-medium is-dark" id="left-toggle" title="Сайдбар">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+        </div>
+        <p class="level-item has-text-centered">
+            <button class="button" id="add-block"><i class="fa fa-code"></i> Рыба</button>
+            <button class="button" id="add-sound"><i class="fa fa-file-o"></i> Файлы</button>
+            <button class="button" id="add-folder"><i class="fa fa-folder-o"></i> Папки</button>
+        </p>
+        <div class="level-right">
+            <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
+                <i class="fa fa-edit"></i>
+            </button>
+
+            <button class="button is-medium is-dark" id="deck-toggle" title="Колода">
+                <i class="fa fa-list"></i>
+            </button>
+
+            <button class="button is-medium is-dark" id="right-toggle" title="Сайдбар">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </nav>
+</div>
+
+<nav class="panel deck" id="deck">
+    <p class="panel-heading">
+        Осталось фраз: <span class="count">0</span>
     </p>
-    <div class="level-right">
-        <a class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
-            <i class="fa fa-edit"></i>
-        </a>
+    <div class="panel-block">
+        <p class="control has-icons-left">
+            <input class="input" type="text" placeholder="фильтр">
+            <span class="icon is-left">
+                <i class="fa fa-search" aria-hidden="true"></i>
+            </span>
+        </p>
     </div>
+    <p class="panel-tabs">
+        <a class="by-name is-active">по алфавиту</a>
+        <a class="by-length">по длине</a>
+    </p>
+    <a class="panel-block is-active">один один один один один</a>
+    <a class="panel-block">два два</a>
+    <a class="panel-block">три</a>
+    <a class="panel-block">четыре четыре</a>
+    <a class="panel-block">пять пять пять пять пять пять пять пять</a>
+    <a class="panel-block">шесть шесть</a>
 </nav>
 
 </body>

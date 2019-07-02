@@ -7,6 +7,13 @@
 $family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 $bulmaswatch-import-font: false;
 
+// overriding variables
+$input-color: $grey-lighter;
+$input-icon-color: darken($grey-light, 10);
+$input-background-color: transparent;
+$input-hover-color: $grey-light;
+$input-border-color: $border;
+
 @import "node_modules/bulma/bulma";
 
 @import "node_modules/bulmaswatch/superhero/overrides";
@@ -27,12 +34,26 @@ html, body {
     height: 100%;
 }
 
+.wrapper {
+    height: calc(100% - 50px);
+    position: relative;
+    margin-right: 0;
+    transition: margin-right 0.3s ease-in-out 0.2s;
+}
+
 // ------------------ //
 //  Global
 // ------------------ //
 
 .title {
     text-align: center;
+}
+
+.panel-heading,
+.panel-tabs,
+.panel-block {
+    border-left: 0;
+    border-right: 0;
 }
 
 // ------------------ //
@@ -116,69 +137,12 @@ html, body {
 }
 
 // ------------------ //
-//  Navbar Bottom
-// ------------------ //
-
-body {
-    transition: padding-bottom 0.5s;
-}
-
-body.has-navbar-fixed-bottom {
-    padding-bottom: 0;
-}
-
-.navbar.level {
-    & {
-        height: 4rem;
-        bottom: -4rem;
-        transition: bottom 0.5s;
-        background-color: rgba($navbar-background-color, 0.7);
-    }
-
-    .button {
-        margin: 0 $size-small;
-        font-size: $size-6;
-    }
-
-    .button .fa {
-        margin-right: 0.5rem;
-    }
-
-    .edit {
-        width: 3rem;
-        height: 3rem;
-        position: absolute;
-        top: -3rem;
-        right: 0;
-        border: 2px solid $border;
-        border-bottom: 0;
-        border-right: 0;
-        margin: 0;
-    }
-
-    .edit .fa {
-        font-size: $size-large;
-        margin: 0;
-    }
-}
-
-.has-navbar-fixed-bottom .navbar.level {
-    & {
-        bottom: 0;
-    }
-
-    .edit {
-        color: $green;
-    }
-}
-
-// ------------------ //
 //  Main Block
 // ------------------ //
 
 .main {
     & {
-        height: calc(100% - 50px);
+        height: 100%;
         position: relative;
         background-image: linear-gradient($grey-dark 1px, transparent 1px),
         linear-gradient(90deg, $grey-dark 1px, transparent 1px);
@@ -240,5 +204,118 @@ body.has-navbar-fixed-bottom {
         height: 100%;
         width: 0;
         background-color: rgba($blue, 0.4);
+    }
+}
+
+// ------------------ //
+//  Navbar Bottom
+// ------------------ //
+
+.navbar.level {
+    & {
+        position: absolute;
+        right: 0;
+        width: 100%;
+        height: 200px;
+        bottom: -200px;
+        transition: bottom 0.5s;
+        background-color: rgba($navbar-background-color, 0.95);
+        z-index: 2000;
+    }
+
+    .button {
+        margin: 0 $size-small;
+        font-size: $size-6;
+    }
+
+    .button .fa {
+        margin-right: 0.5rem;
+    }
+}
+
+.navbar .level-right {
+    & {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin-top: -48px;
+    }
+
+    .button {
+        width: 48px;
+        height: 48px;
+        margin: 0;
+        border: 2px solid $border;
+        border-right: 0;
+    }
+
+    .button + .button {
+        margin-top: 35px;
+    }
+
+    .button .fa {
+        font-size: $size-large;
+        margin: 0;
+    }
+}
+
+.navbar .level-left {
+    .button {
+        width: 48px;
+        height: 48px;
+        margin: 0;
+        border: 2px solid $border;
+    }
+
+    .button .fa {
+        font-size: $size-large;
+        margin: 0;
+    }
+}
+
+.has-bottom .navbar.level {
+    & {
+        bottom: 0;
+    }
+
+    .edit {
+        color: $green;
+    }
+}
+
+// ------------------ //
+//  Deck Panel
+// ------------------ //
+
+.panel.deck {
+    & {
+        position: absolute;
+        width: 250px;
+        height: calc(100% - 50px);
+        top: 50px;
+        right: -250px;
+        transition: right 0.3s ease-in-out 0.2s;
+        background-color: $grey-darker;
+        border-left: 2px solid $border;
+        z-index: 2000;
+    }
+
+    .count {
+        font-weight: bold;
+    }
+
+    .input,
+    .input + .icon {
+        font-size: 0.8rem;
+    }
+}
+
+.has-right {
+    .wrapper {
+        margin-right: 250px;
+    }
+
+    .panel.deck {
+        right: 0;
     }
 }

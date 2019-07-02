@@ -10,9 +10,9 @@ const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
 const fg = require('fast-glob');
-const config = require('./config');
+// 1 const config = require('./config');
 
-const fixedClass = 'has-navbar-fixed-bottom';
+const editClass = 'has-bottom';
 let blockDb = [];
 let lastPlayedIndex = -1;
 let lastAddedIndex = -1;
@@ -24,12 +24,12 @@ window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 
 // Check current mode
 function isEditMode() {
-    return $('body').hasClass(fixedClass);
+    return $('body').hasClass(editClass);
 }
 
 // Toggle edit mode
 function toggleEditMode() {
-    $('body').toggleClass(fixedClass);
+    $('body').toggleClass(editClass);
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
     if (isEditMode()) {
@@ -46,7 +46,8 @@ function initDraggable($elements) {
         stop: function (e) {
             const id = e.target.dataset.id;
             blockDb[id].rect = getRectWithOffset(e.target);
-        }
+        },
+        stack: '.draggable'
     }).resizable({
         grid: [10, 10],
         stop: function (e) {
@@ -220,7 +221,7 @@ $(function () {
         shell.openExternal('https://discord.gg/EEkpKp2');
     });
 
-    // Page edit controls
+    // Toggle Edit mode
     $('#page-edit').click(function () {
         toggleEditMode();
     });
@@ -233,6 +234,20 @@ $(function () {
     // Test block
     $('#add-block').click(function () {
         addSoundBlock(ryba(), './dist/sounds/привет.mp3');
+    });
+
+    // Deck toggle
+    $('#deck-toggle').click(function () {
+        const $body = $('body');
+        const size = window.getSize();
+
+        if ($body.hasClass('has-right')) {
+            window.setSize(size[0] - 250, size[1]);
+        } else {
+            window.setSize(size[0] + 250, size[1]);
+        }
+
+        $body.toggleClass('has-right');
     });
 
     // Add block from single or multiple files
@@ -316,7 +331,4 @@ $(function () {
             }
         }
     });
-
-    // Debug
-    console.log(config.get('favoriteAnimal'));
 });

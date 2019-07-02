@@ -5,6 +5,7 @@ const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
+const config = require('./config');
 
 unhandled();
 debug();
@@ -18,6 +19,7 @@ app.setAppUserModelId('com.Nik.GrinchPlayer');
 
 // Prevent variables from being garbage collected
 let mainWindow;
+let bounds = config.get('bounds') || {};
 
 const createMainWindow = async () => {
     const appName = app.getName() + ' v' + app.getVersion();
@@ -35,8 +37,14 @@ const createMainWindow = async () => {
         }
     });
 
+    win.setBounds(bounds);
+
     win.on('ready-to-show', () => {
         win.show();
+    });
+
+    win.on('close', () => {
+        config.set('bounds', win.getBounds());
     });
 
     win.on('closed', () => {
