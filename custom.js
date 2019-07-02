@@ -284,13 +284,22 @@ $(function () {
     $('#main').on('click', '.draggable', function () {
         if (!isEditMode()) {
             const id = this.dataset.id;
+            const howl = blockDb[id].howl;
 
             if (lastPlayedIndex > -1) {
                 blockDb[lastPlayedIndex].howl.stop();
                 setAudioOverlay(0);
             }
 
-            blockDb[id].howl.load().play();
+            if (howl.state() === 'unloaded') {
+                howl.load();
+                howl.once('load', function () {
+                    howl.play();
+                });
+            } else {
+                howl.play();
+            }
+
             lastPlayedIndex = id;
             $currentBlock = $(this);
         }
