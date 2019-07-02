@@ -33,9 +33,9 @@ function toggleEditMode() {
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
     if (isEditMode()) {
-        initDraggable($('.draggable'));
+        initDraggable($('.sound-block'));
     } else {
-        $('.draggable').draggable('destroy').resizable('destroy');
+        $('.sound-block').draggable('destroy').resizable('destroy');
     }
 }
 
@@ -47,7 +47,7 @@ function initDraggable($elements) {
             const id = e.target.dataset.id;
             blockDb[id].rect = getRectWithOffset(e.target);
         },
-        stack: '.draggable'
+        stack: '.sound-block'
     }).resizable({
         grid: [10, 10],
         stop: function (e) {
@@ -118,7 +118,7 @@ function autoPosition(block, batch) {
 function addSoundBlock(text, soundPath, batch) {
     const id = blockDb.length;
 
-    const html = '<a class="button is-dark draggable ui-widget-content"' +
+    const html = '<a class="button is-dark sound-block"' +
         ' data-id="' + id + '"><div class="overlay"></div>' +
         '<span class="text">' + text + '</span></a>';
 
@@ -296,7 +296,7 @@ $(function () {
     });
 
     // Audio
-    $('#main').on('click', '.draggable', function () {
+    $('#main').on('click', '.sound-block', function () {
         if (!isEditMode()) {
             const id = this.dataset.id;
             const howl = blockDb[id].howl;

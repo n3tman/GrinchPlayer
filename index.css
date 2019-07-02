@@ -12871,7 +12871,7 @@ html, body {
   zoom: 2;
   z-index: 200;
 }
-.main .draggable {
+.main .sound-block {
   position: absolute;
   top: 0;
   left: 10px;
@@ -12885,12 +12885,12 @@ html, body {
   z-index: 1;
   opacity: 0;
 }
-.main .draggable .text {
+.main .sound-block .text {
   padding: 5px;
   line-height: normal;
   z-index: 1;
 }
-.main .draggable .overlay {
+.main .sound-block .overlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -12903,8 +12903,8 @@ html, body {
   position: absolute;
   right: 0;
   width: 100%;
-  height: 200px;
-  bottom: -200px;
+  height: 100px;
+  bottom: -100px;
   transition: bottom 0.5s;
   background-color: rgba(43, 62, 80, 0.95);
   z-index: 2000;
@@ -12917,43 +12917,51 @@ html, body {
   margin-right: 0.5rem;
 }
 
-.navbar .level-right {
+.navbar .level-right,
+.navbar .level-left {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  margin-top: -48px;
+  justify-content: center;
 }
-.navbar .level-right .button {
-  width: 48px;
-  height: 48px;
-  margin: 0;
-  border: 2px solid #4E5D6C;
-  border-right: 0;
-}
-.navbar .level-right .button + .button {
-  margin-top: 35px;
-}
-.navbar .level-right .button .fa {
-  font-size: 1.5rem;
-  margin: 0;
-}
-
+.navbar .level-right .button,
 .navbar .level-left .button {
   width: 48px;
   height: 48px;
   margin: 0;
   border: 2px solid #4E5D6C;
 }
+.navbar .level-right .button + .button,
+.navbar .level-left .button + .button {
+  margin-top: 2px;
+}
+.navbar .level-right .button .fa,
 .navbar .level-left .button .fa {
   font-size: 1.5rem;
   margin: 0;
 }
 
-.has-bottom .navbar.level {
+.navbar .level-right {
+  justify-content: flex-start;
+  margin-top: -48px;
+}
+.navbar .level-right .button {
+  border-right: 0;
+}
+
+.navbar .level-left .button {
+  border-left: 0;
+}
+
+.has-bottom:not(.has-right) .navbar.level {
   bottom: 0;
 }
-.has-bottom .navbar.level .edit {
+.has-bottom:not(.has-right) .navbar.level .edit {
   color: #5cb85c;
+}
+
+.has-right .navbar.level .deck-toggle {
+  margin-top: -48px !important;
+  color: #5cb85c !important;
 }
 
 .panel.deck {
