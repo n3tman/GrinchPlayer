@@ -1,4 +1,4 @@
-/* global window, document, $, requestAnimationFrame */
+/* global window, $, requestAnimationFrame */
 
 'use strict';
 
@@ -6,7 +6,6 @@ const {remote, shell} = require('electron');
 const {dialog} = require('electron').remote;
 const path = require('path');
 const hp = require('howler');
-const ryba = require('ryba-js');
 const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
 const fg = require('fast-glob');
@@ -44,13 +43,15 @@ function toggleEditMode() {
 function initDraggableMain($elements) {
     return $elements.draggable({
         grid: [10, 10],
+        containment: 'parent',
+        stack: '.sound-block',
         stop: function (e) {
             const id = e.target.dataset.id;
             blockDb[id].rect = getRectWithOffset(e.target);
-        },
-        stack: '.sound-block'
+        }
     }).resizable({
         grid: [10, 10],
+        containment: 'parent',
         stop: function (e) {
             const id = e.target.dataset.id;
             blockDb[id].rect = getRectWithOffset(e.target);
@@ -120,6 +121,7 @@ function autoPosition(block, batch) {
     }
 
     do {
+        console.log('moved!');
         block.style.top = block.offsetTop + 10 + 'px';
 
         if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
@@ -130,38 +132,30 @@ function autoPosition(block, batch) {
 }
 
 // Add a sound block
-function addSoundBlock(text, soundPath, batch) {
-    const id = blockDb.length;
+function addSoundBlock($element, position, batch) {
+    const id = $element.data('id');
+    const selector = '[data-id="' + id + '"]';
+    const height = $element.outerHeight();
 
-    const html = '<a class="button is-dark sound-block"' +
-        ' data-id="' + id + '"><div class="sound-overlay"></div>' +
-        '<div class="sound-text">' + text + '</div></a>';
+    $element.removeClass('panel-block').draggable('destroy')
+        .addClass('button is-dark sound-block')
+        .outerHeight(roundToTen(height));
 
-    $(html).appendTo('#main').height(function () {
-        return Math.ceil(this.offsetHeight / 10) * 10;
-    });
+    $('#main').append($element);
 
-    const element = document.querySelector('[data-id="' + id + '"]');
-    autoPosition(element, batch);
-
-    if (batch) {
-        lastAddedIndex = id;
+    if (position === undefined) {
+        autoPosition($(selector)[0], batch);
+        console.log('positioned ' + id);
+    } else {
+        $(selector).css('left', roundToTen(position.left))
+            .css('top', roundToTen(position.top - 50));
     }
 
-    const rect = getRectWithOffset(element);
-    $(element).fadeTo('fast', 1);
-
-    blockDb.push({
-        rect: rect,
-        howl: new hp.Howl({
-            src: [soundPath],
-            html5: true,
-            preload: false,
-            onplay: function () {
-                requestAnimationFrame(updateAudioStep);
-            }
-        })
-    });
+    setTimeout(function () {
+        const $dropped = $('[data-id="' + id + '"]');
+        blockDb[id].rect = getRectWithOffset($dropped[0]);
+        initDraggableMain($dropped);
+    }, 100);
 }
 
 // Add sound block to the deck
@@ -251,7 +245,7 @@ function recalcScrollbars() {
 
 // Round to nearest 10
 function roundToTen(value) {
-    return Math.ceil(value / 10) * 10;
+    return Math.ceil((value - 1) / 10) * 10;
 }
 
 // Main action on document.ready
@@ -294,11 +288,6 @@ $(function () {
         toggleEditMode();
     });
 
-    // Test block
-    $('#add-block').click(function () {
-        addSoundBlock(ryba(), './dist/sounds/привет.mp3');
-    });
-
     // Deck toggle
     $('#deck-toggle').click(function () {
         const $body = $('body');
@@ -324,7 +313,6 @@ $(function () {
         }, function (files) {
             if (files !== undefined) {
                 addFileBlocks(files);
-                lastAddedIndex = -1;
             }
 
             $main.removeClass('is-loading');
@@ -349,8 +337,6 @@ $(function () {
 
                     addFileBlocks(files);
                 });
-
-                lastAddedIndex = -1;
             }
 
             $main.removeClass('is-loading');
@@ -377,22 +363,7 @@ $(function () {
     }).droppable({
         accept: '.panel-block',
         drop: function (e, ui) {
-            const $elem = ui.draggable;
-            const height = ui.helper.find('.sound-text').outerHeight();
-            const id = $elem[0].dataset.id;
-
-            $elem.removeClass('panel-block').draggable('destroy')
-                .addClass('button is-dark sound-block')
-                .css('left', roundToTen(ui.position.left))
-                .css('top', roundToTen(ui.position.top) - 50)
-                .outerHeight(roundToTen(height));
-            $(this).append($elem);
-
-            setTimeout(function () {
-                const $dropped = $('[data-id="' + id + '"]');
-                blockDb[id].rect = getRectWithOffset($dropped[0]);
-                initDraggableMain($dropped);
-            }, 100);
+            addSoundBlock(ui.draggable, ui.position);
         }
     });
 

@@ -57,9 +57,8 @@
             </button>
         </div>
         <p class="level-item has-text-centered">
-            <button class="button" id="add-block"><i class="fa fa-code"></i> Рыба</button>
-            <button class="button" id="add-sound"><i class="fa fa-file-o"></i> Файлы</button>
-            <button class="button" id="add-folder"><i class="fa fa-folder-o"></i> Папки</button>
+            <button class="button is-large" id="add-sound"><i class="fa fa-file-o"></i> Файлы</button>
+            <button class="button is-large" id="add-folder"><i class="fa fa-folder-o"></i> Папки</button>
         </p>
         <div class="level-right">
             <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
@@ -81,6 +80,24 @@
     <p class="panel-heading">
         Осталось фраз: <span class="count">0</span>
     </p>
+    <div class="panel-block batch">
+        <div class="field has-addons">
+            <p class="control">
+                <a class="button is-dark is-static">Добавить</a>
+            </p>
+            <p class="control is-expanded">
+                <input class="input" type="number" min="1">
+            </p>
+            <p class="control">
+                <a class="button is-dark is-static">фраз</a>
+            </p>
+            <p class="control">
+                <a class="button is-dark" title="Добавить">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                </a>
+            </p>
+        </div>
+    </div>
     <div class="panel-search">
         <p class="control has-icons-left">
             <input class="input" type="text" placeholder="фильтр">
@@ -92,8 +109,8 @@
     <p class="panel-tabs">
         <a class="by-name is-active">по алфавиту</a>
         <a class="by-length">по длине</a>
-        <div class="deck-items" data-simplebar></div>
     </p>
+    <div class="deck-items" data-simplebar></div>
 </nav>
 
 </body>

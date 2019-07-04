@@ -61,7 +61,7 @@ html, body {
 .sound-text {
     text-align: center;
     width: 100%;
-    padding: 5px;
+    padding: 4px 6px;
     line-height: normal;
     z-index: 1;
 }
@@ -245,7 +245,6 @@ html, body {
 
     .button {
         margin: 0 $size-small;
-        font-size: $size-6;
     }
 
     .button .fa {
@@ -329,47 +328,87 @@ html, body {
         z-index: 2000;
     }
 
-    .deck-items {
-        height: calc(100% - 110px);
-    }
-
-    .panel-block {
-        position: relative;
-    }
-
-    .panel-block .text {
-        z-index: 1;
-    }
-
     .panel-heading {
-        height: 50px;
+        & {
+            height: 50px;
+        }
+
+        .count {
+            font-weight: bold;
+        }
     }
 
     .panel-search {
-        height: 30px;
+        & {
+            height: 40px;
+        }
+
+        .input {
+            border: 0;
+            border-bottom: 1px solid $border;
+        }
     }
 
-    .panel-search .input {
-        border: 0;
-        border-bottom: 1px solid $border;
+    .panel-tabs {
+        a {
+            height: 30px;
+            padding: 3px 20px 0;
+        }
     }
 
-    .panel-tabs a {
-        height: 30px;
-        padding: 3px 20px 0;
+    .deck-items {
+        & {
+            height: calc(100% - 160px);
+        }
+
+        .panel-block {
+            position: relative;
+            padding: 0;
+            margin-left: 25px;
+            width: 200px;
+        }
+
+        .panel-block:first-child {
+            border-top: 0;
+        }
+
+        .sound-text {
+            text-align: left;
+        }
     }
 
-    .count {
-        font-weight: bold;
+    .batch {
+        & {
+            padding: 0;
+            height: 40px;
+        }
+
+        .button {
+            background: transparent;
+            border: 0;
+            color: $input-color;
+        }
+
+        .button:hover {
+            background: $grey-dark;
+            opacity: 0.8;
+        }
     }
 
-    .input,
-    .input + .icon {
-        font-size: 0.8rem;
+    .batch .input {
+        & {
+            border: 0;
+        }
+
+        &::-webkit-inner-spin-button,
+        &::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
     }
 
-    .sound-text {
-        text-align: left;
+    .control + .control {
+        border-left: 1px solid $border;
     }
 }
 
