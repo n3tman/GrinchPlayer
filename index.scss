@@ -25,6 +25,8 @@ $fa-font-path: "node_modules/fork-awesome/fonts";
 
 @import "node_modules/jquery-ui-dist/jquery-ui.css";
 
+@import "node_modules/simplebar/src/simplebar.css";
+
 // ------------------ //
 //  Layout
 // ------------------ //
@@ -66,6 +68,27 @@ html, body {
 
 .no-drag {
     -webkit-app-region: no-drag;
+}
+
+.sound-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: rgba($blue, 0.3);
+}
+
+// ------------------ //
+//  SimpleBar
+// ------------------ //
+
+.simplebar-scrollbar:before {
+    background: $grey-light;
+}
+
+.simplebar-track .simplebar-scrollbar.simplebar-visible:before {
+    opacity: 0.8;
 }
 
 // ------------------ //
@@ -196,15 +219,6 @@ html, body {
         line-height: normal;
         z-index: 1;
     }
-
-    .sound-block .overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        height: 100%;
-        width: 0;
-        background-color: rgba($blue, 0.4);
-    }
 }
 
 // ------------------ //
@@ -307,6 +321,36 @@ html, body {
         background-color: $grey-darker;
         border-left: 2px solid $border;
         z-index: 2000;
+    }
+
+    .deck-items {
+        height: calc(100% - 110px);
+    }
+
+    .panel-block {
+        position: relative;
+    }
+
+    .panel-block .text {
+        z-index: 1;
+    }
+
+    .panel-heading {
+        height: 50px;
+    }
+
+    .panel-search {
+        height: 30px;
+    }
+
+    .panel-search .input {
+        border: 0;
+        border-bottom: 1px solid $border;
+    }
+
+    .panel-tabs a {
+        height: 30px;
+        padding: 3px 20px 0;
     }
 
     .count {

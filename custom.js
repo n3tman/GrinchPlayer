@@ -21,6 +21,7 @@ let $currentBlock;
 window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
+window.sBar = require('simplebar');
 
 // Check current mode
 function isEditMode() {
@@ -119,7 +120,7 @@ function addSoundBlock(text, soundPath, batch) {
     const id = blockDb.length;
 
     const html = '<a class="button is-dark sound-block"' +
-        ' data-id="' + id + '"><div class="overlay"></div>' +
+        ' data-id="' + id + '"><div class="sound-overlay"></div>' +
         '<span class="text">' + text + '</span></a>';
 
     $(html).appendTo('#main').height(function () {
@@ -165,9 +166,55 @@ function addSoundBlock(text, soundPath, batch) {
     });
 }
 
+// Add sound block to the deck
+function addDeckItem(text, soundPath) {
+    const id = blockDb.length;
+
+    const html = '<a class="panel-block"' +
+        ' data-id="' + id + '"><div class="sound-overlay"></div>' +
+        '<span class="text">' + text + '</span></a>';
+
+    blockDb.push({
+        howl: new hp.Howl({
+            src: [soundPath],
+            html5: true,
+            preload: false,
+            onplay: function () {
+                requestAnimationFrame(updateAudioStep);
+            }
+        })
+    });
+
+    $(html).appendTo('#deck .simplebar-content').on('contextmenu', function () {
+        playSound(id, this);
+    });
+}
+
 // Sets width of audio overlay
 function setAudioOverlay(width) {
-    $currentBlock.find('.overlay').width(width);
+    $currentBlock.find('.sound-overlay').width(width);
+}
+
+// Play sound if it's not loaded
+function playSound(id, element) {
+    const howl = blockDb[id].howl;
+
+    if (lastPlayedIndex > -1) {
+        blockDb[lastPlayedIndex].howl.stop();
+        setAudioOverlay(0);
+    }
+
+    if (howl.state() === 'unloaded') {
+        howl.load();
+        howl.once('load', function () {
+            howl.play();
+        });
+    } else {
+        howl.play();
+    }
+
+    lastPlayedIndex = id;
+    $currentBlock = $(element);
 }
 
 // Update block audio animation
@@ -184,10 +231,20 @@ function updateAudioStep() {
 }
 
 // Add multiple files as blocks
-function addFileBlocks(files, batch) {
+function addFileBlocks(files) {
     files.forEach(function (file) {
         const parsed = path.parse(file);
-        addSoundBlock(parsed.name, file, batch);
+        addDeckItem(parsed.name, file);
+        // 1 addSoundBlock(parsed.name, file, batch);
+    });
+
+    recalcScrollbars();
+}
+
+// Recalculate scrollbars
+function recalcScrollbars() {
+    $('[data-simplebar]').each(function (i, val) {
+        val.SimpleBar.recalculate();
     });
 }
 
@@ -260,8 +317,7 @@ $(function () {
             filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
         }, function (files) {
             if (files !== undefined) {
-                const batch = (files.length > 5);
-                addFileBlocks(files, batch);
+                addFileBlocks(files);
                 lastAddedIndex = -1;
             }
 
@@ -285,7 +341,7 @@ $(function () {
                         absolute: true
                     });
 
-                    addFileBlocks(files, true);
+                    addFileBlocks(files);
                 });
 
                 lastAddedIndex = -1;
@@ -299,29 +355,12 @@ $(function () {
     $('#main').on('click', '.sound-block', function () {
         if (!isEditMode()) {
             const id = this.dataset.id;
-            const howl = blockDb[id].howl;
-
-            if (lastPlayedIndex > -1) {
-                blockDb[lastPlayedIndex].howl.stop();
-                setAudioOverlay(0);
-            }
-
-            if (howl.state() === 'unloaded') {
-                howl.load();
-                howl.once('load', function () {
-                    howl.play();
-                });
-            } else {
-                howl.play();
-            }
-
-            lastPlayedIndex = id;
-            $currentBlock = $(this);
+            playSound(id, this);
         }
     }).on('contextmenu', function () {
         const sound = blockDb[lastPlayedIndex];
 
-        if (!isEditMode() && sound) {
+        if (sound) {
             const howl = sound.howl;
 
             if (howl.playing()) {

@@ -1,6 +1,7 @@
 @charset "UTF-8";
 /*! bulma.io v0.7.5 | MIT License | github.com/jgthms/bulma */
 @import "node_modules/jquery-ui-dist/jquery-ui.css";
+@import "node_modules/simplebar/src/simplebar.css";
 @keyframes spinAround {
   from {
     transform: rotate(0deg);
@@ -12783,6 +12784,23 @@ html, body {
   -webkit-app-region: no-drag;
 }
 
+.sound-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background-color: rgba(91, 192, 222, 0.3);
+}
+
+.simplebar-scrollbar:before {
+  background: #8694a4;
+}
+
+.simplebar-track .simplebar-scrollbar.simplebar-visible:before {
+  opacity: 0.8;
+}
+
 .navbar.top {
   padding: 4px 4px 0;
   min-height: 50px;
@@ -12890,14 +12908,6 @@ html, body {
   line-height: normal;
   z-index: 1;
 }
-.main .sound-block .overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 0;
-  background-color: rgba(91, 192, 222, 0.4);
-}
 
 .navbar.level {
   position: absolute;
@@ -12974,6 +12984,29 @@ html, body {
   background-color: #1f2d3b;
   border-left: 2px solid #4E5D6C;
   z-index: 2000;
+}
+.panel.deck .deck-items {
+  height: calc(100% - 110px);
+}
+.panel.deck .panel-block {
+  position: relative;
+}
+.panel.deck .panel-block .text {
+  z-index: 1;
+}
+.panel.deck .panel-heading {
+  height: 50px;
+}
+.panel.deck .panel-search {
+  height: 30px;
+}
+.panel.deck .panel-search .input {
+  border: 0;
+  border-bottom: 1px solid #4E5D6C;
+}
+.panel.deck .panel-tabs a {
+  height: 30px;
+  padding: 3px 20px 0;
 }
 .panel.deck .count {
   font-weight: bold;

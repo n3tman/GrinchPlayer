@@ -32,7 +32,8 @@
 		"jquery": "^3.4.1",
 		"jquery-ui-dist": "^1.12.1",
 		"lodash": "^4.17.11",
-		"ryba-js": "0.0.9"
+		"ryba-js": "0.0.9",
+		"simplebar": "^4.1.0"
 	},
 	"devDependencies": {
 		"electron": "^5.0.4",
