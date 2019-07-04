@@ -12906,6 +12906,8 @@ html, body {
 }
 .main .sound-block {
   position: absolute;
+  left: 10px;
+  top: 0;
   width: 200px;
   height: auto;
   overflow: hidden;

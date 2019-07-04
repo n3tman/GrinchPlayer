@@ -13,6 +13,7 @@ const fg = require('fast-glob');
 
 const editClass = 'has-bottom';
 let blockDb = [];
+let addedIds = [];
 let lastPlayedIndex = -1;
 let lastAddedIndex = -1;
 let $currentBlock;
@@ -88,13 +89,15 @@ function getRectWithOffset(element) {
 
 // Check block for collision with others
 function isCollision(target) {
-    if (blockDb.length > 0) {
+    if (addedIds.length > 0) {
         const rect = target.getBoundingClientRect();
         const targetId = Number(target.dataset.id);
 
         let collision = false;
-        for (let block of blockDb) {
-            if (blockDb[targetId] !== block) {
+        for (let id of addedIds) {
+            const block = blockDb[id];
+
+            if (targetId !== id) {
                 collision = rect.right > block.rect.left &&
                     rect.left < block.rect.right &&
                     rect.bottom > block.rect.top &&
@@ -113,15 +116,14 @@ function isCollision(target) {
 }
 
 // Automatically move block to free space
-function autoPosition(block, batch) {
-    if (batch && lastAddedIndex > -1) {
+function autoPosition(block) {
+    if (lastAddedIndex > -1) {
         const lastRect = blockDb[lastAddedIndex].rect;
         block.style.left = lastRect.left + 'px';
         block.style.top = lastRect.bottom - 60 + 'px';
     }
 
     do {
-        console.log('moved!');
         block.style.top = block.offsetTop + 10 + 'px';
 
         if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
@@ -132,8 +134,8 @@ function autoPosition(block, batch) {
 }
 
 // Add a sound block
-function addSoundBlock($element, position, batch) {
-    const id = $element.data('id');
+function addSoundBlock($element, position) {
+    const id = Number($element.data('id'));
     const selector = '[data-id="' + id + '"]';
     const height = $element.outerHeight();
 
@@ -143,18 +145,20 @@ function addSoundBlock($element, position, batch) {
 
     $('#main').append($element);
 
-    if (position === undefined) {
-        autoPosition($(selector)[0], batch);
-        console.log('positioned ' + id);
+    const dropped = $(selector)[0];
+
+    if (position === false) {
+        autoPosition(dropped);
     } else {
-        $(selector).css('left', roundToTen(position.left))
-            .css('top', roundToTen(position.top - 50));
+        dropped.style.left = roundToTen(position.left) + 'px';
+        dropped.style.top = roundToTen(position.top - 50) + 'px';
     }
 
+    blockDb[id].rect = getRectWithOffset(dropped);
+    addedIds.push(id);
+
     setTimeout(function () {
-        const $dropped = $('[data-id="' + id + '"]');
-        blockDb[id].rect = getRectWithOffset($dropped[0]);
-        initDraggableMain($dropped);
+        initDraggableMain($(selector));
     }, 100);
 }
 
@@ -364,11 +368,25 @@ $(function () {
         accept: '.panel-block',
         drop: function (e, ui) {
             addSoundBlock(ui.draggable, ui.position);
+            recalcScrollbars();
         }
     });
 
     // Deck sidebar
-    $('#deck').on('contextmenu', '.panel-block', function () {
+    $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
+    }).on('click', '#batch-btn', function () {
+        const num = $('#batch-num').val();
+        const $items = $('.deck-items .panel-block');
+
+        if (num > 0 && $items.length > 0) {
+            $items.slice(0, num).each(function (i, elem) {
+                const id = elem.dataset.id;
+                addSoundBlock($(elem), false);
+                lastAddedIndex = id;
+            });
+
+            lastAddedIndex = -1;
+        }
     });
 });
