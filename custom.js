@@ -34,14 +34,14 @@ function toggleEditMode() {
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
     if (isEditMode()) {
-        initDraggable($('.sound-block'));
+        $('.sound-block').draggable('enable').resizable('enable');
     } else {
-        $('.sound-block').draggable('destroy').resizable('destroy');
+        $('.sound-block').draggable('disable').resizable('disable');
     }
 }
 
 // Initialize draggable/resizable block
-function initDraggable($elements) {
+function initDraggableMain($elements) {
     return $elements.draggable({
         grid: [10, 10],
         stop: function (e) {
@@ -54,6 +54,20 @@ function initDraggable($elements) {
         stop: function (e) {
             const id = e.target.dataset.id;
             blockDb[id].rect = getRectWithOffset(e.target);
+        }
+    }).mousedown(function (e) {
+        if (e.which === 3 && isEditMode()) {
+            const $target = $(e.currentTarget).find('.ui-resizable-se');
+            const posX = $target.offset().left + 8;
+            const posY = $target.offset().top + 8;
+
+            $target.trigger({
+                type: 'mouseover', which: 1,
+                pageX: posX, pageY: posY
+            }).trigger({
+                type: 'mousedown', which: 1,
+                pageX: posX, pageY: posY
+            });
         }
     });
 }
@@ -121,7 +135,7 @@ function addSoundBlock(text, soundPath, batch) {
 
     const html = '<a class="button is-dark sound-block"' +
         ' data-id="' + id + '"><div class="sound-overlay"></div>' +
-        '<span class="text">' + text + '</span></a>';
+        '<div class="sound-text">' + text + '</div></a>';
 
     $(html).appendTo('#main').height(function () {
         return Math.ceil(this.offsetHeight / 10) * 10;
@@ -136,22 +150,6 @@ function addSoundBlock(text, soundPath, batch) {
 
     const rect = getRectWithOffset(element);
     $(element).fadeTo('fast', 1);
-
-    initDraggable($(element)).mousedown(function (e) {
-        if (e.which === 3 && isEditMode()) {
-            const $target = $(e.currentTarget).find('.ui-resizable-se');
-            const posX = $target.offset().left + 8;
-            const posY = $target.offset().top + 8;
-
-            $target.trigger({
-                type: 'mouseover', which: 1,
-                pageX: posX, pageY: posY
-            }).trigger({
-                type: 'mousedown', which: 1,
-                pageX: posX, pageY: posY
-            });
-        }
-    });
 
     blockDb.push({
         rect: rect,
@@ -172,7 +170,7 @@ function addDeckItem(text, soundPath) {
 
     const html = '<a class="panel-block"' +
         ' data-id="' + id + '"><div class="sound-overlay"></div>' +
-        '<span class="text">' + text + '</span></a>';
+        '<div class="sound-text">' + text + '</div></a>';
 
     blockDb.push({
         howl: new hp.Howl({
@@ -185,8 +183,11 @@ function addDeckItem(text, soundPath) {
         })
     });
 
-    $(html).appendTo('#deck .simplebar-content').on('contextmenu', function () {
-        playSound(id, this);
+    $(html).appendTo('#deck .simplebar-content').draggable({
+        appendTo: 'body',
+        revert: 'invalid',
+        scroll: false,
+        helper: 'clone'
     });
 }
 
@@ -196,7 +197,8 @@ function setAudioOverlay(width) {
 }
 
 // Play sound if it's not loaded
-function playSound(id, element) {
+function playSound(element) {
+    const id = element.dataset.id;
     const howl = blockDb[id].howl;
 
     if (lastPlayedIndex > -1) {
@@ -235,7 +237,6 @@ function addFileBlocks(files) {
     files.forEach(function (file) {
         const parsed = path.parse(file);
         addDeckItem(parsed.name, file);
-        // 1 addSoundBlock(parsed.name, file, batch);
     });
 
     recalcScrollbars();
@@ -246,6 +247,11 @@ function recalcScrollbars() {
     $('[data-simplebar]').each(function (i, val) {
         val.SimpleBar.recalculate();
     });
+}
+
+// Round to nearest 10
+function roundToTen(value) {
+    return Math.ceil(value / 10) * 10;
 }
 
 // Main action on document.ready
@@ -351,11 +357,10 @@ $(function () {
         });
     });
 
-    // Audio
+    // Main block
     $('#main').on('click', '.sound-block', function () {
         if (!isEditMode()) {
-            const id = this.dataset.id;
-            playSound(id, this);
+            playSound(this);
         }
     }).on('contextmenu', function () {
         const sound = blockDb[lastPlayedIndex];
@@ -369,5 +374,30 @@ $(function () {
                 howl.play();
             }
         }
+    }).droppable({
+        accept: '.panel-block',
+        drop: function (e, ui) {
+            const $elem = ui.draggable;
+            const height = ui.helper.find('.sound-text').outerHeight();
+            const id = $elem[0].dataset.id;
+
+            $elem.removeClass('panel-block').draggable('destroy')
+                .addClass('button is-dark sound-block')
+                .css('left', roundToTen(ui.position.left))
+                .css('top', roundToTen(ui.position.top) - 50)
+                .outerHeight(roundToTen(height));
+            $(this).append($elem);
+
+            setTimeout(function () {
+                const $dropped = $('[data-id="' + id + '"]');
+                blockDb[id].rect = getRectWithOffset($dropped[0]);
+                initDraggableMain($dropped);
+            }, 100);
+        }
+    });
+
+    // Deck sidebar
+    $('#deck').on('contextmenu', '.panel-block', function () {
+        playSound(this);
     });
 });

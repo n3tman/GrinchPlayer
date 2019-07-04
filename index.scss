@@ -58,6 +58,21 @@ html, body {
     border-right: 0;
 }
 
+.sound-text {
+    text-align: center;
+    width: 100%;
+    padding: 5px;
+    line-height: normal;
+    z-index: 1;
+}
+
+.ui-draggable-dragging {
+    background: $background;
+    width: 200px;
+    padding: 0;
+    z-index: 100;
+}
+
 // ------------------ //
 //  Utilities
 // ------------------ //
@@ -201,8 +216,6 @@ html, body {
 
     .sound-block {
         position: absolute;
-        top: 0;
-        left: 10px;
         width: 200px;
         height: auto;
         overflow: hidden;
@@ -210,13 +223,6 @@ html, body {
         box-sizing: content-box;
         padding: 0;
         border: 0;
-        z-index: 1;
-        opacity: 0;
-    }
-
-    .sound-block .text {
-        padding: 5px;
-        line-height: normal;
         z-index: 1;
     }
 }
@@ -360,6 +366,10 @@ html, body {
     .input,
     .input + .icon {
         font-size: 0.8rem;
+    }
+
+    .sound-text {
+        text-align: left;
     }
 }
 

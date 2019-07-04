@@ -12776,6 +12776,21 @@ html, body {
   border-right: 0;
 }
 
+.sound-text {
+  text-align: center;
+  width: 100%;
+  padding: 5px;
+  line-height: normal;
+  z-index: 1;
+}
+
+.ui-draggable-dragging {
+  background: #2B3E50;
+  width: 200px;
+  padding: 0;
+  z-index: 100;
+}
+
 .drag {
   -webkit-app-region: drag;
 }
@@ -12891,8 +12906,6 @@ html, body {
 }
 .main .sound-block {
   position: absolute;
-  top: 0;
-  left: 10px;
   width: 200px;
   height: auto;
   overflow: hidden;
@@ -12900,12 +12913,6 @@ html, body {
   box-sizing: content-box;
   padding: 0;
   border: 0;
-  z-index: 1;
-  opacity: 0;
-}
-.main .sound-block .text {
-  padding: 5px;
-  line-height: normal;
   z-index: 1;
 }
 
@@ -13014,6 +13021,9 @@ html, body {
 .panel.deck .input,
 .panel.deck .input + .icon {
   font-size: 0.8rem;
+}
+.panel.deck .sound-text {
+  text-align: left;
 }
 
 .has-right .wrapper {
