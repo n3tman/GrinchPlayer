@@ -4,18 +4,20 @@
 
 const {remote, shell} = require('electron');
 const {dialog} = require('electron').remote;
+const farmhash = require('farmhash');
 const path = require('path');
 const hp = require('howler');
 const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
+const fs = require('fs');
 const fg = require('fast-glob');
 // 1 const config = require('./config');
 
 const editClass = 'has-bottom';
-let blockDb = [];
-let addedIds = [];
-let lastPlayedIndex = -1;
-let lastAddedIndex = -1;
+let blockDb = {};
+let addedBlocks = [];
+let lastPlayedHash = '';
+let lastAddedHash = '';
 let $currentBlock;
 
 window.$ = require('jquery');
@@ -47,15 +49,15 @@ function initDraggableMain($elements) {
         containment: 'parent',
         stack: '.sound-block',
         stop: function (e) {
-            const id = e.target.dataset.id;
-            blockDb[id].rect = getRectWithOffset(e.target);
+            const hash = e.target.dataset.hash;
+            blockDb[hash].rect = getRectWithOffset(e.target);
         }
     }).resizable({
         grid: [10, 10],
         containment: 'parent',
         stop: function (e) {
-            const id = e.target.dataset.id;
-            blockDb[id].rect = getRectWithOffset(e.target);
+            const hash = e.target.dataset.hash;
+            blockDb[hash].rect = getRectWithOffset(e.target);
         }
     }).mousedown(function (e) {
         if (e.which === 3 && isEditMode()) {
@@ -89,15 +91,15 @@ function getRectWithOffset(element) {
 
 // Check block for collision with others
 function isCollision(target) {
-    if (addedIds.length > 0) {
+    if (addedBlocks.length > 0) {
         const rect = target.getBoundingClientRect();
-        const targetId = Number(target.dataset.id);
+        const targetHash = target.dataset.hash;
 
         let collision = false;
-        for (let id of addedIds) {
-            const block = blockDb[id];
+        for (let hash of addedBlocks) {
+            const block = blockDb[hash];
 
-            if (targetId !== id) {
+            if (targetHash !== hash) {
                 collision = rect.right > block.rect.left &&
                     rect.left < block.rect.right &&
                     rect.bottom > block.rect.top &&
@@ -117,8 +119,8 @@ function isCollision(target) {
 
 // Automatically move block to free space
 function autoPosition(block) {
-    if (lastAddedIndex > -1) {
-        const lastRect = blockDb[lastAddedIndex].rect;
+    if (lastAddedHash.length > 0) {
+        const lastRect = blockDb[lastAddedHash].rect;
         block.style.left = lastRect.left + 'px';
         block.style.top = lastRect.bottom - 60 + 'px';
     }
@@ -135,8 +137,8 @@ function autoPosition(block) {
 
 // Add a sound block
 function addSoundBlock($element, position) {
-    const id = Number($element.data('id'));
-    const selector = '[data-id="' + id + '"]';
+    const hash = $element.data('hash');
+    const selector = '[data-hash="' + hash + '"]';
     const height = $element.outerHeight();
 
     $element.removeClass('panel-block').draggable('destroy')
@@ -154,8 +156,8 @@ function addSoundBlock($element, position) {
         dropped.style.top = roundToTen(position.top - 50) + 'px';
     }
 
-    blockDb[id].rect = getRectWithOffset(dropped);
-    addedIds.push(id);
+    blockDb[hash].rect = getRectWithOffset(dropped);
+    addedBlocks.push(hash);
 
     setTimeout(function () {
         initDraggableMain($(selector));
@@ -164,29 +166,34 @@ function addSoundBlock($element, position) {
 
 // Add sound block to the deck
 function addDeckItem(text, soundPath) {
-    const id = blockDb.length;
+    const hash = getFileHash(soundPath);
 
     const html = '<a class="panel-block"' +
-        ' data-id="' + id + '"><div class="sound-overlay"></div>' +
+        ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
-    blockDb.push({
-        howl: new hp.Howl({
-            src: [soundPath],
-            html5: true,
-            preload: false,
-            onplay: function () {
-                requestAnimationFrame(updateAudioStep);
-            }
-        })
-    });
+    if (hash in blockDb) {
+        console.log('Пропущено: ' + soundPath);
+    } else {
+        blockDb[hash] = {
+            hash: hash,
+            howl: new hp.Howl({
+                src: [soundPath],
+                html5: true,
+                preload: false,
+                onplay: function () {
+                    requestAnimationFrame(updateAudioStep);
+                }
+            })
+        };
 
-    $(html).appendTo('#deck .simplebar-content').draggable({
-        appendTo: 'body',
-        revert: 'invalid',
-        scroll: false,
-        helper: 'clone'
-    });
+        $(html).appendTo('#deck .simplebar-content').draggable({
+            appendTo: 'body',
+            revert: 'invalid',
+            scroll: false,
+            helper: 'clone'
+        });
+    }
 }
 
 // Sets width of audio overlay
@@ -196,11 +203,11 @@ function setAudioOverlay(width) {
 
 // Play sound if it's not loaded
 function playSound(element) {
-    const id = element.dataset.id;
-    const howl = blockDb[id].howl;
+    const hash = element.dataset.hash;
+    const howl = blockDb[hash].howl;
 
-    if (lastPlayedIndex > -1) {
-        blockDb[lastPlayedIndex].howl.stop();
+    if (lastPlayedHash.length > 0) {
+        blockDb[lastPlayedHash].howl.stop();
         setAudioOverlay(0);
     }
 
@@ -213,13 +220,13 @@ function playSound(element) {
         howl.play();
     }
 
-    lastPlayedIndex = id;
+    lastPlayedHash = hash;
     $currentBlock = $(element);
 }
 
 // Update block audio animation
 function updateAudioStep() {
-    const sound = blockDb[lastPlayedIndex].howl;
+    const sound = blockDb[lastPlayedHash].howl;
     const seek = sound.seek() || 0;
     const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
@@ -238,6 +245,7 @@ function addFileBlocks(files) {
     });
 
     recalcScrollbars();
+    setDeckCounter();
 }
 
 // Recalculate scrollbars
@@ -250,6 +258,20 @@ function recalcScrollbars() {
 // Round to nearest 10
 function roundToTen(value) {
     return Math.ceil((value - 1) / 10) * 10;
+}
+
+// Set deck counter value
+function setDeckCounter() {
+    const $deck = $('#deck');
+    const $counter = $deck.find('.count');
+    const $items = $deck.find('.deck-items .panel-block');
+    $counter.text($items.length);
+}
+
+// Get hex hash of a file
+function getFileHash(path) {
+    const file = fs.readFileSync(path);
+    return Number(farmhash.hash64(file)).toString(16);
 }
 
 // Main action on document.ready
@@ -353,7 +375,7 @@ $(function () {
             playSound(this);
         }
     }).on('contextmenu', function () {
-        const sound = blockDb[lastPlayedIndex];
+        const sound = blockDb[lastPlayedHash];
 
         if (sound) {
             const howl = sound.howl;
@@ -369,6 +391,7 @@ $(function () {
         drop: function (e, ui) {
             addSoundBlock(ui.draggable, ui.position);
             recalcScrollbars();
+            setDeckCounter();
         }
     });
 
@@ -381,12 +404,13 @@ $(function () {
 
         if (num > 0 && $items.length > 0) {
             $items.slice(0, num).each(function (i, elem) {
-                const id = elem.dataset.id;
+                const hash = elem.dataset.hash;
                 addSoundBlock($(elem), false);
-                lastAddedIndex = id;
+                lastAddedHash = hash;
             });
 
-            lastAddedIndex = -1;
+            lastAddedHash = '';
+            setDeckCounter();
         }
     });
 });
