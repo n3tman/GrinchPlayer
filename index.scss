@@ -114,6 +114,7 @@ html, body {
     padding: 4px 4px 0;
     min-height: 50px;
     height: 50px;
+    user-select: none;
 }
 
 .navbar.top .navbar-brand {
@@ -226,6 +227,7 @@ html, body {
         padding: 0;
         border: 0;
         z-index: 1;
+        user-select: none;
     }
 }
 
@@ -243,6 +245,7 @@ html, body {
         transition: bottom 0.5s;
         background-color: rgba($navbar-background-color, 0.95);
         z-index: 2000;
+        user-select: none;
     }
 
     .button {
@@ -354,7 +357,29 @@ html, body {
     .panel-tabs {
         a {
             height: 30px;
-            padding: 3px 20px 0;
+            padding: 3px 15px 0;
+            user-select: none;
+        }
+
+        a::before {
+            @extend .fa;
+            margin-right: 5px;
+        }
+
+        a::before {
+            content: '\f15d';
+        }
+
+        a.desc::before {
+            content: '\f15e';
+        }
+
+        a.by-length::before {
+            content: '\f160';
+        }
+
+        a.by-length.desc::before {
+            content: '\f161';
         }
     }
 
@@ -368,6 +393,7 @@ html, body {
             padding: 0;
             margin-left: 25px;
             width: 200px;
+            user-select: none;
         }
 
         .panel-block:first-child {

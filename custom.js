@@ -4,13 +4,14 @@
 
 const {remote, shell} = require('electron');
 const {dialog} = require('electron').remote;
-const farmhash = require('farmhash');
 const path = require('path');
+const fs = require('fs');
+const farmhash = require('farmhash');
 const hp = require('howler');
 const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
-const fs = require('fs');
 const fg = require('fast-glob');
+const List = require('list.js');
 // 1 const config = require('./config');
 
 const editClass = 'has-bottom';
@@ -19,6 +20,7 @@ let addedBlocks = [];
 let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
+let deckList;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -244,8 +246,15 @@ function addFileBlocks(files) {
         addDeckItem(parsed.name, file);
     });
 
-    recalcScrollbars();
-    setDeckCounter();
+    if (deckList === undefined) {
+        deckList = new List('deck', {
+            valueNames: ['sound-text'],
+            listClass: 'simplebar-content'
+        });
+    }
+
+    updateDeckData();
+    deckList.sort('sound-text', {order: 'asc'});
 }
 
 // Recalculate scrollbars
@@ -266,6 +275,13 @@ function setDeckCounter() {
     const $counter = $deck.find('.count');
     const $items = $deck.find('.deck-items .panel-block');
     $counter.text($items.length);
+}
+
+// Update deck items
+function updateDeckData() {
+    recalcScrollbars();
+    setDeckCounter();
+    deckList.reIndex();
 }
 
 // Get hex hash of a file
@@ -390,8 +406,7 @@ $(function () {
         accept: '.panel-block',
         drop: function (e, ui) {
             addSoundBlock(ui.draggable, ui.position);
-            recalcScrollbars();
-            setDeckCounter();
+            updateDeckData();
         }
     });
 
@@ -410,7 +425,35 @@ $(function () {
             });
 
             lastAddedHash = '';
-            setDeckCounter();
+            updateDeckData();
+        }
+    }).on('click', '.sort', function () {
+        const $this = $(this);
+        const value = 'sound-text';
+        const sortByLength = function (a, b) {
+            const valA = a.elm.textContent.length;
+            const valB = b.elm.textContent.length;
+            return valA > valB ? 1 : valA < valB ? -1 : 0;
+        };
+
+        let order;
+
+        $this.parent().find('.sort').removeClass('is-active');
+        $this.addClass('is-active');
+
+        if ($this.hasClass('by-length')) {
+            if ($this.hasClass('asc')) {
+                order = 'asc';
+            } else {
+                order = 'desc';
+            }
+
+            deckList.sort(value, {
+                order: order,
+                sortFunction: sortByLength
+            });
+
+            $this.addClass(order);
         }
     });
 });

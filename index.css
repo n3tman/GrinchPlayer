@@ -4125,13 +4125,13 @@ a.tag:hover {
 .file.is-medium {
   font-size: 1.25rem;
 }
-.file.is-medium .file-icon .fa {
+.file.is-medium .file-icon .fa, .file.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-medium .file-icon a::before {
   font-size: 21px;
 }
 .file.is-large {
   font-size: 1.5rem;
 }
-.file.is-large .file-icon .fa {
+.file.is-large .file-icon .fa, .file.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-large .file-icon a::before {
   font-size: 28px;
 }
 .file.has-name .file-cta {
@@ -4163,16 +4163,16 @@ a.tag:hover {
   height: 1.5em;
   width: 1.5em;
 }
-.file.is-boxed .file-icon .fa {
+.file.is-boxed .file-icon .fa, .file.is-boxed .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed .file-icon a::before {
   font-size: 21px;
 }
-.file.is-boxed.is-small .file-icon .fa {
+.file.is-boxed.is-small .file-icon .fa, .file.is-boxed.is-small .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-small .file-icon a::before {
   font-size: 14px;
 }
-.file.is-boxed.is-medium .file-icon .fa {
+.file.is-boxed.is-medium .file-icon .fa, .file.is-boxed.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-medium .file-icon a::before {
   font-size: 28px;
 }
-.file.is-boxed.is-large .file-icon .fa {
+.file.is-boxed.is-large .file-icon .fa, .file.is-boxed.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-large .file-icon a::before {
   font-size: 35px;
 }
 .file.is-boxed.has-name .file-cta {
@@ -4271,7 +4271,7 @@ a.tag:hover {
   margin-right: 0.5em;
   width: 1em;
 }
-.file-icon .fa {
+.file-icon .fa, .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file-icon a::before {
   font-size: 14px;
 }
 
@@ -6547,7 +6547,7 @@ label.panel-block:hover {
   color: #8694a4;
   margin-right: 0.75em;
 }
-.panel-icon .fa {
+.panel-icon .fa, .panel-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-icon a::before {
   font-size: inherit;
   line-height: inherit;
 }
@@ -9428,7 +9428,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: normal;
   font-style: normal;
 }
-.fa {
+.fa, .panel.deck .panel-tabs a::before {
   display: inline-block;
   font: normal normal normal 14px/1 ForkAwesome;
   font-size: inherit;
@@ -9499,10 +9499,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   float: right;
 }
 
-.fa.fa-pull-left {
+.fa.fa-pull-left, .panel.deck .panel-tabs a.fa-pull-left::before {
   margin-right: 0.3em;
 }
-.fa.fa-pull-right {
+.fa.fa-pull-right, .panel.deck .panel-tabs a.fa-pull-right::before {
   margin-left: 0.3em;
 }
 
@@ -9515,10 +9515,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   float: left;
 }
 
-.fa.pull-left {
+.fa.pull-left, .panel.deck .panel-tabs a.pull-left::before {
   margin-right: 0.3em;
 }
-.fa.pull-right {
+.fa.pull-right, .panel.deck .panel-tabs a.pull-right::before {
   margin-left: 0.3em;
 }
 
@@ -12820,6 +12820,7 @@ html, body {
   padding: 4px 4px 0;
   min-height: 50px;
   height: 50px;
+  user-select: none;
 }
 
 .navbar.top .navbar-brand {
@@ -12916,6 +12917,7 @@ html, body {
   padding: 0;
   border: 0;
   z-index: 1;
+  user-select: none;
 }
 
 .navbar.level {
@@ -12927,11 +12929,12 @@ html, body {
   transition: bottom 0.5s;
   background-color: rgba(43, 62, 80, 0.95);
   z-index: 2000;
+  user-select: none;
 }
 .navbar.level .button {
   margin: 0 0.75rem;
 }
-.navbar.level .button .fa {
+.navbar.level .button .fa, .navbar.level .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar.level .button a::before {
   margin-right: 0.5rem;
 }
 
@@ -12952,8 +12955,10 @@ html, body {
 .navbar .level-left .button + .button {
   margin-top: 2px;
 }
-.navbar .level-right .button .fa,
-.navbar .level-left .button .fa {
+.navbar .level-right .button .fa, .navbar .level-right .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar .level-right .button a::before,
+.navbar .level-left .button .fa,
+.navbar .level-left .button .panel.deck .panel-tabs a::before,
+.panel.deck .panel-tabs .navbar .level-left .button a::before {
   font-size: 1.5rem;
   margin: 0;
 }
@@ -13008,7 +13013,23 @@ html, body {
 }
 .panel.deck .panel-tabs a {
   height: 30px;
-  padding: 3px 20px 0;
+  padding: 3px 15px 0;
+  user-select: none;
+}
+.panel.deck .panel-tabs a::before {
+  margin-right: 5px;
+}
+.panel.deck .panel-tabs a::before {
+  content: "";
+}
+.panel.deck .panel-tabs a.desc::before {
+  content: "";
+}
+.panel.deck .panel-tabs a.by-length::before {
+  content: "";
+}
+.panel.deck .panel-tabs a.by-length.desc::before {
+  content: "";
 }
 .panel.deck .deck-items {
   height: calc(100% - 160px);
@@ -13018,6 +13039,7 @@ html, body {
   padding: 0;
   margin-left: 25px;
   width: 200px;
+  user-select: none;
 }
 .panel.deck .deck-items .panel-block:first-child {
   border-top: 0;
