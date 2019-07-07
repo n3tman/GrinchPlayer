@@ -21,6 +21,7 @@ let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
 let deckList;
+let notifyHandle;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -29,9 +30,10 @@ window.sBar = require('simplebar');
 
 // Show notification
 function showNotification(text) {
+    clearTimeout(notifyHandle);
     const $notify = $('.notification');
     $notify.html(text).fadeIn();
-    setTimeout(function () {
+    notifyHandle = setTimeout(function () {
         $notify.fadeOut();
     }, 4000);
 }
@@ -465,49 +467,53 @@ $(function () {
             updateDeckData();
         }
     }).on('click', '.sort', function () {
-        const $this = $(this);
-        const value = 'sound-text';
-        const sortByLength = function (a, b) {
-            const valA = a.elm.textContent.length;
-            const valB = b.elm.textContent.length;
-            return valA > valB ? 1 : valA < valB ? -1 : 0;
-        };
+        if (deckList !== undefined) {
+            const $this = $(this);
+            const value = 'sound-text';
+            const sortByLength = function (a, b) {
+                const valA = a.elm.textContent.length;
+                const valB = b.elm.textContent.length;
+                return valA > valB ? 1 : valA < valB ? -1 : 0;
+            };
 
-        let order;
+            let order;
 
-        $this.parent().find('.sort').removeClass('is-active');
-        $this.addClass('is-active');
+            $this.parent().find('.sort').removeClass('is-active');
+            $this.addClass('is-active');
 
-        if ($this.hasClass('by-length')) {
-            if ($this.hasClass('asc')) {
-                order = 'asc';
-            } else {
-                order = 'desc';
+            if ($this.hasClass('by-length')) {
+                if ($this.hasClass('asc')) {
+                    order = 'asc';
+                } else {
+                    order = 'desc';
+                }
+
+                deckList.sort(value, {
+                    order: order,
+                    sortFunction: sortByLength
+                });
+
+                $this.addClass(order);
             }
-
-            deckList.sort(value, {
-                order: order,
-                sortFunction: sortByLength
-            });
-
-            $this.addClass(order);
         }
     });
 
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
-        let counter = 0;
+        if (_.size(blockDb) > 0) {
+            let counter = 0;
 
-        for (let hash in blockDb) {
-            if (!addedBlocks.includes(hash)) {
-                blockDb[hash].howl.unload();
-                delete blockDb[hash];
-                $('[data-hash="' + hash + '"]').remove();
-                counter++;
+            for (let hash in blockDb) {
+                if (!addedBlocks.includes(hash)) {
+                    blockDb[hash].howl.unload();
+                    delete blockDb[hash];
+                    $('[data-hash="' + hash + '"]').remove();
+                    counter++;
+                }
             }
-        }
 
-        showNotification('Удалено из колоды: <b>' + counter + '</b>');
-        updateDeckData();
+            showNotification('Удалено из колоды: <b>' + counter + '</b>');
+            updateDeckData();
+        }
     });
 });
