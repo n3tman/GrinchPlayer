@@ -27,6 +27,15 @@ window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 window.sBar = require('simplebar');
 
+// Show notification
+function showNotification(text) {
+    const $notify = $('.notification');
+    $notify.html(text).fadeIn();
+    setTimeout(function () {
+        $notify.fadeOut();
+    }, 4000);
+}
+
 // Check current mode
 function isEditMode() {
     return $('body').hasClass(editClass);
@@ -186,23 +195,23 @@ function addDeckItem(soundPath) {
     const text = path.parse(soundPath).name;
 
     if (hash in blockDb) {
-        console.log('Пропущено: ' + soundPath);
-    } else {
-        blockDb[hash] = {
-            hash: hash,
-            text: text,
-            howl: new hp.Howl({
-                src: [soundPath],
-                html5: true,
-                preload: false,
-                onplay: function () {
-                    requestAnimationFrame(updateAudioStep);
-                }
-            })
-        };
-
-        appendDeckItemHtml(hash, text);
+        return false;
     }
+
+    blockDb[hash] = {
+        hash: hash,
+        text: text,
+        howl: new hp.Howl({
+            src: [soundPath],
+            html5: true,
+            preload: false,
+            onplay: function () {
+                requestAnimationFrame(updateAudioStep);
+            }
+        })
+    };
+
+    appendDeckItemHtml(hash, text);
 }
 
 // Sets width of audio overlay
@@ -248,9 +257,14 @@ function updateAudioStep() {
 
 // Add multiple files as blocks
 function addFileBlocks(files) {
+    const before = _.size(blockDb);
+
     files.forEach(function (file) {
         addDeckItem(file);
     });
+
+    const added = _.size(blockDb) - before;
+    const skipped = files.length - added;
 
     if (deckList === undefined) {
         deckList = new List('deck', {
@@ -258,6 +272,9 @@ function addFileBlocks(files) {
             listClass: 'simplebar-content'
         });
     }
+
+    showNotification('Добавлено звуков: <b>' + added + '</b>. ' +
+        'Пропущено: <b>' + skipped + '</b>');
 
     updateDeckData();
 }
@@ -399,6 +416,7 @@ $(function () {
                 appendDeckItemHtml(hash, blockDb[hash].text);
             }
 
+            showNotification('Удалено со страницы: <b>' + addedBlocks.length + '</b>');
             addedBlocks = [];
             updateDeckData();
         }
@@ -474,5 +492,22 @@ $(function () {
 
             $this.addClass(order);
         }
+    });
+
+    // Unload and remove sounds from the deck
+    $('#remove-deck').click(function () {
+        let counter = 0;
+
+        for (let hash in blockDb) {
+            if (!addedBlocks.includes(hash)) {
+                blockDb[hash].howl.unload();
+                delete blockDb[hash];
+                $('[data-hash="' + hash + '"]').remove();
+                counter++;
+            }
+        }
+
+        showNotification('Удалено из колоды: <b>' + counter + '</b>');
+        updateDeckData();
     });
 });

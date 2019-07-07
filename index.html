@@ -48,6 +48,8 @@
 </nav>
 
 <div class="wrapper">
+    <div class="notification is-success"></div>
+
     <main class="main" id="main"></main>
 
     <nav class="level navbar">
@@ -57,7 +59,7 @@
             </button>
         </div>
         <p class="level-item has-text-centered">
-            <button class="button is-large" id="remove-main"><i class="fa fa-window-close-o"></i> Очистить</button>
+            <button class="button is-large" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Очистить</button>
             <button class="button is-large" id="add-sound"><i class="fa fa-file-o"></i> Файлы</button>
             <button class="button is-large" id="add-folder"><i class="fa fa-folder-o"></i> Папки</button>
         </p>
@@ -112,6 +114,11 @@
         <a class="sort by-length desc">по длине</a>
     </p>
     <div class="deck-items" data-simplebar></div>
+    <div class="panel-block bottom">
+        <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
+            Очистить
+        </button>
+    </div>
 </nav>
 
 </body>

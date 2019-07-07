@@ -73,6 +73,17 @@ html, body {
     z-index: 100;
 }
 
+.notification {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-bottom: 0 !important;
+    font-size: 1.5rem;
+    padding: 1rem 3rem;
+    display: none;
+    z-index: 100;
+}
+
 // ------------------ //
 //  Utilities
 // ------------------ //
@@ -385,7 +396,7 @@ html, body {
 
     .deck-items {
         & {
-            height: calc(100% - 160px);
+            height: calc(100% - 210px);
         }
 
         .panel-block {
@@ -437,6 +448,10 @@ html, body {
 
     .control + .control {
         border-left: 1px solid $border;
+    }
+
+    .bottom {
+        height: 50px;
     }
 }
 

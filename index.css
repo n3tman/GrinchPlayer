@@ -12791,6 +12791,17 @@ html, body {
   z-index: 100;
 }
 
+.notification {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  margin-bottom: 0 !important;
+  font-size: 1.5rem;
+  padding: 1rem 3rem;
+  display: none;
+  z-index: 100;
+}
+
 .drag {
   -webkit-app-region: drag;
 }
@@ -13032,7 +13043,7 @@ html, body {
   content: "";
 }
 .panel.deck .deck-items {
-  height: calc(100% - 160px);
+  height: calc(100% - 210px);
 }
 .panel.deck .deck-items .panel-block {
   position: relative;
@@ -13069,6 +13080,9 @@ html, body {
 }
 .panel.deck .control + .control {
   border-left: 1px solid #4E5D6C;
+}
+.panel.deck .bottom {
+  height: 50px;
 }
 
 .has-right .wrapper {
