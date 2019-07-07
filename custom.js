@@ -166,19 +166,31 @@ function addSoundBlock($element, position) {
     }, 100);
 }
 
-// Add sound block to the deck
-function addDeckItem(text, soundPath) {
-    const hash = getFileHash(soundPath);
-
+// Append HTML of the idem to the deck
+function appendDeckItemHtml(hash, text) {
     const html = '<a class="panel-block"' +
         ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
+
+    $(html).appendTo('#deck .simplebar-content').draggable({
+        appendTo: 'body',
+        revert: 'invalid',
+        scroll: false,
+        helper: 'clone'
+    });
+}
+
+// Add sound block to the deck
+function addDeckItem(soundPath) {
+    const hash = getFileHash(soundPath);
+    const text = path.parse(soundPath).name;
 
     if (hash in blockDb) {
         console.log('Пропущено: ' + soundPath);
     } else {
         blockDb[hash] = {
             hash: hash,
+            text: text,
             howl: new hp.Howl({
                 src: [soundPath],
                 html5: true,
@@ -189,12 +201,7 @@ function addDeckItem(text, soundPath) {
             })
         };
 
-        $(html).appendTo('#deck .simplebar-content').draggable({
-            appendTo: 'body',
-            revert: 'invalid',
-            scroll: false,
-            helper: 'clone'
-        });
+        appendDeckItemHtml(hash, text);
     }
 }
 
@@ -242,8 +249,7 @@ function updateAudioStep() {
 // Add multiple files as blocks
 function addFileBlocks(files) {
     files.forEach(function (file) {
-        const parsed = path.parse(file);
-        addDeckItem(parsed.name, file);
+        addDeckItem(file);
     });
 
     if (deckList === undefined) {
@@ -254,7 +260,6 @@ function addFileBlocks(files) {
     }
 
     updateDeckData();
-    deckList.sort('sound-text', {order: 'asc'});
 }
 
 // Recalculate scrollbars
@@ -383,6 +388,20 @@ $(function () {
 
             $main.removeClass('is-loading');
         });
+    });
+
+    // Remove all added blocks
+    $('#remove-main').click(function () {
+        if (addedBlocks.length > 0) {
+            for (let hash of addedBlocks) {
+                delete blockDb[hash].rect;
+                $('[data-hash="' + hash + '"]').remove();
+                appendDeckItemHtml(hash, blockDb[hash].text);
+            }
+
+            addedBlocks = [];
+            updateDeckData();
+        }
     });
 
     // Main block
