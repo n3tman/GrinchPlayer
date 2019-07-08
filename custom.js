@@ -15,6 +15,7 @@ const List = require('list.js');
 const config = require('./config');
 
 const editClass = 'has-bottom';
+const deckClass = 'has-right';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const blockDb = {};
 const howlDb = {};
@@ -31,10 +32,11 @@ window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 window.sBar = require('simplebar');
 
-// Do actions before window is closed or reloaded
-window.addEventListener('beforeunload', function () {
-    config.set('test', 'hey1');
-});
+// ================== //
+//                    //
+//   Main Functions   //
+//                    //
+// ================== //
 
 // Show notification
 function showNotification(text) {
@@ -44,11 +46,6 @@ function showNotification(text) {
     notifyHandle = setTimeout(function () {
         $notify.fadeOut();
     }, 4000);
-}
-
-// Check current mode
-function isEditMode() {
-    return $('body').hasClass(editClass);
 }
 
 // Toggle edit mode
@@ -99,19 +96,6 @@ function initDraggableMain($elements) {
             playSound(e.currentTarget);
         }
     });
-}
-
-// Get block position, compensate navbar
-function getRectWithOffset(element) {
-    const rect = element.getBoundingClientRect();
-    return {
-        left: rect.left,
-        top: rect.top,
-        right: rect.right,
-        bottom: rect.bottom,
-        width: rect.width,
-        height: rect.height
-    };
 }
 
 // Check block for collision with others
@@ -255,11 +239,6 @@ function addDeckItem(soundPath) {
     }
 }
 
-// Sets width of audio overlay
-function setAudioOverlay(width) {
-    $currentBlock.find('.sound-overlay').width(width);
-}
-
 // Play sound if it's not loaded
 function playSound(element) {
     const hash = element.dataset.hash;
@@ -281,19 +260,6 @@ function playSound(element) {
 
     lastPlayedHash = hash;
     $currentBlock = $(element);
-}
-
-// Update block audio animation
-function updateAudioStep() {
-    const sound = howlDb[lastPlayedHash];
-    const seek = sound.seek() || 0;
-    const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
-
-    setAudioOverlay(width);
-
-    if (sound.playing()) {
-        requestAnimationFrame(updateAudioStep);
-    }
 }
 
 // Add multiple files as blocks
@@ -320,18 +286,6 @@ function addFileBlocks(files) {
     updateDeckData();
 }
 
-// Recalculate scrollbars
-function recalcScrollbars() {
-    $('[data-simplebar]').each(function (i, val) {
-        val.SimpleBar.recalculate();
-    });
-}
-
-// Round to nearest 10
-function roundToTen(value) {
-    return Math.ceil((value - 1) / 10) * 10;
-}
-
 // Set deck counter value
 function setDeckCounter() {
     const $deck = $('#deck');
@@ -345,6 +299,85 @@ function updateDeckData() {
     recalcScrollbars();
     setDeckCounter();
     deckList.reIndex();
+}
+
+// Delete one block from the page
+function removeBlockFromPage(hash) {
+    delete blockDb[hash].rect;
+    $('[data-hash="' + hash + '"]').remove();
+    appendDeckItemHtml(hash, blockDb[hash].text);
+}
+
+// Save all pages/projects/settings to config
+function saveAllData() {
+    if (addedBlocks.length > 0) {
+        config.set('pages.123.added', addedBlocks);
+    }
+
+    if (_.size(blockDb) > 0) {
+        config.set('pages.123.blocks', blockDb);
+    }
+
+    showNotification('Данные сохранены в базу!');
+}
+
+// ==================== //
+//                      //
+//   Helper Functions   //
+//                      //
+// ==================== //
+
+// Check current mode
+function isEditMode() {
+    return $('body').hasClass(editClass);
+}
+
+// Check if deck is active
+function isDeckActive() {
+    return $('body').hasClass(deckClass);
+}
+
+// Sets width of audio overlay
+function setAudioOverlay(width) {
+    $currentBlock.find('.sound-overlay').width(width);
+}
+
+// Update block audio animation
+function updateAudioStep() {
+    const sound = howlDb[lastPlayedHash];
+    const seek = sound.seek() || 0;
+    const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
+
+    setAudioOverlay(width);
+
+    if (sound.playing()) {
+        requestAnimationFrame(updateAudioStep);
+    }
+}
+
+// Get block position, compensate navbar
+function getRectWithOffset(element) {
+    const rect = element.getBoundingClientRect();
+    return {
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height
+    };
+}
+
+// Recalculate scrollbars
+function recalcScrollbars() {
+    $('[data-simplebar]').each(function (i, val) {
+        val.SimpleBar.recalculate();
+    });
+}
+
+// Round to nearest 10
+function roundToTen(value) {
+    return Math.ceil((value - 1) / 10) * 10;
 }
 
 // Get hex hash of a file
@@ -363,14 +396,31 @@ function getAudioFilesInFolder(path) {
     });
 }
 
-// Delete one block from the page
-function removeBlockFromPage(hash) {
-    delete blockDb[hash].rect;
-    $('[data-hash="' + hash + '"]').remove();
-    appendDeckItemHtml(hash, blockDb[hash].text);
+// Add hotkey, prevent default action
+function addHotkey(keys, callback) {
+    hotkeys(keys, function (e) {
+        e.preventDefault();
+        callback();
+    });
 }
 
-// Main action on document.ready
+// ================== //
+//                    //
+//   Global actions   //
+//                    //
+// ================== //
+
+// Do actions before window is closed or reloaded
+window.addEventListener('beforeunload', function () {
+    saveAllData();
+});
+
+// ================================= //
+//                                   //
+//   Main action on document.ready   //
+//                                   //
+// ================================= //
+
 $(function () {
     const mainWindow = remote.getCurrentWindow();
 
@@ -405,11 +455,6 @@ $(function () {
         toggleEditMode();
     });
 
-    hotkeys('ctrl+space', function (event) {
-        event.preventDefault();
-        toggleEditMode();
-    });
-
     // Deck toggle
     $('#deck-toggle').click(function () {
         const $body = $('body');
@@ -430,6 +475,7 @@ $(function () {
         $main.addClass('is-loading');
 
         dialog.showOpenDialog({
+            title: 'Выберите звуки',
             properties: ['openFile', 'multiSelections'],
             filters: [{
                 name: 'Аудио: ' + audioExtensions.join(', '),
@@ -444,12 +490,13 @@ $(function () {
         });
     });
 
-    // Add block from single or multiple files
+    // Add folder with sounds
     $('#add-folder').click(function () {
         const $main = $('#main');
         $main.addClass('is-loading');
 
         dialog.showOpenDialog({
+            title: 'Выберите папки со звуками',
             properties: ['openDirectory', 'multiSelections']
         }, function (dirs) {
             if (dirs !== undefined) {
@@ -480,12 +527,20 @@ $(function () {
         }
     });
 
-    // Main block
+    // Save all pages and projects to DB
+    $('#save-all').click(function () {
+        saveAllData();
+    });
+
+    // ------------ //
+    //  Main block  //
+    // ------------ //
     $('#main').on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
         }
     }).on('contextmenu', function (e) {
+        // Pause/play already playing sound
         if (!e.target.classList.contains('ui-resizable-handle')) {
             const sound = howlDb[lastPlayedHash];
 
@@ -510,10 +565,13 @@ $(function () {
         }
     });
 
-    // Deck sidebar
+    // -------------- //
+    //  Deck sidebar  //
+    // -------------- //
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
+        // Batch add several blocks from the top
         const num = $('#batch-num').val();
         const $items = $('.deck-items .panel-block');
 
@@ -532,6 +590,7 @@ $(function () {
             updateDeckData();
         }
     }).on('click', '.sort', function () {
+        // Sort deck items
         if (deckList !== undefined) {
             const $this = $(this);
             const value = 'sound-text';
@@ -563,7 +622,29 @@ $(function () {
         }
     });
 
-    // Drag and drop files or folders
+    // Unload and remove sounds from the deck
+    $('#remove-deck').click(function () {
+        if (_.size(blockDb) > 0) {
+            let counter = 0;
+
+            for (const hash in blockDb) {
+                if (!addedBlocks.includes(hash)) {
+                    howlDb[hash].unload();
+                    delete howlDb[hash];
+                    delete blockDb[hash];
+                    $('[data-hash="' + hash + '"]').remove();
+                    counter++;
+                }
+            }
+
+            showNotification('Удалено из колоды: <b>' + counter + '</b>');
+            updateDeckData();
+        }
+    });
+
+    // ----------------------------- //
+    //  Drag and drop files/folders  //
+    // ----------------------------- //
     $('#deck, #controls').on('dragover', false).on('drop', function (e) {
         if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;
@@ -591,34 +672,27 @@ $(function () {
         }
     });
 
-    // Unload and remove sounds from the deck
-    $('#remove-deck').click(function () {
-        if (_.size(blockDb) > 0) {
-            let counter = 0;
+    // --------- //
+    //  HotKeys  //
+    // --------- //
 
-            for (const hash in blockDb) {
-                if (!addedBlocks.includes(hash)) {
-                    howlDb[hash].unload();
-                    delete howlDb[hash];
-                    delete blockDb[hash];
-                    $('[data-hash="' + hash + '"]').remove();
-                    counter++;
-                }
-            }
-
-            showNotification('Удалено из колоды: <b>' + counter + '</b>');
-            updateDeckData();
+    // Toggle edit mode
+    addHotkey('space', function () {
+        if (isDeckActive()) {
+            $('#deck-toggle').click();
+        } else {
+            toggleEditMode();
         }
     });
 
-    // Save all pages and projects to DB
-    $('#save-all').click(function () {
-        if (addedBlocks.length > 0) {
-            config.set('pages.123.added', addedBlocks);
-        }
+    // Toggle deck
+    addHotkey('ctrl+space', function () {
+        toggleEditMode();
+        $('#deck-toggle').click();
+    });
 
-        if (_.size(blockDb) > 0) {
-            config.set('pages.123.blocks', blockDb);
-        }
+    // Save all data
+    addHotkey('ctrl+s', function () {
+        saveAllData();
     });
 });
