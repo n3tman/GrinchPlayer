@@ -19,7 +19,7 @@ app.setAppUserModelId('com.Nik.GrinchPlayer');
 
 // Prevent variables from being garbage collected
 let mainWindow;
-let bounds = config.get('bounds') || {};
+const bounds = config.get('bounds') || {};
 
 const createMainWindow = async () => {
     const appName = app.getName() + ' v' + app.getVersion();

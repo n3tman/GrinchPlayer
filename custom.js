@@ -15,7 +15,9 @@ const List = require('list.js');
 // 1 const config = require('./config');
 
 const editClass = 'has-bottom';
-let blockDb = {};
+const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
+const blockDb = {};
+
 let addedBlocks = [];
 let lastPlayedHash = '';
 let lastAddedHash = '';
@@ -109,7 +111,7 @@ function isCollision(target) {
         const targetHash = target.dataset.hash;
 
         let collision = false;
-        for (let hash of addedBlocks) {
+        for (const hash of addedBlocks) {
             const block = blockDb[hash];
 
             if (targetHash !== hash) {
@@ -314,9 +316,19 @@ function getFileHash(path) {
     return Number(farmhash.hash64(file)).toString(16);
 }
 
+// Get files in folder by mask
+function getAudioFilesInFolder(path) {
+    return fg.sync('**/*.{' + audioExtensions.join(',') + '}', {
+        cwd: path,
+        caseSensitiveMatch: false,
+        onlyFiles: true,
+        absolute: true
+    });
+}
+
 // Main action on document.ready
 $(function () {
-    let window = remote.getCurrentWindow();
+    const window = remote.getCurrentWindow();
 
     // Window controls
     $('#win-minimize').click(function () {
@@ -375,7 +387,10 @@ $(function () {
 
         dialog.showOpenDialog({
             properties: ['openFile', 'multiSelections'],
-            filters: [{name: 'Аудио (mp3, wav, ogg, flac)', extensions: ['mp3', 'wav', 'ogg', 'flac']}]
+            filters: [{
+                name: 'Аудио: ' + audioExtensions.join(', '),
+                extensions: audioExtensions
+            }]
         }, function (files) {
             if (files !== undefined) {
                 addFileBlocks(files);
@@ -394,15 +409,14 @@ $(function () {
             properties: ['openDirectory', 'multiSelections']
         }, function (dirs) {
             if (dirs !== undefined) {
+                let files = [];
                 dirs.forEach(function (dir) {
-                    const files = fg.sync('**/*.{mp3,wav,ogg,flac}', {
-                        cwd: dir,
-                        onlyFiles: true,
-                        absolute: true
-                    });
-
-                    addFileBlocks(files);
+                    files = files.concat(getAudioFilesInFolder(dir));
                 });
+
+                if (files.length > 0) {
+                    addFileBlocks(files);
+                }
             }
 
             $main.removeClass('is-loading');
@@ -412,7 +426,7 @@ $(function () {
     // Remove all added blocks
     $('#remove-main').click(function () {
         if (addedBlocks.length > 0) {
-            for (let hash of addedBlocks) {
+            for (const hash of addedBlocks) {
                 delete blockDb[hash].rect;
                 $('[data-hash="' + hash + '"]').remove();
                 appendDeckItemHtml(hash, blockDb[hash].text);
@@ -444,6 +458,11 @@ $(function () {
     }).droppable({
         accept: '.panel-block',
         drop: function (e, ui) {
+            if (deckList.searched) {
+                deckList.search();
+                $('#deck').find('.search').val('').focus();
+            }
+
             addSoundBlock(ui.draggable, ui.position);
             updateDeckData();
         }
@@ -498,12 +517,40 @@ $(function () {
         }
     });
 
+    // Drag and drop files or folders
+    $('#deck, #controls').on('dragover', false).on('drop', function (e) {
+        if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
+            const files = e.originalEvent.dataTransfer.files;
+            const $main = $('#main');
+            let fileArray = [];
+            $main.addClass('is-loading');
+
+            for (const file of files) {
+                if (!file.type && file.size % 4096 === 0 &&
+                    fs.lstatSync(file.path).isDirectory()) {
+                    fileArray = fileArray.concat(getAudioFilesInFolder(file.path));
+                } else {
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    if (audioExtensions.includes(ext)) {
+                        fileArray.push(file.path);
+                    }
+                }
+            }
+
+            if (fileArray.length > 0) {
+                addFileBlocks(fileArray);
+            }
+
+            $main.removeClass('is-loading');
+        }
+    });
+
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
         if (_.size(blockDb) > 0) {
             let counter = 0;
 
-            for (let hash in blockDb) {
+            for (const hash in blockDb) {
                 if (!addedBlocks.includes(hash)) {
                     blockDb[hash].howl.unload();
                     delete blockDb[hash];

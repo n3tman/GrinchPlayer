@@ -59,7 +59,6 @@
 		"esnext ": false,
 		"rules": {
 			"prefer-arrow-callback": 0,
-			"prefer-const": 0,
 			"unicorn/prevent-abbreviations": 0,
 			"prefer-destructuring": 0,
 			"object-shorthand": 0
