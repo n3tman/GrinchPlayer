@@ -17,9 +17,9 @@ const config = require('./config');
 const editClass = 'has-bottom';
 const deckClass = 'has-right';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
-const blockDb = {};
 const howlDb = {};
 
+let blockDb = {};
 let addedBlocks = [];
 let lastPlayedHash = '';
 let lastAddedHash = '';
@@ -158,8 +158,8 @@ function autoPosition(block) {
     return success;
 }
 
-// Add a sound block
-function addSoundBlock($element, position) {
+// Add a sound block from the deck
+function addSoundBlockFromDeck($element, position) {
     const hash = $element.data('hash');
     const selector = '[data-hash="' + hash + '"]';
     const height = $element.outerHeight();
@@ -195,6 +195,30 @@ function addSoundBlock($element, position) {
     return false;
 }
 
+// Add a previously saved sound block to main div
+function addSavedSoundBlock(hash) {
+    const selector = '[data-hash="' + hash + '"]';
+    const text = blockDb[hash].text;
+    const rect = blockDb[hash].rect;
+
+    const html = '<a class="button is-dark sound-block"' +
+        ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
+        '<div class="sound-text">' + text + '</div></a>';
+
+    $(html).appendTo('#main').css({
+        top: rect.top - 50,
+        left: rect.left,
+        height: rect.height,
+        width: rect.width
+    });
+
+    setTimeout(function () {
+        const $block = $(selector);
+        initDraggableMain($block);
+        $block.draggable('disable').resizable('disable');
+    }, 100);
+}
+
 // Append HTML of the idem to the deck
 function appendDeckItemHtml(hash, text) {
     const html = '<a class="panel-block"' +
@@ -222,7 +246,7 @@ function addInitHowl(hash, soundPath) {
 }
 
 // Add sound block to the deck
-function addDeckItem(soundPath) {
+function addDeckItemFromFile(soundPath) {
     const hash = getFileHash(soundPath);
     const text = path.parse(soundPath).name;
 
@@ -230,11 +254,10 @@ function addDeckItem(soundPath) {
         blockDb[hash] = {
             hash: hash,
             text: text,
-            path: soundPath
+            path: path.win32.normalize(soundPath)
         };
 
         addInitHowl(hash, soundPath);
-
         appendDeckItemHtml(hash, text);
     }
 }
@@ -244,10 +267,7 @@ function playSound(element) {
     const hash = element.dataset.hash;
     const howl = howlDb[hash];
 
-    if (lastPlayedHash.length > 0) {
-        howlDb[lastPlayedHash].stop();
-        setAudioOverlay(0);
-    }
+    stopCurrentSound();
 
     if (howl.state() === 'unloaded') {
         howl.load();
@@ -267,23 +287,27 @@ function addFileBlocks(files) {
     const before = _.size(blockDb);
 
     files.forEach(function (file) {
-        addDeckItem(file);
+        addDeckItemFromFile(file);
     });
 
     const added = _.size(blockDb) - before;
     const skipped = files.length - added;
 
+    showNotification('Добавлено звуков: <b>' + added + '</b>. ' +
+        'Пропущено: <b>' + skipped + '</b>');
+
+    initDeckList();
+    updateDeckData();
+}
+
+// Init deck list.js
+function initDeckList() {
     if (deckList === undefined) {
         deckList = new List('deck', {
             valueNames: ['sound-text'],
             listClass: 'simplebar-content'
         });
     }
-
-    showNotification('Добавлено звуков: <b>' + added + '</b>. ' +
-        'Пропущено: <b>' + skipped + '</b>');
-
-    updateDeckData();
 }
 
 // Set deck counter value
@@ -312,10 +336,14 @@ function removeBlockFromPage(hash) {
 function saveAllData() {
     if (addedBlocks.length > 0) {
         config.set('pages.123.added', addedBlocks);
+    } else {
+        config.delete('pages.123.added');
     }
 
     if (_.size(blockDb) > 0) {
         config.set('pages.123.blocks', blockDb);
+    } else {
+        config.delete('pages.123.blocks');
     }
 
     showNotification('Данные сохранены в базу!');
@@ -345,13 +373,23 @@ function setAudioOverlay(width) {
 // Update block audio animation
 function updateAudioStep() {
     const sound = howlDb[lastPlayedHash];
-    const seek = sound.seek() || 0;
-    const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
+    if (sound !== undefined) {
+        const seek = sound.seek() || 0;
+        const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
-    setAudioOverlay(width);
+        setAudioOverlay(width);
 
-    if (sound.playing()) {
-        requestAnimationFrame(updateAudioStep);
+        if (sound.playing()) {
+            requestAnimationFrame(updateAudioStep);
+        }
+    }
+}
+
+// Stop current sound if it's playing
+function stopCurrentSound() {
+    if (lastPlayedHash.length > 0) {
+        howlDb[lastPlayedHash].stop();
+        setAudioOverlay(0);
     }
 }
 
@@ -455,6 +493,34 @@ $(function () {
         toggleEditMode();
     });
 
+    // Load pages info from config
+    if (_.size(config.get('pages')) > 0) {
+        const saved = config.get('pages.123');
+
+        if (saved.blocks !== undefined && _.size(saved.blocks) > 0) {
+            blockDb = saved.blocks;
+        }
+
+        if (saved.added !== undefined && saved.added.length > 0) {
+            addedBlocks = saved.added;
+        }
+
+        if (_.size(blockDb) > 0) {
+            _.each(blockDb, function (block) {
+                if (addedBlocks.includes(block.hash)) {
+                    addSavedSoundBlock(block.hash);
+                } else {
+                    appendDeckItemHtml(block.hash, block.text);
+                }
+
+                addInitHowl(block.hash, block.path);
+            });
+
+            initDeckList();
+            updateDeckData();
+        }
+    }
+
     // Deck toggle
     $('#deck-toggle').click(function () {
         const $body = $('body');
@@ -517,6 +583,8 @@ $(function () {
     // Remove all added blocks
     $('#remove-main').click(function () {
         if (addedBlocks.length > 0) {
+            stopCurrentSound();
+
             for (const hash of addedBlocks) {
                 removeBlockFromPage(hash);
             }
@@ -560,7 +628,7 @@ $(function () {
                 $('#deck').find('.search').val('').focus();
             }
 
-            addSoundBlock(ui.draggable, ui.position);
+            addSoundBlockFromDeck(ui.draggable, ui.position);
             updateDeckData();
         }
     });
@@ -578,7 +646,7 @@ $(function () {
         if (num > 0 && $items.length > 0) {
             $items.slice(0, num).each(function (i, elem) {
                 const hash = elem.dataset.hash;
-                const success = addSoundBlock($(elem), false);
+                const success = addSoundBlockFromDeck($(elem), false);
                 if (success) {
                     lastAddedHash = hash;
                 } else {
@@ -626,6 +694,8 @@ $(function () {
     $('#remove-deck').click(function () {
         if (_.size(blockDb) > 0) {
             let counter = 0;
+
+            stopCurrentSound();
 
             for (const hash in blockDb) {
                 if (!addedBlocks.includes(hash)) {
@@ -687,7 +757,10 @@ $(function () {
 
     // Toggle deck
     addHotkey('ctrl+space', function () {
-        toggleEditMode();
+        if (!isEditMode()) {
+            toggleEditMode();
+        }
+
         $('#deck-toggle').click();
     });
 

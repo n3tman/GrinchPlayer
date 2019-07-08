@@ -12917,7 +12917,7 @@ html, body {
   z-index: 200;
 }
 .main .sound-block {
-  position: absolute;
+  position: absolute !important;
   left: 10px;
   top: 0;
   width: 200px;

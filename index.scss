@@ -227,7 +227,7 @@ html, body {
     }
 
     .sound-block {
-        position: absolute;
+        position: absolute !important;
         left: 10px;
         top: 0;
         width: 200px;
