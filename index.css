@@ -12944,6 +12944,7 @@ html, body {
 }
 .navbar.level .button {
   margin: 0 0.75rem;
+  font-size: 1.2rem;
 }
 .navbar.level .button .fa, .navbar.level .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar.level .button a::before {
   margin-right: 0.5rem;

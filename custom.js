@@ -12,11 +12,12 @@ const hotkeys = require('hotkeys-js');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
-// 1 const config = require('./config');
+const config = require('./config');
 
 const editClass = 'has-bottom';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const blockDb = {};
+const howlDb = {};
 
 let addedBlocks = [];
 let lastPlayedHash = '';
@@ -29,6 +30,11 @@ window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 window.sBar = require('simplebar');
+
+// Do actions before window is closed or reloaded
+window.addEventListener('beforeunload', function () {
+    config.set('test', 'hey1');
+});
 
 // Show notification
 function showNotification(text) {
@@ -215,29 +221,34 @@ function appendDeckItemHtml(hash, text) {
     });
 }
 
+// Init Howl object and add it to howlDB
+function addInitHowl(hash, soundPath) {
+    howlDb[hash] = new hp.Howl({
+        src: [soundPath],
+        html5: true,
+        preload: false,
+        onplay: function () {
+            requestAnimationFrame(updateAudioStep);
+        }
+    });
+}
+
 // Add sound block to the deck
 function addDeckItem(soundPath) {
     const hash = getFileHash(soundPath);
     const text = path.parse(soundPath).name;
 
-    if (hash in blockDb) {
-        return false;
+    if (!{}.hasOwnProperty.call(blockDb, hash)) {
+        blockDb[hash] = {
+            hash: hash,
+            text: text,
+            path: soundPath
+        };
+
+        addInitHowl(hash, soundPath);
+
+        appendDeckItemHtml(hash, text);
     }
-
-    blockDb[hash] = {
-        hash: hash,
-        text: text,
-        howl: new hp.Howl({
-            src: [soundPath],
-            html5: true,
-            preload: false,
-            onplay: function () {
-                requestAnimationFrame(updateAudioStep);
-            }
-        })
-    };
-
-    appendDeckItemHtml(hash, text);
 }
 
 // Sets width of audio overlay
@@ -248,10 +259,10 @@ function setAudioOverlay(width) {
 // Play sound if it's not loaded
 function playSound(element) {
     const hash = element.dataset.hash;
-    const howl = blockDb[hash].howl;
+    const howl = howlDb[hash];
 
     if (lastPlayedHash.length > 0) {
-        blockDb[lastPlayedHash].howl.stop();
+        howlDb[lastPlayedHash].stop();
         setAudioOverlay(0);
     }
 
@@ -270,7 +281,7 @@ function playSound(element) {
 
 // Update block audio animation
 function updateAudioStep() {
-    const sound = blockDb[lastPlayedHash].howl;
+    const sound = howlDb[lastPlayedHash];
     const seek = sound.seek() || 0;
     const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
@@ -357,23 +368,23 @@ function removeBlockFromPage(hash) {
 
 // Main action on document.ready
 $(function () {
-    const window = remote.getCurrentWindow();
+    const mainWindow = remote.getCurrentWindow();
 
     // Window controls
     $('#win-minimize').click(function () {
-        window.minimize();
+        mainWindow.minimize();
     });
 
     $('#win-maximize').click(function () {
-        if (window.isMaximized()) {
-            window.unmaximize();
+        if (mainWindow.isMaximized()) {
+            mainWindow.unmaximize();
         } else {
-            window.maximize();
+            mainWindow.maximize();
         }
     });
 
     $('#win-close').click(function () {
-        window.close();
+        mainWindow.close();
     });
 
     // Navbar links
@@ -398,12 +409,12 @@ $(function () {
     // Deck toggle
     $('#deck-toggle').click(function () {
         const $body = $('body');
-        const size = window.getSize();
+        const size = mainWindow.getSize();
 
         if ($body.hasClass('has-right')) {
-            window.setSize(size[0] - 250, size[1]);
+            mainWindow.setSize(size[0] - 250, size[1]);
         } else {
-            window.setSize(size[0] + 250, size[1]);
+            mainWindow.setSize(size[0] + 250, size[1]);
         }
 
         $body.toggleClass('has-right');
@@ -471,15 +482,13 @@ $(function () {
             playSound(this);
         }
     }).on('contextmenu', function () {
-        const sound = blockDb[lastPlayedHash];
+        const sound = howlDb[lastPlayedHash];
 
         if (sound) {
-            const howl = sound.howl;
-
-            if (howl.playing()) {
-                howl.pause();
-            } else if (howl.seek() > 0) {
-                howl.play();
+            if (sound.playing()) {
+                sound.pause();
+            } else if (sound.seek() > 0) {
+                sound.play();
             }
         }
     }).droppable({
@@ -583,7 +592,8 @@ $(function () {
 
             for (const hash in blockDb) {
                 if (!addedBlocks.includes(hash)) {
-                    blockDb[hash].howl.unload();
+                    howlDb[hash].unload();
+                    delete howlDb[hash];
                     delete blockDb[hash];
                     $('[data-hash="' + hash + '"]').remove();
                     counter++;
@@ -592,6 +602,17 @@ $(function () {
 
             showNotification('Удалено из колоды: <b>' + counter + '</b>');
             updateDeckData();
+        }
+    });
+
+    // Save all pages and projects to DB
+    $('#save-all').click(function () {
+        if (addedBlocks.length > 0) {
+            config.set('pages.123.added', addedBlocks);
+        }
+
+        if (_.size(blockDb) > 0) {
+            config.set('pages.123.blocks', blockDb);
         }
     });
 });
