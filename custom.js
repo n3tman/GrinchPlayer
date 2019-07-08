@@ -134,6 +134,9 @@ function isCollision(target) {
 
 // Automatically move block to free space
 function autoPosition(block) {
+    const mainWidth = $('#main').width();
+    let success = true;
+
     if (lastAddedHash.length > 0) {
         const lastRect = blockDb[lastAddedHash].rect;
         block.style.left = lastRect.left + 'px';
@@ -147,7 +150,18 @@ function autoPosition(block) {
             block.style.top = 10 + 'px';
             block.style.left = block.offsetLeft + 200 + 'px';
         }
+
+        if (block.getBoundingClientRect().right > mainWidth - 10) {
+            success = false;
+            break;
+        }
     } while (isCollision(block));
+
+    if (!success) {
+        removeBlockFromPage(block.dataset.hash);
+    }
+
+    return success;
 }
 
 // Add a sound block
@@ -155,6 +169,7 @@ function addSoundBlock($element, position) {
     const hash = $element.data('hash');
     const selector = '[data-hash="' + hash + '"]';
     const height = $element.outerHeight();
+    let positioned;
 
     $element.removeClass('panel-block').draggable('destroy')
         .addClass('button is-dark sound-block')
@@ -165,18 +180,25 @@ function addSoundBlock($element, position) {
     const dropped = $(selector)[0];
 
     if (position === false) {
-        autoPosition(dropped);
+        positioned = autoPosition(dropped);
     } else {
         dropped.style.left = roundToTen(position.left) + 'px';
         dropped.style.top = roundToTen(position.top - 50) + 'px';
+        positioned = true;
     }
 
-    blockDb[hash].rect = getRectWithOffset(dropped);
-    addedBlocks.push(hash);
+    if (positioned) {
+        blockDb[hash].rect = getRectWithOffset(dropped);
+        addedBlocks.push(hash);
 
-    setTimeout(function () {
-        initDraggableMain($(selector));
-    }, 100);
+        setTimeout(function () {
+            initDraggableMain($(selector));
+        }, 100);
+
+        return true;
+    }
+
+    return false;
 }
 
 // Append HTML of the idem to the deck
@@ -185,7 +207,7 @@ function appendDeckItemHtml(hash, text) {
         ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
-    $(html).appendTo('#deck .simplebar-content').draggable({
+    $(html).prependTo('#deck .simplebar-content').draggable({
         appendTo: 'body',
         revert: 'invalid',
         scroll: false,
@@ -326,6 +348,13 @@ function getAudioFilesInFolder(path) {
     });
 }
 
+// Delete one block from the page
+function removeBlockFromPage(hash) {
+    delete blockDb[hash].rect;
+    $('[data-hash="' + hash + '"]').remove();
+    appendDeckItemHtml(hash, blockDb[hash].text);
+}
+
 // Main action on document.ready
 $(function () {
     const window = remote.getCurrentWindow();
@@ -427,9 +456,7 @@ $(function () {
     $('#remove-main').click(function () {
         if (addedBlocks.length > 0) {
             for (const hash of addedBlocks) {
-                delete blockDb[hash].rect;
-                $('[data-hash="' + hash + '"]').remove();
-                appendDeckItemHtml(hash, blockDb[hash].text);
+                removeBlockFromPage(hash);
             }
 
             showNotification('Удалено со страницы: <b>' + addedBlocks.length + '</b>');
@@ -478,8 +505,12 @@ $(function () {
         if (num > 0 && $items.length > 0) {
             $items.slice(0, num).each(function (i, elem) {
                 const hash = elem.dataset.hash;
-                addSoundBlock($(elem), false);
-                lastAddedHash = hash;
+                const success = addSoundBlock($(elem), false);
+                if (success) {
+                    lastAddedHash = hash;
+                } else {
+                    return false;
+                }
             });
 
             lastAddedHash = '';
