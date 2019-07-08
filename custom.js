@@ -94,6 +94,10 @@ function initDraggableMain($elements) {
                 pageX: posX, pageY: posY
             });
         }
+    }).on('wheel', function (e) {
+        if (isEditMode()) {
+            playSound(e.currentTarget);
+        }
     });
 }
 
@@ -481,14 +485,16 @@ $(function () {
         if (!isEditMode()) {
             playSound(this);
         }
-    }).on('contextmenu', function () {
-        const sound = howlDb[lastPlayedHash];
+    }).on('contextmenu', function (e) {
+        if (!e.target.classList.contains('ui-resizable-handle')) {
+            const sound = howlDb[lastPlayedHash];
 
-        if (sound) {
-            if (sound.playing()) {
-                sound.pause();
-            } else if (sound.seek() > 0) {
-                sound.play();
+            if (sound) {
+                if (sound.playing()) {
+                    sound.pause();
+                } else if (sound.seek() > 0) {
+                    sound.play();
+                }
             }
         }
     }).droppable({
