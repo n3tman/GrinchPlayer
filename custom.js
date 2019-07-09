@@ -7,8 +7,10 @@ const {dialog} = require('electron').remote;
 const path = require('path');
 const fs = require('fs');
 const farmhash = require('farmhash');
+const filenamify = require('filenamify');
 const hp = require('howler');
 const hotkeys = require('hotkeys-js');
+const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
@@ -424,6 +426,11 @@ function getFileHash(path) {
     return Number(farmhash.hash64(file)).toString(16);
 }
 
+// Get hex hash of a string
+function getStringHash(text) {
+    return Number(farmhash.hash64(text)).toString(16);
+}
+
 // Get files in folder by mask
 function getAudioFilesInFolder(path) {
     return fg.sync('**/*.{' + audioExtensions.join(',') + '}', {
@@ -440,6 +447,11 @@ function addHotkey(keys, callback) {
         e.preventDefault();
         callback();
     });
+}
+
+// Slugify a string and return correct file name for a page
+function getPageName(text) {
+    return 'grinch-page_' + filenamify(slugify(text)) + '.json';
 }
 
 // ================== //
@@ -461,6 +473,7 @@ window.addEventListener('beforeunload', function () {
 
 $(function () {
     const mainWindow = remote.getCurrentWindow();
+    const $main = $('#main');
 
     // Window controls
     $('#win-minimize').click(function () {
@@ -537,7 +550,6 @@ $(function () {
 
     // Add block from single or multiple files
     $('#add-sound').click(function () {
-        const $main = $('#main');
         $main.addClass('is-loading');
 
         dialog.showOpenDialog({
@@ -558,7 +570,6 @@ $(function () {
 
     // Add folder with sounds
     $('#add-folder').click(function () {
-        const $main = $('#main');
         $main.addClass('is-loading');
 
         dialog.showOpenDialog({
@@ -574,6 +585,49 @@ $(function () {
                 if (files.length > 0) {
                     addFileBlocks(files);
                 }
+            }
+
+            $main.removeClass('is-loading');
+        });
+    });
+
+    // Add folder with sounds
+    $('#page-export').click(function () {
+        const pageName = 'Тестовая страница';
+        const fileName = getPageName(pageName);
+
+        $main.addClass('is-loading');
+
+        dialog.showSaveDialog({
+            title: 'Сохранить страницу в файл',
+            defaultPath: fileName,
+            filters: [{
+                name: 'JSON',
+                extensions: ['json']
+            }]
+        }, function (filePath) {
+            if (filePath !== undefined) {
+                const json = {
+                    type: 'page',
+                    hash: getStringHash(pageName),
+                    name: pageName
+                };
+                const blocks = {};
+
+                if (addedBlocks.length > 0) {
+                    json.added = addedBlocks;
+                }
+
+                if (_.size(blockDb) > 0) {
+                    _.each(blockDb, function (block, hash) {
+                        blocks[hash] = _.omit(block, 'path');
+                    });
+                    json.blocks = blocks;
+                }
+
+                fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
+
+                showNotification('Сохранено в <b>' + fileName + '</b>');
             }
 
             $main.removeClass('is-loading');
@@ -603,7 +657,7 @@ $(function () {
     // ------------ //
     //  Main block  //
     // ------------ //
-    $('#main').on('click', '.sound-block', function () {
+    $main.on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
         }
@@ -718,7 +772,6 @@ $(function () {
     $('#deck, #controls').on('dragover', false).on('drop', function (e) {
         if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;
-            const $main = $('#main');
             let fileArray = [];
             $main.addClass('is-loading');
 
