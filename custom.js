@@ -220,11 +220,7 @@ function addSavedSoundBlock(hash) {
         width: rect.width
     });
 
-    setTimeout(function () {
-        const $block = $(selector);
-        initDraggableMain($block);
-        $block.draggable('disable').resizable('disable');
-    }, 100);
+    initDraggableMain($(selector));
 }
 
 // Append HTML of the idem to the deck
@@ -258,7 +254,9 @@ function addDeckItemFromFile(soundPath) {
     const hash = getFileHash(soundPath);
     const text = path.parse(soundPath).name;
 
-    if (!{}.hasOwnProperty.call(blockDb, hash)) {
+    if ({}.hasOwnProperty.call(blockDb, hash)) {
+        console.log(text + ' === ' + blockDb[hash].text + '\n----------\n');
+    } else {
         blockDb[hash] = {
             hash: hash,
             text: text,
@@ -355,6 +353,58 @@ function saveAllData() {
     }
 
     showNotification('Данные сохранены в базу!');
+}
+
+// Show a dialog for folder selection, return sounds
+function showFolderSelectionDialog(callback, finish) {
+    let files = [];
+
+    dialog.showOpenDialog({
+        title: 'Выберите папки со звуками',
+        properties: ['openDirectory', 'multiSelections']
+    }, function (dirs) {
+        if (dirs === undefined) {
+            finish();
+        } else {
+            dirs.forEach(function (dir) {
+                files = files.concat(getAudioFilesInFolder(dir));
+            });
+
+            if (files.length > 0) {
+                callback(files);
+            }
+
+            if (finish !== undefined) {
+                finish();
+            }
+        }
+    });
+}
+
+// Load saved page
+function loadSavedPage(page) {
+    if (page.blocks !== undefined && _.size(page.blocks) > 0) {
+        blockDb = page.blocks;
+    }
+
+    if (page.added !== undefined && page.added.length > 0) {
+        addedBlocks = page.added;
+    }
+
+    if (_.size(blockDb) > 0) {
+        _.each(blockDb, function (block, hash) {
+            if (addedBlocks.includes(hash)) {
+                addSavedSoundBlock(hash);
+            } else {
+                appendDeckItemHtml(hash, block.text);
+            }
+
+            addInitHowl(hash, block.path);
+        });
+
+        initDeckList();
+        updateDeckData();
+    }
 }
 
 // ==================== //
@@ -460,6 +510,47 @@ function getPageName(text) {
     return 'grinch-page_' + filenamify(slugify(text)) + '.json';
 }
 
+// Clear added blocks from main area
+function flushAddedBlocks() {
+    for (const hash of addedBlocks) {
+        removeBlockFromPage(hash);
+    }
+
+    addedBlocks = [];
+}
+
+// Remove all deck items
+function flushDeckItems() {
+    _.keys(blockDb).forEach(function (hash) {
+        if (!addedBlocks.includes(hash)) {
+            howlDb[hash].unload();
+            delete howlDb[hash];
+            delete blockDb[hash];
+            $('[data-hash="' + hash + '"]').remove();
+        }
+    });
+}
+
+// Prevent dragging/resizing of the main blocks
+function freezeMainBlocks() {
+    $('.sound-block').draggable('disable').resizable('disable');
+}
+
+// Remove blocks without path from json
+function filterBlocksWithoutPath(json) {
+    _.keys(json.blocks).forEach(function (hash) {
+        const block = json.blocks[hash];
+        if (!{}.hasOwnProperty.call(block, 'path')) {
+            delete json.blocks[hash];
+            if (json.added.includes(hash)) {
+                _.pull(json.added, hash);
+            }
+        }
+    });
+
+    return json;
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -514,30 +605,9 @@ $(function () {
 
     // Load pages info from config
     if (_.size(config.get('pages')) > 0) {
-        const saved = config.get('pages.123');
-
-        if (saved.blocks !== undefined && _.size(saved.blocks) > 0) {
-            blockDb = saved.blocks;
-        }
-
-        if (saved.added !== undefined && saved.added.length > 0) {
-            addedBlocks = saved.added;
-        }
-
-        if (_.size(blockDb) > 0) {
-            _.each(blockDb, function (block) {
-                if (addedBlocks.includes(block.hash)) {
-                    addSavedSoundBlock(block.hash);
-                } else {
-                    appendDeckItemHtml(block.hash, block.text);
-                }
-
-                addInitHowl(block.hash, block.path);
-            });
-
-            initDeckList();
-            updateDeckData();
-        }
+        const page = config.get('pages.123');
+        loadSavedPage(page);
+        freezeMainBlocks();
     }
 
     // Deck toggle
@@ -566,11 +636,12 @@ $(function () {
                 extensions: audioExtensions
             }]
         }, function (files) {
-            if (files !== undefined) {
+            if (files === undefined) {
+                $main.removeClass('is-loading');
+            } else {
                 addFileBlocks(files);
+                $main.removeClass('is-loading');
             }
-
-            $main.removeClass('is-loading');
         });
     });
 
@@ -578,26 +649,14 @@ $(function () {
     $('#add-folder').click(function () {
         $main.addClass('is-loading');
 
-        dialog.showOpenDialog({
-            title: 'Выберите папки со звуками',
-            properties: ['openDirectory', 'multiSelections']
-        }, function (dirs) {
-            if (dirs !== undefined) {
-                let files = [];
-                dirs.forEach(function (dir) {
-                    files = files.concat(getAudioFilesInFolder(dir));
-                });
-
-                if (files.length > 0) {
-                    addFileBlocks(files);
-                }
-            }
-
+        showFolderSelectionDialog(function (files) {
+            addFileBlocks(files);
+        }, function () {
             $main.removeClass('is-loading');
         });
     });
 
-    // Add folder with sounds
+    // Export current page to a file
     $('#page-export').click(function () {
         const pageName = 'Тестовая страница';
         const fileName = getPageName(pageName);
@@ -612,7 +671,9 @@ $(function () {
                 extensions: ['json']
             }]
         }, function (filePath) {
-            if (filePath !== undefined) {
+            if (filePath === undefined) {
+                $main.removeClass('is-loading');
+            } else {
                 const json = {
                     type: 'page',
                     hash: getStringHash(pageName),
@@ -632,26 +693,69 @@ $(function () {
                 }
 
                 fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
-
+                $main.removeClass('is-loading');
                 showNotification('Сохранено в <b>' + fileName + '</b>');
             }
+        });
+    });
 
-            $main.removeClass('is-loading');
+    // Import a page from a file
+    $('#page-import').click(function () {
+        $main.addClass('is-loading');
+
+        dialog.showOpenDialog({
+            title: 'Выберите сохраненную страницу',
+            properties: ['openFile'],
+            filters: [{
+                name: 'JSON',
+                extensions: ['json']
+            }]
+        }, function (files) {
+            if (files === undefined) {
+                $main.removeClass('is-loading');
+            } else {
+                let json = JSON.parse(fs.readFileSync(files[0]));
+
+                if (json.type && json.type === 'page' && files.length > 0) {
+                    let counter = 0;
+                    const filesNum = _.size(json.blocks);
+
+                    showFolderSelectionDialog(function (files) {
+                        for (const file of files) {
+                            const hash = getFileHash(file);
+                            if ({}.hasOwnProperty.call(json.blocks, hash)) {
+                                json.blocks[hash].path = path.win32.normalize(file);
+                                counter++;
+                            }
+                        }
+
+                        json = filterBlocksWithoutPath(json);
+
+                        if (counter > 0) {
+                            flushAddedBlocks();
+                            flushDeckItems();
+                            loadSavedPage(json);
+                        }
+                    }, function () {
+                        $main.removeClass('is-loading');
+                        showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
+                            'Пропущено: <b>' + (filesNum - counter) + '</b>');
+                    });
+                } else {
+                    showNotification('Ошибка импортирования', true);
+                }
+            }
         });
     });
 
     // Remove all added blocks
     $('#remove-main').click(function () {
         if (addedBlocks.length > 0) {
+            const count = addedBlocks.length;
             stopCurrentSound();
-
-            for (const hash of addedBlocks) {
-                removeBlockFromPage(hash);
-            }
-
-            showNotification('Удалено со страницы: <b>' + addedBlocks.length + '</b>');
-            addedBlocks = [];
+            flushAddedBlocks();
             updateDeckData();
+            showNotification('Удалено со страницы: <b>' + count + '</b>');
         } else {
             showNotification('Удалять нечего o_O', true);
         }
@@ -708,12 +812,12 @@ $(function () {
 
         if (num > 0 && $items.length > 0) {
             $items.slice(0, num).each(function (i, elem) {
-                count++;
                 const hash = elem.dataset.hash;
                 const success = addSoundBlockFromDeck($(elem), false);
 
                 if (success) {
                     lastAddedHash = hash;
+                    count++;
                 } else {
                     return false;
                 }
@@ -762,21 +866,10 @@ $(function () {
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
         if (_.size(blockDb) > 0) {
-            let counter = 0;
-
+            const before = _.size(blockDb);
             stopCurrentSound();
-
-            for (const hash in blockDb) {
-                if (!addedBlocks.includes(hash)) {
-                    howlDb[hash].unload();
-                    delete howlDb[hash];
-                    delete blockDb[hash];
-                    $('[data-hash="' + hash + '"]').remove();
-                    counter++;
-                }
-            }
-
-            showNotification('Удалено из колоды: <b>' + counter + '</b>');
+            flushDeckItems();
+            showNotification('Удалено из колоды: <b>' + (before - _.size(blockDb)) + '</b>');
             updateDeckData();
         } else {
             showNotification('Удалять нечего o_O', true);
@@ -790,7 +883,6 @@ $(function () {
         if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;
             let fileArray = [];
-            $main.addClass('is-loading');
 
             for (const file of files) {
                 if (!file.type && file.size % 4096 === 0 &&
@@ -807,8 +899,6 @@ $(function () {
             if (fileArray.length > 0) {
                 addFileBlocks(fileArray);
             }
-
-            $main.removeClass('is-loading');
         }
     });
 
