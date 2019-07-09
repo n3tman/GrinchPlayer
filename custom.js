@@ -41,9 +41,15 @@ window.sBar = require('simplebar');
 // ================== //
 
 // Show notification
-function showNotification(text) {
+function showNotification(text, error) {
     clearTimeout(notifyHandle);
     const $notify = $('.notification');
+
+    $notify.removeClass('is-danger');
+    if (error === true) {
+        $notify.addClass('is-danger');
+    }
+
     $notify.html(text).fadeIn();
     notifyHandle = setTimeout(function () {
         $notify.fadeOut();
@@ -646,6 +652,8 @@ $(function () {
             showNotification('Удалено со страницы: <b>' + addedBlocks.length + '</b>');
             addedBlocks = [];
             updateDeckData();
+        } else {
+            showNotification('Удалять нечего o_O', true);
         }
     });
 
@@ -696,11 +704,14 @@ $(function () {
         // Batch add several blocks from the top
         const num = $('#batch-num').val();
         const $items = $('.deck-items .panel-block');
+        let count = 0;
 
         if (num > 0 && $items.length > 0) {
             $items.slice(0, num).each(function (i, elem) {
+                count++;
                 const hash = elem.dataset.hash;
                 const success = addSoundBlockFromDeck($(elem), false);
+
                 if (success) {
                     lastAddedHash = hash;
                 } else {
@@ -708,8 +719,12 @@ $(function () {
                 }
             });
 
+            showNotification('Добавлено блоков: <b>' + count + '</b>');
+
             lastAddedHash = '';
             updateDeckData();
+        } else {
+            showNotification('Ошибка: нет числа или список пуст', true);
         }
     }).on('click', '.sort', function () {
         // Sort deck items
@@ -763,6 +778,8 @@ $(function () {
 
             showNotification('Удалено из колоды: <b>' + counter + '</b>');
             updateDeckData();
+        } else {
+            showNotification('Удалять нечего o_O', true);
         }
     });
 
