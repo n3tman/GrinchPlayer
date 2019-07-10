@@ -1,4 +1,4 @@
-/* global window, $, requestAnimationFrame */
+/* global window, document, $, requestAnimationFrame */
 
 'use strict';
 
@@ -14,6 +14,7 @@ const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
+const tippy = require('tippy.js/umd/index');
 const config = require('./config');
 
 const editClass = 'has-bottom';
@@ -58,32 +59,49 @@ function showNotification(text, error) {
 
 // Toggle edit mode
 function toggleEditMode() {
+    const $blocks = $('.sound-block');
     $('body').toggleClass(editClass);
     $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
 
     if (isEditMode()) {
-        $('.sound-block').draggable('enable').resizable('enable');
+        $blocks.draggable('enable').resizable('enable');
+        $blocks.each(function () {
+            this._tippy.enable();
+        });
     } else {
-        $('.sound-block').draggable('disable').resizable('disable');
+        $blocks.draggable('disable').resizable('disable');
+        $blocks.each(function () {
+            this._tippy.disable();
+        });
     }
 }
 
 // Initialize draggable/resizable block
-function initDraggableMain($elements) {
-    return $elements.draggable({
+function initDraggableMain($element) {
+    $element.draggable({
         grid: [10, 10],
         containment: 'parent',
         stack: '.sound-block',
+        start: function (e) {
+            e.target._tippy.hide();
+            e.target._tippy.disable();
+        },
         stop: function (e) {
             const hash = e.target.dataset.hash;
             blockDb[hash].rect = getRectWithOffset(e.target);
+            e.target._tippy.enable();
         }
     }).resizable({
         grid: [10, 10],
         containment: 'parent',
+        start: function (e) {
+            e.target._tippy.hide();
+            e.target._tippy.disable();
+        },
         stop: function (e) {
             const hash = e.target.dataset.hash;
             blockDb[hash].rect = getRectWithOffset(e.target);
+            e.target._tippy.enable();
         }
     }).mousedown(function (e) {
         if (e.which === 3 && isEditMode()) {
@@ -103,6 +121,18 @@ function initDraggableMain($elements) {
         if (isEditMode()) {
             playSound(e.currentTarget);
         }
+    });
+
+    tippy($element[0], {
+        content: '<div class="block-controls" data-for="' + $element.data('hash') + '">' +
+            '<button class="button block-rename" title="Переименовать"><i class="fa fa-pencil" aria-hidden="true"></i></button>' +
+            '<button class="button block-delete" title="Удалить"><i class="fa fa-times" aria-hidden="true"></i></button></div>',
+        arrow: true,
+        aria: null,
+        interactive: true,
+        interactiveBorder: 10,
+        placement: 'right',
+        boundary: document.querySelector('#main')
     });
 }
 
@@ -268,7 +298,7 @@ function addDeckItemFromFile(soundPath) {
     }
 }
 
-// Play sound if it's not loaded
+// Play sound, load if it's not loaded
 function playSound(element) {
     const hash = element.dataset.hash;
     const howl = howlDb[hash];
@@ -336,6 +366,9 @@ function removeBlockFromPage(hash) {
     delete blockDb[hash].rect;
     $('[data-hash="' + hash + '"]').remove();
     appendDeckItemHtml(hash, blockDb[hash].text);
+    if (addedBlocks.includes(hash)) {
+        _.pull(addedBlocks, hash);
+    }
 }
 
 // Save all pages/projects/settings to config
@@ -451,7 +484,7 @@ function stopCurrentSound() {
     }
 }
 
-// Get block position, compensate navbar
+// Get block position
 function getRectWithOffset(element) {
     const rect = element.getBoundingClientRect();
     return {
@@ -533,7 +566,11 @@ function flushDeckItems() {
 
 // Prevent dragging/resizing of the main blocks
 function freezeMainBlocks() {
-    $('.sound-block').draggable('disable').resizable('disable');
+    const $blocks = $('.sound-block');
+    $blocks.draggable('disable').resizable('disable');
+    $blocks.each(function () {
+        this._tippy.disable();
+    });
 }
 
 // Remove blocks without path from json
@@ -570,6 +607,7 @@ window.addEventListener('beforeunload', function () {
 
 $(function () {
     const mainWindow = remote.getCurrentWindow();
+    const $body = $('body');
     const $main = $('#main');
 
     // Window controls
@@ -612,7 +650,6 @@ $(function () {
 
     // Deck toggle
     $('#deck-toggle').click(function () {
-        const $body = $('body');
         const size = mainWindow.getSize();
 
         if ($body.hasClass('has-right')) {
@@ -764,6 +801,20 @@ $(function () {
     // Save all pages and projects to DB
     $('#save-all').click(function () {
         saveAllData();
+    });
+
+    // ------------- //
+    //  Body events  //
+    // ------------- //
+
+    $body.on('click', '.block-delete', function () {
+        if (isEditMode()) {
+            const hash = $(this).parent().data('for');
+            const selector = '[data-hash="' + hash + '"]';
+            $(selector)[0]._tippy.hide();
+            removeBlockFromPage(hash);
+            updateDeckData();
+        }
     });
 
     // ------------ //
