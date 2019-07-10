@@ -61,11 +61,28 @@ html, body {
 }
 
 .sound-text {
-    text-align: center;
-    width: 100%;
-    padding: 4px 6px;
-    line-height: normal;
-    z-index: 1;
+    & {
+        text-align: center;
+        width: 100%;
+        padding: 4px 6px;
+        line-height: 21px;
+        z-index: 1;
+        word-break: break-word;
+    }
+
+    textarea {
+        text-align: center;
+        font-size: 1rem;
+        background: transparent;
+        color: $light;
+        resize: none;
+        border: 0;
+        overflow-x: hidden;
+    }
+
+    textarea:focus {
+        outline: none;
+    }
 }
 
 .ui-draggable-dragging {
@@ -273,14 +290,13 @@ html, body {
         top: 0;
         width: 200px;
         height: auto;
-        overflow: hidden;
         white-space: normal;
         box-sizing: content-box;
         padding: 0;
         border: 0;
         z-index: 1;
         user-select: none;
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.6) !important;
+        box-shadow: inset 0 0 0 1px rgba($grey, 0.7) !important;
     }
 
     .sound-block:hover,

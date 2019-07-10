@@ -12781,8 +12781,21 @@ html, body {
   text-align: center;
   width: 100%;
   padding: 4px 6px;
-  line-height: normal;
+  line-height: 21px;
   z-index: 1;
+  word-break: break-word;
+}
+.sound-text textarea {
+  text-align: center;
+  font-size: 1rem;
+  background: transparent;
+  color: whitesmoke;
+  resize: none;
+  border: 0;
+  overflow-x: hidden;
+}
+.sound-text textarea:focus {
+  outline: none;
 }
 
 .ui-draggable-dragging {
@@ -12953,14 +12966,13 @@ html, body {
   top: 0;
   width: 200px;
   height: auto;
-  overflow: hidden;
   white-space: normal;
   box-sizing: content-box;
   padding: 0;
   border: 0;
   z-index: 1;
   user-select: none;
-  box-shadow: inset 0 0 0 1px rgba(78, 93, 108, 0.6) !important;
+  box-shadow: inset 0 0 0 1px rgba(78, 93, 108, 0.7) !important;
 }
 .main .sound-block:hover,
 .main .sound-block:focus {

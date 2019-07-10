@@ -34,6 +34,7 @@ window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 window.sBar = require('simplebar');
+window.jEditable = require('jquery-jeditable');
 
 // ================== //
 //                    //
@@ -78,6 +79,8 @@ function toggleEditMode() {
 
 // Initialize draggable/resizable block
 function initDraggableMain($element) {
+    const hash = $element.data('hash');
+
     $element.draggable({
         grid: [10, 10],
         containment: 'parent',
@@ -123,8 +126,9 @@ function initDraggableMain($element) {
         }
     });
 
+    // Show tooltip with buttons in Edit mode
     tippy($element[0], {
-        content: '<div class="block-controls" data-for="' + $element.data('hash') + '">' +
+        content: '<div class="block-controls" data-for="' + hash + '">' +
             '<button class="button block-rename" title="Переименовать"><i class="fa fa-pencil" aria-hidden="true"></i></button>' +
             '<button class="button block-delete" title="Удалить"><i class="fa fa-times" aria-hidden="true"></i></button></div>',
         arrow: true,
@@ -134,6 +138,36 @@ function initDraggableMain($element) {
         placement: 'right',
         boundary: document.querySelector('#main')
     });
+
+    // Make text editable in place on button click
+    setTimeout(function () {
+        const $text = $element.find('.sound-text');
+
+        $text.editable(function (value) {
+            return value.replace(/\s+/g, ' ').trim();
+        }, {
+            type: 'textarea',
+            tooltip: null,
+            event: 'edit',
+            onblur: 'submit',
+            width: '100%',
+            height: 'none',
+            onedit: function (settings) {
+                settings.rows = _.round($text.height() / 21);
+            },
+            callback: function (value) {
+                const textHeight = $text.outerHeight();
+                const blockHeight = $element.outerHeight();
+
+                if (textHeight > blockHeight) {
+                    $element.outerHeight(roundToTen(textHeight));
+                }
+
+                blockDb[hash].rect = getRectWithOffset($element[0]);
+                blockDb[hash].text = value;
+            }
+        });
+    }, 300);
 }
 
 // Check block for collision with others
@@ -200,7 +234,7 @@ function autoPosition(block) {
 function addSoundBlockFromDeck($element, position) {
     const hash = $element.data('hash');
     const selector = '[data-hash="' + hash + '"]';
-    const height = $element.outerHeight();
+    const height = $element.find('.sound-text').outerHeight();
     let positioned;
 
     $element.removeClass('panel-block').draggable('destroy')
@@ -366,9 +400,6 @@ function removeBlockFromPage(hash) {
     delete blockDb[hash].rect;
     $('[data-hash="' + hash + '"]').remove();
     appendDeckItemHtml(hash, blockDb[hash].text);
-    if (addedBlocks.includes(hash)) {
-        _.pull(addedBlocks, hash);
-    }
 }
 
 // Save all pages/projects/settings to config
@@ -506,7 +537,7 @@ function recalcScrollbars() {
 
 // Round to nearest 10
 function roundToTen(value) {
-    return Math.ceil((value - 1) / 10) * 10;
+    return Math.ceil(value / 10) * 10;
 }
 
 // Get hex hash of a file
@@ -545,9 +576,9 @@ function getPageName(text) {
 
 // Clear added blocks from main area
 function flushAddedBlocks() {
-    for (const hash of addedBlocks) {
+    addedBlocks.forEach(function (hash) {
         removeBlockFromPage(hash);
-    }
+    });
 
     addedBlocks = [];
 }
@@ -813,7 +844,14 @@ $(function () {
             const selector = '[data-hash="' + hash + '"]';
             $(selector)[0]._tippy.hide();
             removeBlockFromPage(hash);
+            _.pull(addedBlocks, hash);
             updateDeckData();
+        }
+    }).on('click', '.block-rename', function () {
+        if (isEditMode()) {
+            const hash = $(this).parent().data('for');
+            const selector = '[data-hash="' + hash + '"]';
+            $(selector).find('.sound-text').trigger('edit');
         }
     });
 
@@ -847,6 +885,11 @@ $(function () {
 
             addSoundBlockFromDeck(ui.draggable, ui.position);
             updateDeckData();
+        }
+    }).on('keypress', '.sound-text textarea', function (e) {
+        // Prevent new line on Enter key
+        if (e.which === 13) {
+            e.target.blur();
         }
     });
 
