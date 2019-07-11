@@ -12760,7 +12760,7 @@ html, body {
 }
 
 .wrapper {
-  height: calc(100% - 50px);
+  height: calc(100% - 40px);
   position: relative;
   margin-right: 0;
   transition: margin-right 0.3s ease-in-out 0.2s;
@@ -12871,11 +12871,54 @@ html, body {
   font-size: 1.5rem;
 }
 
+.navbar {
+  display: flex !important;
+  align-items: stretch;
+}
+
+.navbar-item,
+.navbar-link {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-dropdown {
+  display: none;
+  font-size: 0.875rem;
+  left: 0;
+  min-width: 100%;
+  position: absolute;
+  z-index: 20;
+  padding: 0;
+  border-bottom: 0 !important;
+  border-radius: 6px 6px 0 0;
+  border-top: none;
+  bottom: 100%;
+  box-shadow: 0 -8px 8px rgba(10, 10, 10, 0.1);
+  top: auto;
+  background-color: #2B3E50;
+}
+
+.navbar-item.has-dropdown {
+  align-items: stretch;
+}
+
+.navbar-item.is-hoverable:focus .navbar-dropdown,
+.navbar-item.is-hoverable:hover .navbar-dropdown {
+  display: block;
+}
+
+.navbar-item.has-dropdown-up .navbar-link::after {
+  transform: rotate(135deg) translate(0.25em, -0.25em);
+}
+
 .navbar.top {
-  padding: 4px 4px 0;
-  min-height: 50px;
-  height: 50px;
+  padding: 4px;
+  min-height: 40px;
+  height: 40px;
   user-select: none;
+  justify-content: space-between;
+  box-shadow: 0 1px 0 1px #4E5D6C;
 }
 
 .navbar.top .navbar-brand {
@@ -12886,39 +12929,40 @@ html, body {
   margin-left: 0.75rem;
 }
 
-.navbar.top .navbar-item {
+.navbar.top .about {
   font-size: 1.25rem;
-}
-.navbar.top .navbar-item.about {
   color: #5cb85c;
-  margin: 0 1.25rem;
+  flex-grow: 1;
+  justify-content: center;
 }
-.navbar.top .navbar-item i {
+.navbar.top .about i {
   margin-right: 0.6rem;
   font-size: 1.5rem;
 }
-.navbar.top .navbar-item .author {
+.navbar.top .about .author {
   font-weight: bold;
 }
 
-.navbar.top .navbar-end .navbar-item {
+.navbar.top .window {
   padding: 0;
+  margin-right: -4px;
 }
-.navbar.top .navbar-end .buttons {
+.navbar.top .window .buttons {
   margin-bottom: 0;
 }
-.navbar.top .navbar-end .button {
+.navbar.top .window .button {
   background: transparent;
   border: 0;
   opacity: 0.7;
   margin: 0 !important;
-  height: 50px;
+  height: 40px;
 }
-.navbar.top .navbar-end .button:hover {
+.navbar.top .window .button:hover {
   opacity: 1;
   background: #1f2d3b;
 }
-.navbar.top .navbar-end i {
+.navbar.top .window i {
+  font-size: 1.5rem;
   margin: 0;
 }
 
@@ -12927,6 +12971,7 @@ html, body {
   position: relative;
   background-image: linear-gradient(#2B3E50 1px, transparent 1px), linear-gradient(90deg, #2B3E50 1px, transparent 1px);
   background-size: 10px 10px;
+  padding-bottom: 40px;
 }
 .main.is-loading:before {
   content: "";
@@ -12980,40 +13025,101 @@ html, body {
 }
 
 .navbar.level {
+  display: flex;
   position: absolute;
   right: 0;
   width: 100%;
-  height: 100px;
+  height: 140px;
   bottom: -100px;
   transition: bottom 0.5s;
   background-color: rgba(43, 62, 80, 0.95);
   z-index: 2000;
   user-select: none;
 }
-.navbar.level .button {
-  margin: 0 0.75rem;
-  font-size: 1.2rem;
-}
 .navbar.level .button .fa, .navbar.level .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar.level .button a::before {
   margin-right: 0.5rem;
+}
+
+.level-center {
+  width: 100%;
+}
+.level-center .level-top,
+.level-center .level-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+.level-center .level-top {
+  border-top: 2px solid #4E5D6C;
+  border-bottom: 2px solid #4E5D6C;
+}
+.level-center .level-bottom {
+  height: calc(100% - 40px);
+}
+.level-center .level-top,
+.level-center .navbar-item {
+  font-size: 1.1rem;
+  height: 40px;
+}
+.level-center .navbar-dropdown .navbar-item {
+  padding: 0.5rem 1rem;
+}
+.level-center .navbar-item.has-dropdown,
+.level-center .navbar-dropdown {
+  padding: 0;
+  border-bottom: 0 !important;
+}
+.level-center .navbar-link {
+  padding-right: 3rem;
+}
+.level-center i {
+  margin-right: 0.6rem;
+  font-size: 1.3rem;
+}
+
+.level-bottom .group {
+  display: flex;
+  align-items: center;
+}
+.level-bottom .text i {
+  display: block;
+  text-align: center;
+  font-size: 3rem;
+  margin-right: 0;
+}
+.level-bottom .buttons {
+  margin-left: 1rem;
+  margin-bottom: 0;
+}
+.level-bottom .add .buttons {
+  width: 250px;
+}
+.level-bottom .page .buttons {
+  width: 270px;
+}
+.level-bottom .button {
+  margin: 0.3rem;
+}
+.level-bottom .buttons .button {
+  margin-right: 0.3rem !important;
 }
 
 .navbar .level-right,
 .navbar .level-left {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
 }
 .navbar .level-right .button,
 .navbar .level-left .button {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   margin: 0;
   border: 2px solid #4E5D6C;
 }
 .navbar .level-right .button + .button,
 .navbar .level-left .button + .button {
-  margin-top: 2px;
+  margin-top: 30px;
 }
 .navbar .level-right .button .fa, .navbar .level-right .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar .level-right .button a::before,
 .navbar .level-left .button .fa,
@@ -13023,10 +13129,6 @@ html, body {
   margin: 0;
 }
 
-.navbar .level-right {
-  justify-content: flex-start;
-  margin-top: -48px;
-}
 .navbar .level-right .button {
   border-right: 0;
 }
@@ -13043,15 +13145,15 @@ html, body {
 }
 
 .has-right .navbar.level .deck-toggle {
-  margin-top: -48px !important;
+  margin-top: -40px !important;
   color: #5cb85c !important;
 }
 
 .panel.deck {
   position: absolute;
   width: 250px;
-  height: calc(100% - 50px);
-  top: 50px;
+  height: calc(100% - 40px);
+  top: 40px;
   right: -250px;
   transition: right 0.3s ease-in-out 0.2s;
   background-color: #1f2d3b;
@@ -13059,7 +13161,9 @@ html, body {
   z-index: 2000;
 }
 .panel.deck .panel-heading {
-  height: 50px;
+  height: 40px;
+  padding: 0.25em 0.5em;
+  text-align: center;
 }
 .panel.deck .panel-heading .count {
   font-weight: bold;
@@ -13092,7 +13196,7 @@ html, body {
   content: "";
 }
 .panel.deck .deck-items {
-  height: calc(100% - 210px);
+  height: calc(100% - 200px);
 }
 .panel.deck .deck-items .panel-block {
   position: relative;

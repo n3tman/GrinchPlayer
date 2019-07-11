@@ -85,6 +85,7 @@ function initDraggableMain($element) {
         grid: [10, 10],
         containment: 'parent',
         stack: '.sound-block',
+        scroll: false,
         start: function (e) {
             e.target._tippy.hide();
             e.target._tippy.disable();
@@ -212,7 +213,7 @@ function autoPosition(block) {
     do {
         block.style.top = block.offsetTop + 10 + 'px';
 
-        if (block.getBoundingClientRect().bottom > window.innerHeight - 10) {
+        if (block.getBoundingClientRect().bottom > window.innerHeight - 50) {
             block.style.top = 10 + 'px';
             block.style.left = block.offsetLeft + 200 + 'px';
         }

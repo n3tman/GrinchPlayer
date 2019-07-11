@@ -9,40 +9,17 @@
 <body>
 
 <nav class="navbar top" role="navigation" aria-label="main navigation">
-    <div class="navbar-brand drag">
-        <div class="navbar-item">
-            <img src="static/icon-64.png" alt="GrinchPlayer">
-            <span class="text is-size-4">GrinchPlayer</span>
-        </div>
+    <div class="navbar-item navbar-brand drag">
+        <img src="static/icon-64.png" alt="GrinchPlayer">
+        <span class="text is-size-4">GrinchPlayer</span>
     </div>
-
-    <div class="navbar-menu drag">
-        <div class="navbar-start">
-            <div class="navbar-item about"><i class="fa fa-phone-volume"></i>
-                Технопранк-плеер by&nbsp; <span class="author">Nik</span></div>
-            <a class="navbar-item no-drag" id="settings">
-                <i class="fa fa-gear"></i> Настройки</a>
-
-            <div class="navbar-item no-drag has-dropdown is-hoverable">
-                <a class="navbar-link"><i class="fa fa-external-link"></i> Ссылки</a>
-
-                <div class="navbar-dropdown">
-                    <a class="navbar-item" id="youtube">
-                        <i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
-                    <a class="navbar-item" id="discord">
-                        <i class="fa fa-discord-alt"></i> Discord</a>
-                </div>
-            </div>
-        </div>
-
-        <div class="navbar-end">
-            <div class="navbar-item">
-                <div class="buttons no-drag">
-                    <button class="button" id="win-minimize"><i class="fa fa-window-minimize"></i></button>
-                    <button class="button" id="win-maximize"><i class="fa fa-window-maximize"></i></button>
-                    <button class="button" id="win-close"><i class="fa fa-window-close"></i></button>
-                </div>
-            </div>
+    <div class="navbar-item about drag"><i class="fa fa-phone-volume"></i>
+        Технопранк-плеер by&nbsp; <span class="author">Nik</span></div>
+    <div class="navbar-item window no-drag">
+        <div class="buttons">
+            <button class="button" id="win-minimize"><i class="fa fa-window-minimize"></i></button>
+            <button class="button" id="win-maximize"><i class="fa fa-window-maximize"></i></button>
+            <button class="button" id="win-close"><i class="fa fa-window-close"></i></button>
         </div>
     </div>
 </nav>
@@ -58,14 +35,40 @@
                 <i class="fa fa-chevron-left"></i>
             </button>
         </div>
-        <p class="level-item has-text-centered">
-            <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Очистить</button>
-            <button class="button" id="add-sound" title="Добавить файлы"><i class="fa fa-file-o"></i> Файлы</button>
-            <button class="button" id="add-folder" title="Добавить папки"><i class="fa fa-folder-o"></i> Папки</button>
-            <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
-            <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
-            <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
-        </p>
+        <div class="level-center">
+            <div class="level-top">
+                <a class="navbar-item" id="settings"><i class="fa fa-gear"></i> Настройки</a>
+
+                <div class="navbar-item has-dropdown has-dropdown-up is-hoverable">
+                    <a class="navbar-link"><i class="fa fa-external-link"></i> Ссылки</a>
+
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item" id="youtube"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
+                        <a class="navbar-item" id="discord"><i class="fa fa-discord-alt"></i> Discord</a>
+                    </div>
+                </div>
+            </div>
+            <div class="level-bottom">
+                <div class="group add">
+                    <div class="text"><i class="fa fa-plus-square-o" aria-hidden="true"></i> Добавить</div>
+                    <div class="buttons">
+                        <button class="button" id="add-sound" title="Добавить файлы"><i class="fa fa-file-o"></i> Файлы</button>
+                        <button class="button" id="add-folder" title="Добавить папки"><i class="fa fa-folder-o"></i> Папки</button>
+                        <button class="button" id="add-pp" title="Добавить файл из PrankPlayer v2"><i class="fa fa-bullhorn"></i> PPv2</button>
+                        <button class="button" id="add-ppx" title="Добавить все PPv2 в папках"><i class="fa fa-tty"></i> Nx PPv2</button>
+                    </div>
+                </div>
+                <div class="group page">
+                    <div class="text"><i class="fa fa-table" aria-hidden="true"></i> Страница</div>
+                    <div class="buttons">
+                        <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Удалить</button>
+                        <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
+                        <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
+                        <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="level-right">
             <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
                 <i class="fa fa-edit"></i>
@@ -73,10 +76,6 @@
 
             <button class="button deck-toggle is-medium is-dark" id="deck-toggle" title="Колода">
                 <i class="fa fa-list"></i>
-            </button>
-
-            <button class="button is-medium is-dark" id="right-toggle" title="Сайдбар">
-                <i class="fa fa-chevron-right"></i>
             </button>
         </div>
     </nav>
