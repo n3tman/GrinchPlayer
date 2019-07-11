@@ -10,6 +10,7 @@ const farmhash = require('farmhash');
 const filenamify = require('filenamify');
 const hp = require('howler');
 const hotkeys = require('hotkeys-js');
+const iconvlite = require('iconv-lite');
 const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
@@ -72,6 +73,7 @@ function toggleEditMode() {
     } else {
         $blocks.draggable('disable').resizable('disable');
         $blocks.each(function () {
+            this._tippy.hide();
             this._tippy.disable();
         });
     }
@@ -92,7 +94,7 @@ function initDraggableMain($element) {
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            blockDb[hash].rect = getRectWithOffset(e.target);
+            blockDb[hash].rect = getRect(e.target);
             e.target._tippy.enable();
         }
     }).resizable({
@@ -104,7 +106,7 @@ function initDraggableMain($element) {
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            blockDb[hash].rect = getRectWithOffset(e.target);
+            blockDb[hash].rect = getRect(e.target);
             e.target._tippy.enable();
         }
     }).mousedown(function (e) {
@@ -154,7 +156,7 @@ function initDraggableMain($element) {
             width: '100%',
             height: 'none',
             onedit: function (settings) {
-                settings.rows = _.round($text.height() / 21);
+                settings.rows = _.round($text.height() / 18);
             },
             callback: function (value) {
                 const textHeight = $text.outerHeight();
@@ -164,7 +166,7 @@ function initDraggableMain($element) {
                     $element.outerHeight(roundToTen(textHeight));
                 }
 
-                blockDb[hash].rect = getRectWithOffset($element[0]);
+                blockDb[hash].rect = getRect($element[0]);
                 blockDb[hash].text = value;
             }
         });
@@ -249,13 +251,13 @@ function addSoundBlockFromDeck($element, position) {
     if (position === false) {
         positioned = autoPosition(dropped);
     } else {
-        dropped.style.left = roundToTen(position.left) + 'px';
+        dropped.style.left = roundToTen(position.left - 10) + 'px';
         dropped.style.top = roundToTen(position.top - 50) + 'px';
         positioned = true;
     }
 
     if (positioned) {
-        blockDb[hash].rect = getRectWithOffset(dropped);
+        blockDb[hash].rect = getRect(dropped);
         addedBlocks.push(hash);
 
         setTimeout(function () {
@@ -279,7 +281,7 @@ function addSavedSoundBlock(hash) {
         '<div class="sound-text">' + text + '</div></a>';
 
     $(html).appendTo('#main').css({
-        top: rect.top - 50,
+        top: rect.top - 40,
         left: rect.left,
         height: rect.height,
         width: rect.width
@@ -517,7 +519,7 @@ function stopCurrentSound() {
 }
 
 // Get block position
-function getRectWithOffset(element) {
+function getRect(element) {
     const rect = element.getBoundingClientRect();
     return {
         left: rect.left,
@@ -581,6 +583,7 @@ function flushAddedBlocks() {
         removeBlockFromPage(hash);
     });
 
+    lastPlayedHash = '';
     addedBlocks = [];
 }
 
@@ -594,6 +597,8 @@ function flushDeckItems() {
             $('[data-hash="' + hash + '"]').remove();
         }
     });
+
+    lastPlayedHash = '';
 }
 
 // Prevent dragging/resizing of the main blocks
@@ -601,6 +606,7 @@ function freezeMainBlocks() {
     const $blocks = $('.sound-block');
     $blocks.draggable('disable').resizable('disable');
     $blocks.each(function () {
+        this._tippy.hide();
         this._tippy.disable();
     });
 }
@@ -833,6 +839,81 @@ $(function () {
     // Save all pages and projects to DB
     $('#save-all').click(function () {
         saveAllData();
+    });
+
+    // Import one PPv2 file
+    $('#add-pp').click(function () {
+        $main.addClass('is-loading');
+
+        dialog.showOpenDialog({
+            title: 'Выберите файл prank.txt из PrankPlayer v2',
+            properties: ['openFile'],
+            filters: [{
+                name: 'prank.txt (PPv2)',
+                extensions: ['txt']
+            }]
+        }, function (files) {
+            if (files === undefined) {
+                $main.removeClass('is-loading');
+            } else {
+                const file = iconvlite.decode(fs.readFileSync(files[0]), 'win1251');
+                const parsed = path.parse(files[0]);
+                const pageName = path.basename(parsed.dir);
+                const lines = file.split(/\r?\n/);
+                let lineNum = 0;
+                let counter = 0;
+
+                const page = {
+                    type: 'page',
+                    hash: getStringHash(pageName),
+                    name: pageName,
+                    added: [],
+                    blocks: {}
+                };
+
+                lines.forEach(function (line, i) {
+                    if (i !== 0 && line.trim().length > 0) {
+                        const parts = line.split('*');
+                        const filePath = parsed.dir + '\\' + parts[0];
+                        const hash = getFileHash(filePath);
+
+                        lineNum++;
+
+                        if (!{}.hasOwnProperty.call(page.blocks, hash)) {
+                            const left = Number(parts[1]);
+
+                            counter++;
+
+                            page.blocks[hash] = {};
+                            page.blocks[hash].path = filePath;
+                            page.blocks[hash].text = parts[5];
+
+                            page.blocks[hash].rect = {
+                                left: left + 10,
+                                top: Number(parts[2]) + 50,
+                                width: Number(parts[3]),
+                                height: Number(parts[4])
+                            };
+
+                            if (left >= 0) {
+                                page.added.push(hash);
+                            }
+                        }
+                    }
+                });
+
+                if (counter > 0) {
+                    flushAddedBlocks();
+                    flushDeckItems();
+                    loadSavedPage(page);
+                }
+
+                $main.removeClass('is-loading');
+
+                showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
+                    'Пропущено: <b>' + (lineNum - counter) + '</b>');
+            }
+        });
     });
 
     // ------------- //
