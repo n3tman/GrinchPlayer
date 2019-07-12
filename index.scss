@@ -300,9 +300,6 @@ html, body {
     & {
         height: 100%;
         position: relative;
-        background-image: linear-gradient($grey-dark 1px, transparent 1px),
-        linear-gradient(90deg, $grey-dark 1px, transparent 1px);
-        background-size: 10px 10px;
         padding-bottom: 40px;
     }
 
@@ -346,12 +343,24 @@ html, body {
         z-index: 1;
         user-select: none;
         overflow: hidden;
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.7) !important;
+        box-shadow: inset 0 0 0 1px rgba($grey, 0.2) !important;
     }
 
     .sound-block:hover,
     .sound-block:focus {
         box-shadow: inset 0 0 0 2px $grey !important;
+    }
+}
+
+.has-bottom .main {
+    & {
+        background-image: linear-gradient($grey-dark 1px, transparent 1px),
+        linear-gradient(90deg, $grey-dark 1px, transparent 1px);
+        background-size: 10px 10px;
+    }
+
+    .sound-block {
+        box-shadow: inset 0 0 0 1px rgba($grey, 0.6) !important;
     }
 }
 
