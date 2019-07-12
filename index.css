@@ -13157,31 +13157,47 @@ html, body {
   color: #5cb85c !important;
 }
 
-.panel.deck {
+.panel {
   position: absolute;
   width: 250px;
   height: calc(100% - 40px);
   top: 40px;
-  right: -250px;
-  transition: right 0.3s ease-in-out 0.2s;
   background-color: #1f2d3b;
-  border-left: 2px solid #4E5D6C;
   z-index: 2000;
 }
-.panel.deck .panel-heading {
+.panel .panel-heading {
   height: 40px;
   padding: 0.25em 0.5em;
   text-align: center;
 }
-.panel.deck .panel-heading .count {
+.panel .count {
   font-weight: bold;
 }
-.panel.deck .panel-search {
+.panel .panel-search {
   height: 40px;
 }
-.panel.deck .panel-search .input {
+.panel .panel-search .input {
   border: 0;
   border-bottom: 1px solid #4E5D6C;
+}
+
+.panel.navigator {
+  left: -250px;
+  transition: left 0.3s ease-in-out 0.2s;
+  border-right: 2px solid #4E5D6C;
+}
+
+.has-left .wrapper {
+  margin-left: 250px;
+}
+.has-left .panel.navigator {
+  left: 0;
+}
+
+.panel.deck {
+  right: -250px;
+  transition: right 0.3s ease-in-out 0.2s;
+  border-left: 2px solid #4E5D6C;
 }
 .panel.deck .panel-tabs a {
   height: 30px;

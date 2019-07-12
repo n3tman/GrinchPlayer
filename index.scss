@@ -524,32 +524,27 @@ html, body {
 }
 
 // ------------------ //
-//  Deck Panel
+//  Panels
 // ------------------ //
 
-.panel.deck {
+.panel {
     & {
         position: absolute;
         width: 250px;
         height: calc(100% - 40px);
         top: 40px;
-        right: -250px;
-        transition: right 0.3s ease-in-out 0.2s;
         background-color: $grey-darker;
-        border-left: 2px solid $border;
         z-index: 2000;
     }
 
     .panel-heading {
-        & {
-            height: 40px;
-            padding: 0.25em 0.5em;
-            text-align: center;
-        }
+        height: 40px;
+        padding: 0.25em 0.5em;
+        text-align: center;
+    }
 
-        .count {
-            font-weight: bold;
-        }
+    .count {
+        font-weight: bold;
     }
 
     .panel-search {
@@ -561,6 +556,40 @@ html, body {
             border: 0;
             border-bottom: 1px solid $border;
         }
+    }
+}
+
+// ------------------ //
+//  Left Panel
+// ------------------ //
+
+.panel.navigator {
+    & {
+        left: -250px;
+        transition: left 0.3s ease-in-out 0.2s;
+        border-right: 2px solid $border;
+    }
+}
+
+.has-left {
+    .wrapper {
+        margin-left: 250px;
+    }
+
+    .panel.navigator {
+        left: 0;
+    }
+}
+
+// ------------------ //
+//  Deck Panel
+// ------------------ //
+
+.panel.deck {
+    & {
+        right: -250px;
+        transition: right 0.3s ease-in-out 0.2s;
+        border-left: 2px solid $border;
     }
 
     .panel-tabs {

@@ -174,7 +174,7 @@ function initDraggableMain($element) {
 }
 
 // Check block for collision with others
-function isCollision(target, offsetTop) {
+function isCollision(target, offsetTop, offsetLeft) {
     if (addedBlocks.length > 0) {
         const targetRect = target.getBoundingClientRect();
         const targetHash = target.dataset.hash;
@@ -184,8 +184,8 @@ function isCollision(target, offsetTop) {
             const block = blockDb[hash];
 
             if (targetHash !== hash) {
-                collision = targetRect.right > block.rect.left &&
-                    targetRect.left < block.rect.right &&
+                collision = targetRect.right - offsetLeft > block.rect.left &&
+                    targetRect.left - offsetLeft < block.rect.right &&
                     targetRect.bottom - offsetTop > block.rect.top &&
                     targetRect.top - offsetTop < block.rect.bottom;
 
@@ -207,6 +207,7 @@ function autoPosition(block) {
     const mainWidth = $main.width();
     const mainHeight = $main.height();
     const offsetTop = getTopOffset();
+    const offsetLeft = getLeftOffset();
     let success = true;
 
     if (lastAddedHash.length > 0) {
@@ -223,11 +224,11 @@ function autoPosition(block) {
             block.style.left = block.offsetLeft + 200 + 'px';
         }
 
-        if (block.getBoundingClientRect().right > mainWidth - 10) {
+        if (block.getBoundingClientRect().right - offsetLeft > mainWidth - 10) {
             success = false;
             break;
         }
-    } while (isCollision(block, offsetTop));
+    } while (isCollision(block, offsetTop, offsetLeft));
 
     if (!success) {
         removeBlockFromPage(block.dataset.hash);
@@ -237,7 +238,7 @@ function autoPosition(block) {
 }
 
 // Add a sound block from the deck
-function addSoundBlockFromDeck($element, position, offsetTop) {
+function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
     const hash = $element.data('hash');
     const selector = '[data-hash="' + hash + '"]';
     const height = $element.find('.sound-text').outerHeight();
@@ -254,7 +255,7 @@ function addSoundBlockFromDeck($element, position, offsetTop) {
     if (position === false) {
         positioned = autoPosition(dropped);
     } else {
-        dropped.style.left = roundToTen(position.left - 10) + 'px';
+        dropped.style.left = roundToTen(position.left - offsetLeft - 10) + 'px';
         dropped.style.top = roundToTen(position.top - offsetTop - 10) + 'px';
         positioned = true;
     }
@@ -525,11 +526,12 @@ function stopCurrentSound() {
 function getRectWithOffset(element) {
     const rect = element.getBoundingClientRect();
     const offsetTop = getTopOffset();
+    const offsetLeft = getLeftOffset();
 
     return {
-        left: rect.left,
+        left: rect.left - offsetLeft,
         top: rect.top - offsetTop,
-        right: rect.right,
+        right: rect.right - offsetLeft,
         bottom: rect.bottom - offsetTop,
         width: rect.width,
         height: rect.height
@@ -637,6 +639,11 @@ function getTopOffset() {
 }
 
 // Get height of all the bottom blocks
+function getLeftOffset() {
+    return $('body').hasClass('has-left') ? 250 : 0;
+}
+
+// Get height of all the bottom blocks
 // function getBottomOffset() {
 //     return $('.level-top').outerHeight();
 // }
@@ -712,6 +719,23 @@ $(function () {
         }
 
         $body.toggleClass('has-right');
+    });
+
+    // Toggle left sidebar
+    $('#left-toggle').click(function () {
+        const size = mainWindow.getSize();
+        const position = mainWindow.getPosition();
+
+        if ($body.hasClass('has-left')) {
+            mainWindow.setPosition(position[0] + 250, position[1]);
+            mainWindow.setSize(size[0] - 250, size[1]);
+        } else {
+            mainWindow.setPosition(position[0] - 250, position[1]);
+            mainWindow.setSize(size[0] + 250, size[1]);
+        }
+
+        $(this).find('.fa').toggleClass('fa-chevron-left fa-chevron-right');
+        $body.toggleClass('has-left');
     });
 
     // Add block from single or multiple files
@@ -976,13 +1000,14 @@ $(function () {
         accept: '.panel-block',
         drop: function (e, ui) {
             const offsetTop = getTopOffset();
+            const offsetLeft = getLeftOffset();
 
             if (deckList.searched) {
                 deckList.search();
-                $('#deck').find('.search').val('').focus();
+                $('#deck-search').val('').focus();
             }
 
-            addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop);
+            addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
             updateDeckData();
         }
     }).on('keypress', '.sound-text textarea', function (e) {
