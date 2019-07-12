@@ -94,7 +94,7 @@ function initDraggableMain($element) {
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            blockDb[hash].rect = getRect(e.target);
+            blockDb[hash].rect = getRectWithOffset(e.target);
             e.target._tippy.enable();
         }
     }).resizable({
@@ -106,7 +106,7 @@ function initDraggableMain($element) {
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            blockDb[hash].rect = getRect(e.target);
+            blockDb[hash].rect = getRectWithOffset(e.target);
             e.target._tippy.enable();
         }
     }).mousedown(function (e) {
@@ -166,7 +166,7 @@ function initDraggableMain($element) {
                     $element.outerHeight(roundToTen(textHeight));
                 }
 
-                blockDb[hash].rect = getRect($element[0]);
+                blockDb[hash].rect = getRectWithOffset($element[0]);
                 blockDb[hash].text = value;
             }
         });
@@ -174,9 +174,9 @@ function initDraggableMain($element) {
 }
 
 // Check block for collision with others
-function isCollision(target) {
+function isCollision(target, offsetTop) {
     if (addedBlocks.length > 0) {
-        const rect = target.getBoundingClientRect();
+        const targetRect = target.getBoundingClientRect();
         const targetHash = target.dataset.hash;
 
         let collision = false;
@@ -184,10 +184,10 @@ function isCollision(target) {
             const block = blockDb[hash];
 
             if (targetHash !== hash) {
-                collision = rect.right > block.rect.left &&
-                    rect.left < block.rect.right &&
-                    rect.bottom > block.rect.top &&
-                    rect.top < block.rect.bottom;
+                collision = targetRect.right > block.rect.left &&
+                    targetRect.left < block.rect.right &&
+                    targetRect.bottom - offsetTop > block.rect.top &&
+                    targetRect.top - offsetTop < block.rect.bottom;
 
                 if (collision) {
                     break;
@@ -203,19 +203,22 @@ function isCollision(target) {
 
 // Automatically move block to free space
 function autoPosition(block) {
-    const mainWidth = $('#main').width();
+    const $main = $('#main');
+    const mainWidth = $main.width();
+    const mainHeight = $main.height();
+    const offsetTop = getTopOffset();
     let success = true;
 
     if (lastAddedHash.length > 0) {
         const lastRect = blockDb[lastAddedHash].rect;
         block.style.left = lastRect.left + 'px';
-        block.style.top = lastRect.bottom - 60 + 'px';
+        block.style.top = lastRect.bottom - 10 + 'px';
     }
 
     do {
         block.style.top = block.offsetTop + 10 + 'px';
 
-        if (block.getBoundingClientRect().bottom > window.innerHeight - 50) {
+        if (block.getBoundingClientRect().bottom - offsetTop > mainHeight - 10) {
             block.style.top = 10 + 'px';
             block.style.left = block.offsetLeft + 200 + 'px';
         }
@@ -224,7 +227,7 @@ function autoPosition(block) {
             success = false;
             break;
         }
-    } while (isCollision(block));
+    } while (isCollision(block, offsetTop));
 
     if (!success) {
         removeBlockFromPage(block.dataset.hash);
@@ -234,7 +237,7 @@ function autoPosition(block) {
 }
 
 // Add a sound block from the deck
-function addSoundBlockFromDeck($element, position) {
+function addSoundBlockFromDeck($element, position, offsetTop) {
     const hash = $element.data('hash');
     const selector = '[data-hash="' + hash + '"]';
     const height = $element.find('.sound-text').outerHeight();
@@ -252,12 +255,12 @@ function addSoundBlockFromDeck($element, position) {
         positioned = autoPosition(dropped);
     } else {
         dropped.style.left = roundToTen(position.left - 10) + 'px';
-        dropped.style.top = roundToTen(position.top - 50) + 'px';
+        dropped.style.top = roundToTen(position.top - offsetTop - 10) + 'px';
         positioned = true;
     }
 
     if (positioned) {
-        blockDb[hash].rect = getRect(dropped);
+        blockDb[hash].rect = getRectWithOffset(dropped);
         addedBlocks.push(hash);
 
         setTimeout(function () {
@@ -281,7 +284,7 @@ function addSavedSoundBlock(hash) {
         '<div class="sound-text">' + text + '</div></a>';
 
     $(html).appendTo('#main').css({
-        top: rect.top - 40,
+        top: rect.top,
         left: rect.left,
         height: rect.height,
         width: rect.width
@@ -519,13 +522,15 @@ function stopCurrentSound() {
 }
 
 // Get block position
-function getRect(element) {
+function getRectWithOffset(element) {
     const rect = element.getBoundingClientRect();
+    const offsetTop = getTopOffset();
+
     return {
         left: rect.left,
-        top: rect.top,
+        top: rect.top - offsetTop,
         right: rect.right,
-        bottom: rect.bottom,
+        bottom: rect.bottom - offsetTop,
         width: rect.width,
         height: rect.height
     };
@@ -625,6 +630,16 @@ function filterBlocksWithoutPath(json) {
 
     return json;
 }
+
+// Get height of all the top blocks
+function getTopOffset() {
+    return $('#header').outerHeight();
+}
+
+// Get height of all the bottom blocks
+// function getBottomOffset() {
+//     return $('.level-top').outerHeight();
+// }
 
 // ================== //
 //                    //
@@ -890,7 +905,7 @@ $(function () {
 
                             page.blocks[hash].rect = {
                                 left: left + 10,
-                                top: Number(parts[2]) + 50,
+                                top: Number(parts[2]) + 10,
                                 width: Number(parts[3]),
                                 height: Number(parts[4])
                             };
@@ -960,12 +975,14 @@ $(function () {
     }).droppable({
         accept: '.panel-block',
         drop: function (e, ui) {
+            const offsetTop = getTopOffset();
+
             if (deckList.searched) {
                 deckList.search();
                 $('#deck').find('.search').val('').focus();
             }
 
-            addSoundBlockFromDeck(ui.draggable, ui.position);
+            addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop);
             updateDeckData();
         }
     }).on('keypress', '.sound-text textarea', function (e) {
