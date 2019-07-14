@@ -12982,7 +12982,7 @@ html, body {
   height: 100%;
   opacity: 0.8;
   background-color: #2B3E50;
-  z-index: 200;
+  z-index: 5000;
 }
 .main.is-loading:after {
   animation: spinAround 500ms infinite linear;
@@ -13002,7 +13002,7 @@ html, body {
   height: 5em;
   border-width: 0.4em;
   zoom: 2;
-  z-index: 200;
+  z-index: 5000;
 }
 .main .sound-block {
   position: absolute !important;

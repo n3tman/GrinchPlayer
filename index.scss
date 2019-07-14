@@ -314,7 +314,7 @@ html, body {
             height: 100%;
             opacity: 0.8;
             background-color: $background;
-            z-index: 200;
+            z-index: 5000;
         }
 
         &:after {
@@ -326,7 +326,7 @@ html, body {
             height: 5em;
             border-width: 0.4em;
             zoom: 2;
-            z-index: 200;
+            z-index: 5000;
         }
     }
 

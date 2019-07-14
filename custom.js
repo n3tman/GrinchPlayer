@@ -20,6 +20,8 @@ const config = require('./config');
 
 const editClass = 'has-bottom';
 const deckClass = 'has-right';
+const sideClass = 'has-left';
+
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 
@@ -62,8 +64,9 @@ function showNotification(text, error) {
 // Toggle edit mode
 function toggleEditMode() {
     const $blocks = $('.sound-block');
-    $('body').toggleClass(editClass);
-    $('#page-edit i').toggleClass('fa-edit fa-check-square-o');
+
+    toggleSidebarClasses(editClass);
+    config.set('lastState.' + editClass, isEditMode());
 
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
@@ -494,6 +497,11 @@ function isDeckActive() {
     return $('body').hasClass(deckClass);
 }
 
+// Check if left sidebar is active
+function isSideActive() {
+    return $('body').hasClass(sideClass);
+}
+
 // Sets width of audio overlay
 function setAudioOverlay(width) {
     $currentBlock.find('.sound-overlay').width(width);
@@ -640,13 +648,26 @@ function getTopOffset() {
 
 // Get height of all the bottom blocks
 function getLeftOffset() {
-    return $('body').hasClass('has-left') ? 250 : 0;
+    return isSideActive() ? 250 : 0;
 }
 
-// Get height of all the bottom blocks
-// function getBottomOffset() {
-//     return $('.level-top').outerHeight();
-// }
+// Toggle sidebar classes
+function toggleSidebarClasses(name) {
+    const $body = $('body');
+
+    switch (name) {
+        case editClass:
+            $('#page-edit .fa').toggleClass('fa-edit fa-check-square-o');
+            break;
+        case sideClass:
+            $('#left-toggle .fa').toggleClass('fa-chevron-left fa-chevron-right');
+            break;
+        default:
+        //
+    }
+
+    $body.toggleClass(name);
+}
 
 // ================== //
 //                    //
@@ -669,6 +690,13 @@ $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
     const $main = $('#main');
+
+    const lastState = config.get('lastState') || {};
+    [editClass, deckClass, sideClass].forEach(function (className) {
+        if ({}.hasOwnProperty.call(lastState, className) && lastState[className] === true) {
+            toggleSidebarClasses(className);
+        }
+    });
 
     // Window controls
     $('#win-minimize').click(function () {
@@ -705,20 +733,23 @@ $(function () {
     if (_.size(config.get('pages')) > 0) {
         const page = config.get('pages.123');
         loadSavedPage(page);
-        freezeMainBlocks();
+        if (!isEditMode()) {
+            freezeMainBlocks();
+        }
     }
 
     // Deck toggle
     $('#deck-toggle').click(function () {
         const size = mainWindow.getSize();
 
-        if ($body.hasClass('has-right')) {
-            mainWindow.setSize(size[0] - 250, size[1]);
-        } else {
-            mainWindow.setSize(size[0] + 250, size[1]);
-        }
+        toggleSidebarClasses(deckClass);
+        config.set('lastState.' + deckClass, isDeckActive());
 
-        $body.toggleClass('has-right');
+        if (isDeckActive()) {
+            mainWindow.setSize(size[0] + 250, size[1]);
+        } else {
+            mainWindow.setSize(size[0] - 250, size[1]);
+        }
     });
 
     // Toggle left sidebar
@@ -726,16 +757,16 @@ $(function () {
         const size = mainWindow.getSize();
         const position = mainWindow.getPosition();
 
-        if ($body.hasClass('has-left')) {
-            mainWindow.setPosition(position[0] + 250, position[1]);
-            mainWindow.setSize(size[0] - 250, size[1]);
-        } else {
+        toggleSidebarClasses(sideClass);
+        config.set('lastState.' + sideClass, isSideActive());
+
+        if (isSideActive()) {
             mainWindow.setPosition(position[0] - 250, position[1]);
             mainWindow.setSize(size[0] + 250, size[1]);
+        } else {
+            mainWindow.setPosition(position[0] + 250, position[1]);
+            mainWindow.setSize(size[0] - 250, size[1]);
         }
-
-        $(this).find('.fa').toggleClass('fa-chevron-left fa-chevron-right');
-        $body.toggleClass('has-left');
     });
 
     // Add block from single or multiple files
