@@ -12762,8 +12762,6 @@ html, body {
 .wrapper {
   height: calc(100% - 40px);
   position: relative;
-  margin-right: 0;
-  transition: margin-right 0.3s ease-in-out 0.2s;
 }
 
 .title {
@@ -12967,6 +12965,41 @@ html, body {
   margin: 0;
 }
 
+.tabs.is-toggle {
+  display: block;
+  margin-bottom: 0;
+  margin-left: -1px;
+  box-shadow: inset 1px 0 0 1px #4E5D6C;
+  overflow: hidden;
+}
+.tabs.is-toggle ul {
+  flex-wrap: wrap;
+}
+.tabs.is-toggle .link {
+  height: 35px;
+  padding: 0.5em 0.6em 0.5em 0.5em;
+}
+.tabs.is-toggle .link strong {
+  letter-spacing: -1px;
+}
+.tabs.is-toggle .is-active .link {
+  border-bottom: 2px solid #dee5ed;
+}
+.tabs.is-toggle .icon:first-child {
+  margin-right: 0.3em;
+}
+.tabs.is-toggle .fa-stack-2x {
+  font-size: 1.5em;
+}
+.tabs.is-toggle .fa-stack {
+  width: 1.5em;
+  height: 1.5em;
+  line-height: 1.5em;
+}
+.tabs.is-toggle .fa-stack-1x {
+  color: #2B3E50;
+}
+
 .main {
   height: 100%;
   position: relative;
@@ -13166,17 +13199,19 @@ html, body {
   z-index: 2000;
 }
 .panel .panel-heading {
-  height: 40px;
-  padding: 0.25em 0.5em;
+  height: 35px;
+  padding: 0.15em 0.5em;
   text-align: center;
 }
 .panel .count {
   font-weight: bold;
 }
-.panel .panel-search {
-  height: 40px;
+.panel .panel-search .input,
+.panel .panel-search .icon {
+  height: 30px;
 }
 .panel .panel-search .input {
+  padding-top: 0.25em;
   border: 0;
   border-bottom: 1px solid #4E5D6C;
 }
@@ -13185,6 +13220,12 @@ html, body {
   left: -250px;
   transition: left 0.3s ease-in-out 0.2s;
   border-right: 2px solid #4E5D6C;
+}
+.panel.navigator .panel-block {
+  padding: 0.25em 0.75em;
+}
+.panel.navigator .panel-block:first-child {
+  border-top: 0;
 }
 
 .has-left .wrapper {
@@ -13220,7 +13261,7 @@ html, body {
   content: "";
 }
 .panel.deck .deck-items {
-  height: calc(100% - 200px);
+  height: calc(100% - 180px);
 }
 .panel.deck .deck-items .panel-block {
   position: relative;
@@ -13234,10 +13275,11 @@ html, body {
 }
 .panel.deck .batch {
   padding: 0;
-  height: 40px;
+  height: 35px;
 }
 .panel.deck .batch .button {
   background: transparent;
+  height: 35px;
   border: 0;
   color: #dee5ed;
 }
@@ -13257,6 +13299,7 @@ html, body {
 }
 .panel.deck .bottom {
   height: 50px;
+  border-bottom: 0;
 }
 
 .has-right .wrapper {

@@ -139,6 +139,7 @@ function initDraggableMain($element) {
             '<button class="button block-delete" title="Удалить"><i class="fa fa-times" aria-hidden="true"></i></button></div>',
         arrow: true,
         aria: null,
+        distance: 0,
         interactive: true,
         interactiveBorder: 10,
         placement: 'right',
@@ -208,7 +209,7 @@ function isCollision(target, offsetTop, offsetLeft) {
 function autoPosition(block) {
     const $main = $('#main');
     const mainWidth = $main.width();
-    const mainHeight = $main.height();
+    const mainHeight = $main.height() - $('#tabs').outerHeight();
     const offsetTop = getTopOffset();
     const offsetLeft = getLeftOffset();
     let success = true;
@@ -643,7 +644,7 @@ function filterBlocksWithoutPath(json) {
 
 // Get height of all the top blocks
 function getTopOffset() {
-    return $('#header').outerHeight();
+    return $('#header').outerHeight() + $('#tabs').outerHeight();
 }
 
 // Get height of all the bottom blocks
@@ -1149,6 +1150,16 @@ $(function () {
                 addFileBlocks(fileArray);
             }
         }
+    });
+
+    // ------ //
+    //  Tabs  //
+    // ------ //
+
+    $('#tabs .link').click(function () {
+        const $this = $(this);
+        $this.closest('ul').find('.is-active').removeClass('is-active');
+        $this.parent().addClass('is-active');
     });
 
     // --------- //

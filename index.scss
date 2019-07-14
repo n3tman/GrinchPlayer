@@ -41,8 +41,6 @@ html, body {
 .wrapper {
     height: calc(100% - 40px);
     position: relative;
-    margin-right: 0;
-    transition: margin-right 0.3s ease-in-out 0.2s;
 }
 
 // ------------------ //
@@ -293,6 +291,55 @@ html, body {
 }
 
 // ------------------ //
+//  Tabs
+// ------------------ //
+
+.tabs.is-toggle {
+    & {
+        display: block;
+        margin-bottom: 0;
+        margin-left: -1px;
+        box-shadow: inset 1px 0 0 1px $border;
+        overflow: hidden;
+    }
+
+    ul {
+        flex-wrap: wrap;
+    }
+
+    .link {
+        height: 35px;
+        padding: 0.5em 0.6em 0.5em 0.5em;
+    }
+
+    .link strong {
+        letter-spacing: -1px;
+    }
+
+    .is-active .link {
+        border-bottom:2px solid $grey-lighter;
+    }
+
+    .icon:first-child {
+        margin-right: 0.3em;
+    }
+
+    .fa-stack-2x {
+        font-size: 1.5em;
+    }
+
+    .fa-stack {
+        width: 1.5em;
+        height: 1.5em;
+        line-height: 1.5em;
+    }
+
+    .fa-stack-1x {
+        color: $background;
+    }
+}
+
+// ------------------ //
 //  Main Block
 // ------------------ //
 
@@ -538,8 +585,8 @@ html, body {
     }
 
     .panel-heading {
-        height: 40px;
-        padding: 0.25em 0.5em;
+        height: 35px;
+        padding: 0.15em 0.5em;
         text-align: center;
     }
 
@@ -548,11 +595,13 @@ html, body {
     }
 
     .panel-search {
-        & {
-            height: 40px;
+        .input,
+        .icon {
+            height: 30px;
         }
 
         .input {
+            padding-top: 0.25em;
             border: 0;
             border-bottom: 1px solid $border;
         }
@@ -568,6 +617,14 @@ html, body {
         left: -250px;
         transition: left 0.3s ease-in-out 0.2s;
         border-right: 2px solid $border;
+    }
+
+    .panel-block {
+        padding: 0.25em 0.75em;
+    }
+
+    .panel-block:first-child {
+        border-top: 0;
     }
 }
 
@@ -623,7 +680,7 @@ html, body {
 
     .deck-items {
         & {
-            height: calc(100% - 200px);
+            height: calc(100% - 180px);
         }
 
         .panel-block {
@@ -642,11 +699,12 @@ html, body {
     .batch {
         & {
             padding: 0;
-            height: 40px;
+            height: 35px;
         }
 
         .button {
             background: transparent;
+            height: 35px;
             border: 0;
             color: $input-color;
         }
@@ -675,6 +733,7 @@ html, body {
 
     .bottom {
         height: 50px;
+        border-bottom: 0;
     }
 }
 
