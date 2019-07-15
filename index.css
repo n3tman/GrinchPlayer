@@ -12791,7 +12791,7 @@ html, body {
   color: whitesmoke;
   resize: none;
   border: 0;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 .sound-text textarea:focus {
   outline: none;
@@ -12853,9 +12853,16 @@ html, body {
   border-right-color: #4E5D6C;
 }
 
+.tippy-popper[x-placement^=bottom] .tippy-arrow {
+  border-bottom-color: #4E5D6C;
+}
+
 .tippy-content .block-controls {
   display: flex;
   flex-direction: column;
+}
+.tippy-content .block-controls .button + .button {
+  margin-top: 8px;
 }
 .tippy-content .button {
   padding: 0;
@@ -12863,8 +12870,9 @@ html, body {
   height: 32px;
   border-radius: 0.25rem;
 }
-.tippy-content .button + .button {
-  margin-top: 8px;
+.tippy-content .button:focus,
+.tippy-content .button.is-focused {
+  border-color: #4E5D6C;
 }
 .tippy-content .fa, .tippy-content .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .tippy-content a::before {
   font-size: 1.5rem;
@@ -12974,6 +12982,9 @@ html, body {
 }
 .tabs.is-toggle ul {
   flex-wrap: wrap;
+}
+.tabs.is-toggle li:focus {
+  outline: none;
 }
 .tabs.is-toggle .link {
   height: 35px;

@@ -76,7 +76,7 @@ html, body {
         color: $light;
         resize: none;
         border: 0;
-        overflow-x: hidden;
+        overflow: hidden;
     }
 
     textarea:focus {
@@ -152,10 +152,18 @@ html, body {
     border-right-color: $grey;
 }
 
+.tippy-popper[x-placement^=bottom] .tippy-arrow {
+    border-bottom-color: $grey;
+}
+
 .tippy-content {
     .block-controls {
         display: flex;
         flex-direction: column;
+    }
+
+    .block-controls .button + .button {
+        margin-top: 8px;
     }
 
     .button {
@@ -165,8 +173,9 @@ html, body {
         border-radius: .25rem;
     }
 
-    .button + .button {
-        margin-top: 8px;
+    .button:focus,
+    .button.is-focused {
+        border-color: $button-border-color;
     }
 
     .fa {
@@ -307,6 +316,10 @@ html, body {
         flex-wrap: wrap;
     }
 
+    li:focus {
+        outline: none;
+    }
+
     .link {
         height: 35px;
         padding: 0.5em 0.6em 0.5em 0.5em;
@@ -317,7 +330,12 @@ html, body {
     }
 
     .is-active .link {
-        border-bottom:2px solid $grey-lighter;
+        border-bottom: 2px solid $grey-lighter;
+    }
+
+    .tab-btn {
+        //font-size: 1.5em;
+        //padding: 0.5em 0.3em;
     }
 
     .icon:first-child {

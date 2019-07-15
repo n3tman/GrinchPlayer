@@ -64,21 +64,18 @@ function showNotification(text, error) {
 // Toggle edit mode
 function toggleEditMode() {
     const $blocks = $('.sound-block');
+    const $tabs = $('.tabs .item');
 
     toggleSidebarClasses(editClass);
     config.set('lastState.' + editClass, isEditMode());
 
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
-        $blocks.each(function () {
+        $blocks.add($tabs).each(function () {
             this._tippy.enable();
         });
     } else {
-        $blocks.draggable('disable').resizable('disable');
-        $blocks.each(function () {
-            this._tippy.hide();
-            this._tippy.disable();
-        });
+        freezePageEditing($blocks, $tabs);
     }
 }
 
@@ -135,13 +132,12 @@ function initDraggableMain($element) {
     // Show tooltip with buttons in Edit mode
     tippy($element[0], {
         content: '<div class="block-controls" data-for="' + hash + '">' +
-            '<button class="button block-rename" title="Переименовать"><i class="fa fa-pencil" aria-hidden="true"></i></button>' +
-            '<button class="button block-delete" title="Удалить"><i class="fa fa-times" aria-hidden="true"></i></button></div>',
+            '<button class="button block-rename" title="Переименовать"><i class="fa fa-pencil"></i></button>' +
+            '<button class="button block-delete" title="Удалить"><i class="fa fa-times"></i></button></div>',
         arrow: true,
         aria: null,
         distance: 0,
         interactive: true,
-        interactiveBorder: 10,
         placement: 'right',
         boundary: document.querySelector('#main')
     });
@@ -618,10 +614,12 @@ function flushDeckItems() {
 }
 
 // Prevent dragging/resizing of the main blocks
-function freezeMainBlocks() {
-    const $blocks = $('.sound-block');
+function freezePageEditing(blocks, tabs) {
+    const $blocks = blocks || $('.sound-block');
+    const $tabs = tabs || $('.tabs .item');
+
     $blocks.draggable('disable').resizable('disable');
-    $blocks.each(function () {
+    $blocks.add($tabs).each(function () {
         this._tippy.hide();
         this._tippy.disable();
     });
@@ -730,12 +728,39 @@ $(function () {
         toggleEditMode();
     });
 
+    // ------ //
+    //  Tabs  //
+    // ------ //
+
+    $('#tabs .link').each(function () {
+        const $this = $(this);
+        const hash = $this.parent().data('hash');
+
+        $this.click(function () {
+            $this.closest('ul').find('.is-active').removeClass('is-active');
+            $this.parent().addClass('is-active');
+        });
+
+        // Show tooltip with buttons in Edit mode
+        tippy(this.parentNode, {
+            content: '<div class="tab-controls" data-for="' + hash + '">' +
+                '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
+                '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
+                '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>',
+            arrow: true,
+            aria: null,
+            distance: 0,
+            interactive: true,
+            placement: 'bottom'
+        });
+    });
+
     // Load pages info from config
     if (_.size(config.get('pages')) > 0) {
         const page = config.get('pages.123');
         loadSavedPage(page);
         if (!isEditMode()) {
-            freezeMainBlocks();
+            freezePageEditing();
         }
     }
 
@@ -1006,6 +1031,27 @@ $(function () {
             const selector = '[data-hash="' + hash + '"]';
             $(selector).find('.sound-text').trigger('edit');
         }
+    }).on('click', '.tab-rename', function () {
+        if (isEditMode()) {
+            const hash = $(this).parent().data('for');
+            const selector = '[data-hash="' + hash + '"]';
+            $(selector)[0]._tippy.hide();
+            console.log(hash);
+        }
+    }).on('click', '.tab-delete', function () {
+        if (isEditMode()) {
+            const hash = $(this).parent().data('for');
+            const selector = '[data-hash="' + hash + '"]';
+            $(selector)[0]._tippy.hide();
+            console.log(hash);
+        }
+    }).on('click', '.tab-add', function () {
+        if (isEditMode()) {
+            const hash = $(this).parent().data('for');
+            const selector = '[data-hash="' + hash + '"]';
+            $(selector)[0]._tippy.hide();
+            console.log(hash);
+        }
     });
 
     // ------------ //
@@ -1150,16 +1196,6 @@ $(function () {
                 addFileBlocks(fileArray);
             }
         }
-    });
-
-    // ------ //
-    //  Tabs  //
-    // ------ //
-
-    $('#tabs .link').click(function () {
-        const $this = $(this);
-        $this.closest('ul').find('.is-active').removeClass('is-active');
-        $this.parent().addClass('is-active');
     });
 
     // --------- //
