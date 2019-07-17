@@ -155,7 +155,6 @@ function initDraggableMain($element) {
             event: 'edit',
             onblur: 'submit',
             width: '100%',
-            height: 'none',
             onedit: function (settings) {
                 settings.rows = _.round($text.height() / 18);
             },
@@ -671,6 +670,69 @@ function toggleSidebarClasses(name) {
     $body.toggleClass(name);
 }
 
+// Update numbers in tabs
+function reorderTabs() {
+    $('#tabs .tab').each(function (index) {
+        $(this).find('strong').text(index + 1);
+    });
+}
+
+// Return HTML code for a tab
+function getTabHtml(text) {
+    const hash = getStringHash(text);
+
+    return [
+        '<li class="tab" data-hash="' + hash + '">' +
+        '<a class="link"><span class="icon fa-stack">' +
+        '<i class="fa fa-circle fa-stack-2x"></i>' +
+        '<strong class="fa-stack-1x">1</strong></span>' +
+        '<span class="text">' + text + '</span></a></li>',
+        '[data-hash="' + hash + '"]',
+        hash
+    ];
+}
+
+// Show tab tooltips in Edit mode
+function initTabTooltip(element) {
+    const hash = element.dataset.hash;
+
+    tippy(element, {
+        content: '<div class="tab-controls" data-for="' + hash + '">' +
+            '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
+            '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
+            '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>',
+        arrow: true,
+        aria: null,
+        distance: 0,
+        interactive: true,
+        placement: 'bottom'
+    });
+}
+
+// Make tab text editable
+function initEditableTab($tab) {
+    $tab.find('.text').editable(function (value) {
+        return value.replace(/\s+/g, ' ').trim();
+    }, {
+        type: 'textarea',
+        tooltip: null,
+        rows: 1,
+        event: 'edit',
+        onblur: 'submit',
+        onedit: function (settings, element) {
+            settings.cols = element.innerText.length + 5;
+        },
+        callback: function (value) {
+            console.log(value);
+        }
+    });
+}
+
+// Get a random short string
+function getRandomString(length) {
+    return getStringHash(_.random(1000000).toString()).slice(0, length);
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -736,26 +798,13 @@ $(function () {
     // ------ //
 
     $('#tabs .tab').each(function () {
-        const $this = $(this);
-        const hash = $this.data('hash');
-
-        $this.click(function () {
-            $this.closest('ul').find('.is-active').removeClass('is-active');
-            $this.addClass('is-active');
-        });
+        const $tab = $(this);
 
         // Show tooltip with buttons in Edit mode
-        tippy($this[0], {
-            content: '<div class="tab-controls" data-for="' + hash + '">' +
-                '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
-                '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
-                '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>',
-            arrow: true,
-            aria: null,
-            distance: 0,
-            interactive: true,
-            placement: 'bottom'
-        });
+        initTabTooltip($tab[0]);
+
+        // Make text inside tabs editable
+        initEditableTab($tab);
     });
 
     // Make tabs sortable
@@ -767,16 +816,17 @@ $(function () {
             ui.item[0]._tippy.hide();
         },
         stop: function () {
-            const hashArray = [];
+            const hashArray = $('#tabs .tab').map(function () {
+                return this.dataset.hash;
+            }).get();
 
-            $('#tabs .tab').each(function (index) {
-                const $this = $(this);
-                $this.find('strong').text(index + 1);
-                hashArray.push($this.data('hash'));
-            });
+            reorderTabs();
 
             config.set('lastPages', hashArray);
         }
+    }).on('click', '.tab', function (e) {
+        $(e.delegateTarget).find('.is-active').removeClass('is-active');
+        $(e.currentTarget).addClass('is-active');
     });
 
     // Load pages info from config
@@ -1044,7 +1094,7 @@ $(function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '[data-hash="' + hash + '"]';
-            $(selector)[0]._tippy.hide();
+            $(selector)[0]._tippy.destroy();
             removeBlockFromPage(hash);
             _.pull(addedBlocks, hash);
             updateDeckData();
@@ -1060,27 +1110,40 @@ $(function () {
             const hash = $(this).parent().data('for');
             const selector = '[data-hash="' + hash + '"]';
             $(selector)[0]._tippy.hide();
-            console.log(hash);
+            $(selector).find('.text').trigger('edit');
         }
     }).on('click', '.tab-delete', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '[data-hash="' + hash + '"]';
-            $(selector)[0]._tippy.hide();
-            console.log(hash);
+            $(selector)[0]._tippy.destroy();
+            $(selector).remove();
+            reorderTabs();
         }
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '[data-hash="' + hash + '"]';
+            const random = getRandomString(5);
+            const html = $(getTabHtml('Таб ' + random));
             $(selector)[0]._tippy.hide();
-            console.log(hash);
+            $(selector).after(html[0]);
+            initTabTooltip($(html[1])[0]);
+            initEditableTab($(html[1]));
+            $('#tabs ul').sortable('refresh');
+            reorderTabs();
+        }
+    }).on('keypress', '.sound-text textarea, .text textarea', function (e) {
+        // Prevent new line on Enter key
+        if (e.which === 13) {
+            e.target.blur();
         }
     });
 
     // ------------ //
     //  Main block  //
     // ------------ //
+
     $main.on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
@@ -1112,16 +1175,12 @@ $(function () {
             addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
             updateDeckData();
         }
-    }).on('keypress', '.sound-text textarea', function (e) {
-        // Prevent new line on Enter key
-        if (e.which === 13) {
-            e.target.blur();
-        }
     });
 
     // -------------- //
     //  Deck sidebar  //
     // -------------- //
+
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
@@ -1199,6 +1258,7 @@ $(function () {
     // ----------------------------- //
     //  Drag and drop files/folders  //
     // ----------------------------- //
+
     $('#deck, #controls').on('dragover', false).on('drop', function (e) {
         if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;

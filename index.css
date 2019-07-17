@@ -12775,25 +12775,7 @@ html, body {
   border-right: 0;
 }
 
-.sound-text {
-  text-align: center;
-  width: 100%;
-  padding: 2px;
-  line-height: 18px;
-  z-index: 1;
-  word-break: break-word;
-}
-.sound-text textarea {
-  text-align: center;
-  font-size: 1rem;
-  line-height: 18px;
-  background: transparent;
-  color: whitesmoke;
-  resize: none;
-  border: 0;
-  overflow: hidden;
-}
-.sound-text textarea:focus {
+textarea:focus {
   outline: none;
 }
 
@@ -12813,6 +12795,26 @@ html, body {
   padding: 1rem 3rem;
   display: none;
   z-index: 100;
+}
+
+.sound-text {
+  text-align: center;
+  width: 100%;
+  padding: 2px;
+  line-height: 18px;
+  z-index: 1;
+  word-break: break-word;
+}
+.sound-text textarea {
+  text-align: center;
+  font-size: 1rem;
+  line-height: 18px;
+  background: transparent;
+  color: whitesmoke;
+  resize: none;
+  border: 0;
+  overflow: hidden;
+  vertical-align: middle;
 }
 
 .drag {
@@ -13009,6 +13011,16 @@ html, body {
 }
 .tabs.is-toggle .fa-stack-1x {
   color: #2B3E50;
+}
+.tabs.is-toggle .text textarea {
+  font-size: 1rem;
+  line-height: 24px;
+  background: transparent;
+  color: whitesmoke;
+  resize: none;
+  border: 0;
+  overflow: hidden;
+  vertical-align: middle;
 }
 
 .main {

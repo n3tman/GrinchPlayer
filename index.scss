@@ -58,6 +58,28 @@ html, body {
     border-right: 0;
 }
 
+textarea:focus {
+    outline: none;
+}
+
+.ui-draggable-dragging {
+    background: $background;
+    width: 200px;
+    padding: 0;
+    z-index: 100;
+}
+
+.notification {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    margin-bottom: 0 !important;
+    font-size: 1.5rem;
+    padding: 1rem 3rem;
+    display: none;
+    z-index: 100;
+}
+
 .sound-text {
     & {
         text-align: center;
@@ -77,29 +99,8 @@ html, body {
         resize: none;
         border: 0;
         overflow: hidden;
+        vertical-align: middle;
     }
-
-    textarea:focus {
-        outline: none;
-    }
-}
-
-.ui-draggable-dragging {
-    background: $background;
-    width: 200px;
-    padding: 0;
-    z-index: 100;
-}
-
-.notification {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    margin-bottom: 0 !important;
-    font-size: 1.5rem;
-    padding: 1rem 3rem;
-    display: none;
-    z-index: 100;
 }
 
 // ------------------ //
@@ -354,6 +355,17 @@ html, body {
 
     .fa-stack-1x {
         color: $background;
+    }
+
+    .text textarea {
+        font-size: 1rem;
+        line-height: 24px;
+        background: transparent;
+        color: $light;
+        resize: none;
+        border: 0;
+        overflow: hidden;
+        vertical-align: middle;
     }
 }
 
