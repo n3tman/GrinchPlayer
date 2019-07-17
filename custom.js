@@ -64,7 +64,7 @@ function showNotification(text, error) {
 // Toggle edit mode
 function toggleEditMode() {
     const $blocks = $('.sound-block');
-    const $tabs = $('.tabs .item');
+    const $tabs = $('#tabs .tab');
 
     toggleSidebarClasses(editClass);
     config.set('lastState.' + editClass, isEditMode());
@@ -74,6 +74,7 @@ function toggleEditMode() {
         $blocks.add($tabs).each(function () {
             this._tippy.enable();
         });
+        $('#tabs ul').sortable('enable');
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -616,13 +617,15 @@ function flushDeckItems() {
 // Prevent dragging/resizing of the main blocks
 function freezePageEditing(blocks, tabs) {
     const $blocks = blocks || $('.sound-block');
-    const $tabs = tabs || $('.tabs .item');
+    const $tabs = tabs || $('#tabs .tab');
 
     $blocks.draggable('disable').resizable('disable');
     $blocks.add($tabs).each(function () {
         this._tippy.hide();
         this._tippy.disable();
     });
+
+    $('#tabs ul').sortable('disable');
 }
 
 // Remove blocks without path from json
@@ -732,17 +735,17 @@ $(function () {
     //  Tabs  //
     // ------ //
 
-    $('#tabs .link').each(function () {
+    $('#tabs .tab').each(function () {
         const $this = $(this);
-        const hash = $this.parent().data('hash');
+        const hash = $this.data('hash');
 
         $this.click(function () {
             $this.closest('ul').find('.is-active').removeClass('is-active');
-            $this.parent().addClass('is-active');
+            $this.addClass('is-active');
         });
 
         // Show tooltip with buttons in Edit mode
-        tippy(this.parentNode, {
+        tippy($this[0], {
             content: '<div class="tab-controls" data-for="' + hash + '">' +
                 '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
                 '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
@@ -753,6 +756,27 @@ $(function () {
             interactive: true,
             placement: 'bottom'
         });
+    });
+
+    // Make tabs sortable
+    $('#tabs ul').sortable({
+        cancel: '',
+        scroll: false,
+        tolerance: 'pointer',
+        start: function (event, ui) {
+            ui.item[0]._tippy.hide();
+        },
+        stop: function () {
+            const hashArray = [];
+
+            $('#tabs .tab').each(function (index) {
+                const $this = $(this);
+                $this.find('strong').text(index + 1);
+                hashArray.push($this.data('hash'));
+            });
+
+            config.set('lastPages', hashArray);
+        }
     });
 
     // Load pages info from config
