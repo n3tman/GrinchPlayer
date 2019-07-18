@@ -1,4 +1,4 @@
-/* global window, document, $, requestAnimationFrame */
+/* global window, $, requestAnimationFrame */
 
 'use strict';
 
@@ -34,6 +34,7 @@ let $currentBlock;
 let deckList;
 let notifyHandle;
 let currentTab = config.get('currentTab') || '';
+let $main;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -142,7 +143,7 @@ function initDraggableMain($element) {
         distance: 0,
         interactive: true,
         placement: 'right',
-        boundary: document.querySelector('#main')
+        boundary: $main[0]
     });
 
     // Make text editable in place on button click
@@ -205,7 +206,6 @@ function isCollision(target, offsetTop, offsetLeft) {
 
 // Automatically move block to free space
 function autoPosition(block) {
-    const $main = $('#main');
     const mainWidth = $main.width();
     const mainHeight = $main.height() - $('#tabs').outerHeight();
     const offsetTop = getTopOffset();
@@ -250,7 +250,7 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
         .addClass('button is-dark sound-block')
         .outerHeight(roundToTen(height));
 
-    $('#main').append($element);
+    $main.append($element);
 
     const dropped = $(selector)[0];
 
@@ -286,7 +286,7 @@ function addSavedSoundBlock(hash) {
         ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
-    $(html).appendTo('#main').css({
+    $(html).appendTo($main).css({
         top: rect.top,
         left: rect.left,
         height: rect.height,
@@ -482,13 +482,15 @@ function loadSavedPage(page) {
 function addNewPage(text, $element, after) {
     const hash = getStringHash(text);
     const selector = '[data-page="' + hash + '"]';
-    const html = $(getTabHtml(text, hash));
+    const tabHtml = $(getTabHtml(text, hash));
 
     if (after) {
-        $element.after(html);
+        $element.after(tabHtml);
     } else {
-        $element.append(html);
+        $element.append(tabHtml);
     }
+
+    $('#controls').before('<div class="main" data-page="' + hash + '">');
 
     initTabTooltip($(selector)[0]);
     initEditableTab($(selector));
@@ -774,7 +776,6 @@ window.addEventListener('beforeunload', function () {
 $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
-    const $main = $('#main');
     const $tabList = $('#tabs ul');
 
     const lastState = config.get('lastState') || {};
@@ -838,8 +839,12 @@ $(function () {
             reorderTabs();
         }
     }).on('click', '.tab', function (e) {
-        const hash = e.currentTarget.dataset.page;
-        config.set('currentTab', hash);
+        // Tab change event
+        currentTab = e.currentTarget.dataset.page;
+        config.set('currentTab', currentTab);
+        $('.main').hide();
+        $main = $('.main[data-page="' + currentTab + '"]');
+        $main.show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
     });
@@ -1071,28 +1076,30 @@ $(function () {
                     if (i !== 0 && line.trim().length > 0) {
                         const parts = line.split('*');
                         const filePath = parsed.dir + '\\' + parts[0];
-                        const hash = getFileHash(filePath);
-
                         lineNum++;
 
-                        if (!{}.hasOwnProperty.call(page.blocks, hash)) {
-                            const left = Number(parts[1]);
+                        if (fs.existsSync(filePath)) {
+                            const hash = getFileHash(filePath);
 
-                            counter++;
+                            if (!{}.hasOwnProperty.call(page.blocks, hash)) {
+                                const left = Number(parts[1]);
 
-                            page.blocks[hash] = {};
-                            page.blocks[hash].path = filePath;
-                            page.blocks[hash].text = parts[5];
+                                counter++;
 
-                            page.blocks[hash].rect = {
-                                left: left + 10,
-                                top: Number(parts[2]) + 10,
-                                width: Number(parts[3]),
-                                height: Number(parts[4])
-                            };
+                                page.blocks[hash] = {};
+                                page.blocks[hash].path = filePath;
+                                page.blocks[hash].text = parts[5];
 
-                            if (left >= 0) {
-                                page.added.push(hash);
+                                page.blocks[hash].rect = {
+                                    left: left + 10,
+                                    top: Number(parts[2]) + 10,
+                                    width: Number(parts[3]),
+                                    height: Number(parts[4])
+                                };
+
+                                if (left >= 0) {
+                                    page.added.push(hash);
+                                }
                             }
                         }
                     }
@@ -1149,7 +1156,7 @@ $(function () {
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-page="' + hash + '"]';
+            const selector = '.tab[data-page="' + hash + '"]';
             const text = 'Таб#' + getRandomString(5);
             $(selector)[0]._tippy.hide();
             addNewPage(text, $(selector), true);
@@ -1165,7 +1172,7 @@ $(function () {
     //  Main block  //
     // ------------ //
 
-    $main.on('click', '.sound-block', function () {
+    $('.main').on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
         }

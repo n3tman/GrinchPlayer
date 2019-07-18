@@ -375,6 +375,7 @@ textarea:focus {
 
 .main {
     & {
+        display: none;
         height: 100%;
         position: relative;
         padding-bottom: 40px;
