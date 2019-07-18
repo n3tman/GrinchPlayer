@@ -682,19 +682,19 @@ function getTabHtml(text) {
     const hash = getStringHash(text);
 
     return [
-        '<li class="tab" data-hash="' + hash + '">' +
+        '<li class="tab" data-page="' + hash + '">' +
         '<a class="link"><span class="icon fa-stack">' +
         '<i class="fa fa-circle fa-stack-2x"></i>' +
         '<strong class="fa-stack-1x">1</strong></span>' +
         '<span class="text">' + text + '</span></a></li>',
-        '[data-hash="' + hash + '"]',
+        '[data-page="' + hash + '"]',
         hash
     ];
 }
 
 // Show tab tooltips in Edit mode
 function initTabTooltip(element) {
-    const hash = element.dataset.hash;
+    const hash = element.dataset.page;
 
     tippy(element, {
         content: '<div class="tab-controls" data-for="' + hash + '">' +
@@ -754,6 +754,7 @@ $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
     const $main = $('#main');
+    const $tabList = $('#tabs ul');
 
     const lastState = config.get('lastState') || {};
     [editClass, deckClass, sideClass].forEach(function (className) {
@@ -808,7 +809,7 @@ $(function () {
     });
 
     // Make tabs sortable
-    $('#tabs ul').sortable({
+    $tabList.sortable({
         cancel: '',
         scroll: false,
         tolerance: 'pointer',
@@ -817,25 +818,45 @@ $(function () {
         },
         stop: function () {
             const hashArray = $('#tabs .tab').map(function () {
-                return this.dataset.hash;
+                return this.dataset.page;
             }).get();
 
             reorderTabs();
 
-            config.set('lastPages', hashArray);
+            config.set('activePages', hashArray);
         }
     }).on('click', '.tab', function (e) {
+        const hash = e.currentTarget.dataset.page;
+        config.set('lastPage', hash);
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
     });
 
     // Load pages info from config
-    if (_.size(config.get('pages')) > 0) {
+    if (_.size(config.get('activePages')) > 0) {
         const page = config.get('pages.123');
         loadSavedPage(page);
-        if (!isEditMode()) {
-            freezePageEditing();
+    } else {
+        const lastPage = config.get('lastPage') || '';
+        const random = getRandomString(5);
+        const html = $(getTabHtml('Таб#' + random));
+        $tabList.append(html[0]);
+        initTabTooltip($(html[1])[0]);
+        initEditableTab($(html[1]));
+        $tabList.sortable('refresh');
+
+        reorderTabs();
+
+        if (lastPage.length > 0) {
+            $tabList.find('[data-page="' + lastPage + '"]').click();
+        } else {
+            $tabList.find('li:first').click();
         }
+    }
+
+    // Freeze editing if not in Edit mode
+    if (!isEditMode()) {
+        freezePageEditing();
     }
 
     // Deck toggle
@@ -1108,14 +1129,14 @@ $(function () {
     }).on('click', '.tab-rename', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-hash="' + hash + '"]';
+            const selector = '[data-page="' + hash + '"]';
             $(selector)[0]._tippy.hide();
             $(selector).find('.text').trigger('edit');
         }
     }).on('click', '.tab-delete', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-hash="' + hash + '"]';
+            const selector = '[data-page="' + hash + '"]';
             $(selector)[0]._tippy.destroy();
             $(selector).remove();
             reorderTabs();
@@ -1123,14 +1144,14 @@ $(function () {
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-hash="' + hash + '"]';
+            const selector = '[data-page="' + hash + '"]';
             const random = getRandomString(5);
-            const html = $(getTabHtml('Таб ' + random));
+            const html = $(getTabHtml('Таб#' + random));
             $(selector)[0]._tippy.hide();
             $(selector).after(html[0]);
             initTabTooltip($(html[1])[0]);
             initEditableTab($(html[1]));
-            $('#tabs ul').sortable('refresh');
+            $tabList.sortable('refresh');
             reorderTabs();
         }
     }).on('keypress', '.sound-text textarea, .text textarea', function (e) {
