@@ -25,6 +25,7 @@ const sideClass = 'has-left';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 
+let activePages = {};
 let blockDb = {};
 let addedBlocks = [];
 let lastPlayedHash = '';
@@ -32,6 +33,7 @@ let lastAddedHash = '';
 let $currentBlock;
 let deckList;
 let notifyHandle;
+let currentTab = config.get('currentTab') || '';
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -411,17 +413,15 @@ function removeBlockFromPage(hash) {
 
 // Save all pages/projects/settings to config
 function saveAllData() {
-    if (addedBlocks.length > 0) {
-        config.set('pages.123.added', addedBlocks);
-    } else {
-        config.delete('pages.123.added');
-    }
+    const activeTabs = $('#tabs .tab').map(function () {
+        return this.dataset.page;
+    }).get();
 
-    if (_.size(blockDb) > 0) {
-        config.set('pages.123.blocks', blockDb);
-    } else {
-        config.delete('pages.123.blocks');
-    }
+    activeTabs.forEach(function (hash) {
+        config.set('pages.' + hash, activePages[hash]);
+    });
+
+    config.set('activeTabs', activeTabs);
 
     showNotification('Данные сохранены в базу!');
 }
@@ -476,6 +476,33 @@ function loadSavedPage(page) {
         initDeckList();
         updateDeckData();
     }
+}
+
+// Add new page
+function addNewPage(text, $element, after) {
+    const hash = getStringHash(text);
+    const selector = '[data-page="' + hash + '"]';
+    const html = $(getTabHtml(text, hash));
+
+    if (after) {
+        $element.after(html);
+    } else {
+        $element.append(html);
+    }
+
+    initTabTooltip($(selector)[0]);
+    initEditableTab($(selector));
+    $('#tabs ul').sortable('refresh');
+    reorderTabs();
+
+    activePages[hash] = {
+        hash: hash,
+        name: text,
+        added: [],
+        blocks: {}
+    };
+
+    currentTab = hash;
 }
 
 // ==================== //
@@ -678,18 +705,12 @@ function reorderTabs() {
 }
 
 // Return HTML code for a tab
-function getTabHtml(text) {
-    const hash = getStringHash(text);
-
-    return [
-        '<li class="tab" data-page="' + hash + '">' +
+function getTabHtml(text, hash) {
+    return '<li class="tab" data-page="' + hash + '">' +
         '<a class="link"><span class="icon fa-stack">' +
         '<i class="fa fa-circle fa-stack-2x"></i>' +
         '<strong class="fa-stack-1x">1</strong></span>' +
-        '<span class="text">' + text + '</span></a></li>',
-        '[data-page="' + hash + '"]',
-        hash
-    ];
+        '<span class="text">' + text + '</span></a></li>';
 }
 
 // Show tab tooltips in Edit mode
@@ -794,10 +815,7 @@ $(function () {
         toggleEditMode();
     });
 
-    // ------ //
-    //  Tabs  //
-    // ------ //
-
+    // Tabs
     $('#tabs .tab').each(function () {
         const $tab = $(this);
 
@@ -817,41 +835,28 @@ $(function () {
             ui.item[0]._tippy.hide();
         },
         stop: function () {
-            const hashArray = $('#tabs .tab').map(function () {
-                return this.dataset.page;
-            }).get();
-
             reorderTabs();
-
-            config.set('activePages', hashArray);
         }
     }).on('click', '.tab', function (e) {
         const hash = e.currentTarget.dataset.page;
-        config.set('lastPage', hash);
+        config.set('currentTab', hash);
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
     });
 
     // Load pages info from config
     if (_.size(config.get('activePages')) > 0) {
-        const page = config.get('pages.123');
-        loadSavedPage(page);
+        // 1 const page = config.get('pages.123');
+        // loadSavedPage(page);
     } else {
-        const lastPage = config.get('lastPage') || '';
-        const random = getRandomString(5);
-        const html = $(getTabHtml('Таб#' + random));
-        $tabList.append(html[0]);
-        initTabTooltip($(html[1])[0]);
-        initEditableTab($(html[1]));
-        $tabList.sortable('refresh');
+        const text = 'Таб#' + getRandomString(5);
+        addNewPage(text, $tabList);
 
-        reorderTabs();
-
-        if (lastPage.length > 0) {
-            $tabList.find('[data-page="' + lastPage + '"]').click();
-        } else {
-            $tabList.find('li:first').click();
-        }
+        // 1 if (activeTab.length > 0) {
+        //     $tabList.find('[data-page="' + activeTab + '"]').click();
+        // } else {
+        //     $tabList.find('li:first').click();
+        // }
     }
 
     // Freeze editing if not in Edit mode
@@ -1145,14 +1150,9 @@ $(function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '[data-page="' + hash + '"]';
-            const random = getRandomString(5);
-            const html = $(getTabHtml('Таб#' + random));
+            const text = 'Таб#' + getRandomString(5);
             $(selector)[0]._tippy.hide();
-            $(selector).after(html[0]);
-            initTabTooltip($(html[1])[0]);
-            initEditableTab($(html[1]));
-            $tabList.sortable('refresh');
-            reorderTabs();
+            addNewPage(text, $(selector), true);
         }
     }).on('keypress', '.sound-text textarea, .text textarea', function (e) {
         // Prevent new line on Enter key
