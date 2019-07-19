@@ -894,7 +894,7 @@ $(function () {
             loadSavedPage(allPages[hash]);
         });
     } else {
-        addNewEmptyPage($tabList);
+        addNewEmptyPage();
     }
 
     // Click current tab if it's saved in the config
@@ -1183,7 +1183,7 @@ $(function () {
     }).on('click', '.tab-rename', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-page="' + hash + '"]';
+            const selector = '.tab[data-page="' + hash + '"]';
             $(selector)[0]._tippy.hide();
             $(selector).find('.text').trigger('edit');
         }
@@ -1191,9 +1191,23 @@ $(function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '[data-page="' + hash + '"]';
+            const $prevTab = $('.tab' + selector).prev();
             $(selector)[0]._tippy.destroy();
             $(selector).remove();
             reorderTabs();
+
+            delete activePages[hash];
+            currentTab = '';
+
+            if ($tabList.find('li').length === 0) {
+                addNewEmptyPage();
+            }
+
+            if ($prevTab.length > 0) {
+                $prevTab.click();
+            } else {
+                $tabList.find('li:first').click();
+            }
         }
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
