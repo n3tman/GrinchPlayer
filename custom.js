@@ -461,7 +461,6 @@ function loadSavedPage(page) {
 
     activePages[hash] = page;
     $tabList.append(tabHtml);
-    addNewMain(hash);
     initNewPageBlocks(hash);
 
     if (page.blocks !== undefined && _.size(page.blocks) > 0) {
@@ -500,7 +499,6 @@ function addNewEmptyPage($element) {
         $element.after(tabHtml);
     }
 
-    addNewMain(hash);
     initNewPageBlocks(hash);
 
     activePages[hash] = {
@@ -514,11 +512,48 @@ function addNewEmptyPage($element) {
 // Init everything for a new page
 function initNewPageBlocks(hash) {
     const selector = '[data-page="' + hash + '"]';
+    const tabSelector = '.tab' + selector;
+    const mainSelector = '.main' + selector;
 
-    initTabTooltip($(selector)[0]);
-    initEditableTab($(selector));
+    $('#controls').before('<div class="main" data-page="' + hash + '">');
+
+    initTabTooltip($(tabSelector)[0]);
+    initEditableTab($(tabSelector));
     $tabList.sortable('refresh');
     reorderTabs();
+
+    $(mainSelector).on('click', '.sound-block', function () {
+        if (!isEditMode()) {
+            playSound(this);
+        }
+    }).on('contextmenu', function (e) {
+        // Pause/play already playing sound
+        if (!e.target.classList.contains('ui-resizable-handle')) {
+            const sound = howlDb[lastPlayedHash];
+
+            if (sound) {
+                if (sound.playing()) {
+                    sound.pause();
+                } else if (sound.seek() > 0) {
+                    sound.play();
+                }
+            }
+        }
+    }).droppable({
+        accept: '.panel-block',
+        drop: function (e, ui) {
+            const offsetTop = getTopOffset();
+            const offsetLeft = getLeftOffset();
+
+            if (deckList.searched) {
+                deckList.search();
+                $('#deck-search').val('').focus();
+            }
+
+            addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
+            updateDeckData();
+        }
+    });
 }
 
 // ==================== //
@@ -526,11 +561,6 @@ function initNewPageBlocks(hash) {
 //   Helper Functions   //
 //                      //
 // ==================== //
-
-// Add new Main block with a hash
-function addNewMain(hash) {
-    $('#controls').before('<div class="main" data-page="' + hash + '">');
-}
 
 // Check current mode
 function isEditMode() {
@@ -1176,43 +1206,6 @@ $(function () {
         // Prevent new line on Enter key
         if (e.which === 13) {
             e.target.blur();
-        }
-    });
-
-    // ------------ //
-    //  Main block  //
-    // ------------ //
-
-    $('.main').on('click', '.sound-block', function () {
-        if (!isEditMode()) {
-            playSound(this);
-        }
-    }).on('contextmenu', function (e) {
-        // Pause/play already playing sound
-        if (!e.target.classList.contains('ui-resizable-handle')) {
-            const sound = howlDb[lastPlayedHash];
-
-            if (sound) {
-                if (sound.playing()) {
-                    sound.pause();
-                } else if (sound.seek() > 0) {
-                    sound.play();
-                }
-            }
-        }
-    }).droppable({
-        accept: '.panel-block',
-        drop: function (e, ui) {
-            const offsetTop = getTopOffset();
-            const offsetLeft = getLeftOffset();
-
-            if (deckList.searched) {
-                deckList.search();
-                $('#deck-search').val('').focus();
-            }
-
-            addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
-            updateDeckData();
         }
     });
 
