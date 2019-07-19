@@ -25,6 +25,7 @@ const sideClass = 'has-left';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 
+let allPages = config.get('pages') || {};
 let activePages = {};
 let blockDb = {};
 let addedBlocks = [];
@@ -35,6 +36,7 @@ let deckList;
 let notifyHandle;
 let currentTab = config.get('currentTab') || '';
 let $main;
+let $tabList;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -77,7 +79,7 @@ function toggleEditMode() {
         $blocks.add($tabs).each(function () {
             this._tippy.enable();
         });
-        $('#tabs ul').sortable('enable');
+        $tabList.sortable('enable');
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -454,6 +456,14 @@ function showFolderSelectionDialog(callback, finish) {
 
 // Load saved page
 function loadSavedPage(page) {
+    const hash = page.hash;
+    const tabHtml = $(getTabHtml(page.name, hash));
+
+    activePages[hash] = page;
+    $tabList.append(tabHtml);
+    addNewMain(hash);
+    initNewPageBlocks(hash);
+
     if (page.blocks !== undefined && _.size(page.blocks) > 0) {
         blockDb = page.blocks;
     }
@@ -478,24 +488,20 @@ function loadSavedPage(page) {
     }
 }
 
-// Add new page
-function addNewPage(text, $element, after) {
+// Add new empty page
+function addNewEmptyPage($element) {
+    const text = 'Таб#' + getRandomString(5);
     const hash = getStringHash(text);
-    const selector = '[data-page="' + hash + '"]';
     const tabHtml = $(getTabHtml(text, hash));
 
-    if (after) {
-        $element.after(tabHtml);
+    if ($element === undefined) {
+        $tabList.append(tabHtml);
     } else {
-        $element.append(tabHtml);
+        $element.after(tabHtml);
     }
 
-    $('#controls').before('<div class="main" data-page="' + hash + '">');
-
-    initTabTooltip($(selector)[0]);
-    initEditableTab($(selector));
-    $('#tabs ul').sortable('refresh');
-    reorderTabs();
+    addNewMain(hash);
+    initNewPageBlocks(hash);
 
     activePages[hash] = {
         hash: hash,
@@ -503,8 +509,16 @@ function addNewPage(text, $element, after) {
         added: [],
         blocks: {}
     };
+}
 
-    currentTab = hash;
+// Init everything for a new page
+function initNewPageBlocks(hash) {
+    const selector = '[data-page="' + hash + '"]';
+
+    initTabTooltip($(selector)[0]);
+    initEditableTab($(selector));
+    $tabList.sortable('refresh');
+    reorderTabs();
 }
 
 // ==================== //
@@ -512,6 +526,11 @@ function addNewPage(text, $element, after) {
 //   Helper Functions   //
 //                      //
 // ==================== //
+
+// Add new Main block with a hash
+function addNewMain(hash) {
+    $('#controls').before('<div class="main" data-page="' + hash + '">');
+}
 
 // Check current mode
 function isEditMode() {
@@ -653,7 +672,7 @@ function freezePageEditing(blocks, tabs) {
         this._tippy.disable();
     });
 
-    $('#tabs ul').sortable('disable');
+    $tabList.sortable('disable');
 }
 
 // Remove blocks without path from json
@@ -776,7 +795,7 @@ window.addEventListener('beforeunload', function () {
 $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
-    const $tabList = $('#tabs ul');
+    $tabList = $('#tabs ul');
 
     const lastState = config.get('lastState') || {};
     [editClass, deckClass, sideClass].forEach(function (className) {
@@ -817,17 +836,6 @@ $(function () {
     });
 
     // Tabs
-    $('#tabs .tab').each(function () {
-        const $tab = $(this);
-
-        // Show tooltip with buttons in Edit mode
-        initTabTooltip($tab[0]);
-
-        // Make text inside tabs editable
-        initEditableTab($tab);
-    });
-
-    // Make tabs sortable
     $tabList.sortable({
         cancel: '',
         scroll: false,
@@ -850,19 +858,23 @@ $(function () {
     });
 
     // Load pages info from config
-    if (_.size(config.get('activePages')) > 0) {
-        // 1 const page = config.get('pages.123');
-        // loadSavedPage(page);
+    const tabs = config.get('activeTabs');
+    if (tabs.length > 0) {
+        tabs.forEach(function (hash) {
+            loadSavedPage(allPages[hash]);
+        });
     } else {
-        const text = 'Таб#' + getRandomString(5);
-        addNewPage(text, $tabList);
-
-        // 1 if (activeTab.length > 0) {
-        //     $tabList.find('[data-page="' + activeTab + '"]').click();
-        // } else {
-        //     $tabList.find('li:first').click();
-        // }
+        addNewEmptyPage($tabList);
     }
+
+    // Click current tab if it's saved in the config
+    setTimeout(function () {
+        if (currentTab.length > 0) {
+            $tabList.find('[data-page="' + currentTab + '"]').click();
+        } else {
+            $tabList.find('li:first').click();
+        }
+    }, 100);
 
     // Freeze editing if not in Edit mode
     if (!isEditMode()) {
@@ -1157,9 +1169,8 @@ $(function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
             const selector = '.tab[data-page="' + hash + '"]';
-            const text = 'Таб#' + getRandomString(5);
             $(selector)[0]._tippy.hide();
-            addNewPage(text, $(selector), true);
+            addNewEmptyPage($(selector));
         }
     }).on('keypress', '.sound-text textarea, .text textarea', function (e) {
         // Prevent new line on Enter key
