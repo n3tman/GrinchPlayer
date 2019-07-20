@@ -13235,6 +13235,7 @@ textarea:focus {
   height: 30px;
 }
 .panel .panel-search .input {
+  display: none;
   padding-top: 0.25em;
   border: 0;
   border-bottom: 1px solid #4E5D6C;
@@ -13285,6 +13286,7 @@ textarea:focus {
   content: "";
 }
 .panel.deck .deck-items {
+  display: none;
   height: calc(100% - 180px);
 }
 .panel.deck .deck-items .panel-block {

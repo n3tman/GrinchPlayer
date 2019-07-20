@@ -632,6 +632,7 @@ textarea:focus {
         }
 
         .input {
+            display: none;
             padding-top: 0.25em;
             border: 0;
             border-bottom: 1px solid $border;
@@ -711,6 +712,7 @@ textarea:focus {
 
     .deck-items {
         & {
+            display: none;
             height: calc(100% - 180px);
         }
 

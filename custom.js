@@ -1,4 +1,4 @@
-/* global window, $, requestAnimationFrame */
+/* global window, $, SBar, requestAnimationFrame */
 
 'use strict';
 
@@ -21,25 +21,25 @@ const config = require('./config');
 const editClass = 'has-bottom';
 const deckClass = 'has-right';
 const sideClass = 'has-left';
-
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 
-let allPages = config.get('pages') || {};
-let activePages = {};
-let lastPlayedHash = '';
-let lastAddedHash = '';
-let $currentBlock;
-let deckList;
-let notifyHandle;
+const allPages = config.get('pages') || {};
+const activePages = {};
+
 let currentTab = config.get('currentTab') || '';
 let $main;
 let $tabList;
 
+let notifyHandle;
+let lastPlayedHash = '';
+let lastAddedHash = '';
+let $currentBlock;
+
 window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
-window.sBar = require('simplebar');
+window.SBar = require('simplebar');
 window.jEditable = require('jquery-jeditable');
 
 // ================== //
@@ -84,7 +84,7 @@ function toggleEditMode() {
 }
 
 // Initialize draggable/resizable block
-function initDraggableMain($element) {
+function initDraggableMain($element, $main) {
     const hash = $element.data('hash');
 
     $element.draggable({
@@ -267,7 +267,7 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
         activePages[currentTab].added.push(hash);
 
         setTimeout(function () {
-            initDraggableMain($(selector));
+            initDraggableMain($(selector), $main);
         }, 100);
 
         return true;
@@ -277,32 +277,35 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
 }
 
 // Add a previously saved sound block to main div
-function addSavedSoundBlock(hash) {
+function addSavedSoundBlock(hash, pageHash) {
     const selector = '[data-hash="' + hash + '"]';
-    const text = activePages[currentTab].blocks[hash].text;
-    const rect = activePages[currentTab].blocks[hash].rect;
+    const text = activePages[pageHash].blocks[hash].text;
+    const rect = activePages[pageHash].blocks[hash].rect;
+    const $mainSelector = $('.main[data-page="' + pageHash + '"]');
 
     const html = '<a class="button is-dark sound-block"' +
         ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
-    $(html).appendTo($main).css({
+    $(html).appendTo($mainSelector).css({
         top: rect.top,
         left: rect.left,
         height: rect.height,
         width: rect.width
     });
 
-    initDraggableMain($(selector));
+    initDraggableMain($mainSelector.find(selector), $mainSelector);
 }
 
-// Append HTML of the idem to the deck
-function appendDeckItemHtml(hash, text) {
+// Append HTML of the item to the deck
+function appendDeckItemHtml(hash, text, pageHash) {
     const html = '<a class="panel-block"' +
         ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
+    const deckHash = pageHash ? pageHash : currentTab;
+    const selector = $('.deck-items[data-page="' + deckHash + '"] .simplebar-content');
 
-    $(html).prependTo('#deck .simplebar-content').draggable({
+    $(html).prependTo(selector).draggable({
         appendTo: 'body',
         revert: 'invalid',
         scroll: false,
@@ -312,14 +315,18 @@ function appendDeckItemHtml(hash, text) {
 
 // Init Howl object and add it to howlDB
 function addInitHowl(hash, soundPath) {
-    howlDb[hash] = new hp.Howl({
-        src: [soundPath],
-        html5: true,
-        preload: false,
-        onplay: function () {
-            requestAnimationFrame(updateAudioStep);
-        }
-    });
+    if ({}.hasOwnProperty.call(howlDb, hash)) {
+        console.log('Howl already loaded: ' + hash);
+    } else {
+        howlDb[hash] = new hp.Howl({
+            src: [soundPath],
+            html5: true,
+            preload: false,
+            onplay: function () {
+                requestAnimationFrame(updateAudioStep);
+            }
+        });
+    }
 }
 
 // Add sound block to the deck
@@ -375,25 +382,14 @@ function addFileBlocks(files) {
     showNotification('Добавлено звуков: <b>' + added + '</b>. ' +
         'Пропущено: <b>' + skipped + '</b>');
 
-    initDeckList();
     updateDeckData();
-}
-
-// Init deck list.js
-function initDeckList() {
-    if (deckList === undefined) {
-        deckList = new List('deck', {
-            valueNames: ['sound-text'],
-            listClass: 'simplebar-content'
-        });
-    }
 }
 
 // Set deck counter value
 function setDeckCounter() {
     const $deck = $('#deck');
     const $counter = $deck.find('.count');
-    const $items = $deck.find('.deck-items .panel-block');
+    const $items = $deck.find('.deck-items[data-page="' + currentTab + '"] .panel-block');
     $counter.text($items.length);
 }
 
@@ -401,7 +397,7 @@ function setDeckCounter() {
 function updateDeckData() {
     recalcScrollbars();
     setDeckCounter();
-    deckList.reIndex();
+    activePages[currentTab].list.reIndex();
 }
 
 // Delete one block from the page
@@ -418,7 +414,8 @@ function saveAllData() {
     }).get();
 
     activeTabs.forEach(function (hash) {
-        config.set('pages.' + hash, activePages[hash]);
+        const page = _.omit(activePages[hash], ['bar', 'list']);
+        config.set('pages.' + hash, page);
     });
 
     config.set('activeTabs', activeTabs);
@@ -454,34 +451,27 @@ function showFolderSelectionDialog(callback, finish) {
 
 // Load saved page
 function loadSavedPage(page) {
-    const hash = page.hash;
-    const tabHtml = $(getTabHtml(page.name, hash));
+    const pageHash = page.hash;
+    const tabHtml = $(getTabHtml(page.name, pageHash));
 
-    activePages[hash] = page;
+    activePages[pageHash] = page;
     $tabList.append(tabHtml);
-    initNewPageBlocks(hash);
+    initNewPageBlocks(pageHash);
 
-    if (page.blocks !== undefined && _.size(page.blocks) > 0) {
-        activePages[currentTab].blocks = page.blocks;
-    }
-
-    if (page.added !== undefined && page.added.length > 0) {
-        activePages[currentTab].added = page.added;
-    }
-
-    if (_.size(activePages[currentTab].blocks) > 0) {
-        _.each(activePages[currentTab].blocks, function (block, hash) {
-            if (activePages[currentTab].added.includes(hash)) {
-                addSavedSoundBlock(hash);
+    if (_.size(page.blocks) > 0) {
+        _.each(page.blocks, function (block, hash) {
+            if (page.added.includes(hash)) {
+                addSavedSoundBlock(hash, pageHash);
             } else {
-                appendDeckItemHtml(hash, block.text);
+                appendDeckItemHtml(hash, block.text, pageHash);
             }
 
             addInitHowl(hash, block.path);
         });
 
-        initDeckList();
-        updateDeckData();
+        if (pageHash === currentTab) {
+            updateDeckData();
+        }
     }
 }
 
@@ -497,33 +487,41 @@ function addNewEmptyPage($element) {
         $element.after(tabHtml);
     }
 
-    initNewPageBlocks(hash);
-
     activePages[hash] = {
         hash: hash,
         name: text,
         added: [],
         blocks: {}
     };
+
+    initNewPageBlocks(hash);
 }
 
 // Init everything for a new page
 function initNewPageBlocks(hash) {
     const selector = '[data-page="' + hash + '"]';
-    const tabSelector = '.tab' + selector;
-    const mainSelector = '.main' + selector;
-
     $('#controls').before('<div class="main" data-page="' + hash + '">');
-    if (currentTab === hash) {
-        $main = $(mainSelector);
-    }
+    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
+    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" type="text" data-page="' + hash + '" placeholder="фильтр">');
 
-    initTabTooltip($(tabSelector)[0]);
-    initEditableTab($(tabSelector));
+    const $tabSelector = $('.tab' + selector);
+    const $mainSelector = $('.main' + selector);
+    const $deckSelector = $('.deck-items' + selector);
+
+    activePages[hash].bar = new SBar($deckSelector[0]);
+    $deckSelector.find('.simplebar-content').addClass('list-' + hash);
+    activePages[hash].list = new List('deck', {
+        valueNames: ['sound-text'],
+        listClass: 'list-' + hash,
+        searchClass: 'search-' + hash
+    });
+
+    initTabTooltip($tabSelector[0]);
+    initEditableTab($tabSelector);
     $tabList.sortable('refresh');
     reorderTabs();
 
-    $(mainSelector).on('click', '.sound-block', function () {
+    $mainSelector.on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
         }
@@ -546,8 +544,8 @@ function initNewPageBlocks(hash) {
             const offsetTop = getTopOffset();
             const offsetLeft = getLeftOffset();
 
-            if (deckList.searched) {
-                deckList.search();
+            if (activePages[currentTab].list.searched) {
+                activePages[currentTab].list.search();
                 $('#deck-search').val('').focus();
             }
 
@@ -624,9 +622,7 @@ function getRectWithOffset(element) {
 
 // Recalculate scrollbars
 function recalcScrollbars() {
-    $('[data-simplebar]').each(function (i, val) {
-        val.SimpleBar.recalculate();
-    });
+    activePages[currentTab].bar.recalculate();
 }
 
 // Round to nearest 10
@@ -793,7 +789,7 @@ function initEditableTab($tab) {
         event: 'edit',
         onblur: 'submit',
         onedit: function (settings, element) {
-            settings.cols = element.innerText.length + 5;
+            settings.cols = element.textContent.length + 5;
         },
         callback: function (value) {
             console.log(value);
@@ -881,9 +877,10 @@ $(function () {
         // Tab change event
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
-        $('.main').hide();
-        $main = $('.main[data-page="' + currentTab + '"]');
-        $main.show();
+        const selector = '[data-page="' + currentTab + '"]';
+        $('.main, .deck-items, #search-wrapper > .search').hide();
+        $main = $('.main' + selector);
+        $(selector).show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
     });
@@ -1258,7 +1255,7 @@ $(function () {
         }
     }).on('click', '.sort', function () {
         // Sort deck items
-        if (deckList !== undefined) {
+        if (activePages[currentTab].list !== undefined) {
             const $this = $(this);
             const value = 'sound-text';
             const sortByLength = function (a, b) {
@@ -1279,7 +1276,7 @@ $(function () {
                     order = 'desc';
                 }
 
-                deckList.sort(value, {
+                activePages[currentTab].list.sort(value, {
                     order: order,
                     sortFunction: sortByLength
                 });
