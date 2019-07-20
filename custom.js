@@ -252,22 +252,22 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
 
     $main.append($element);
 
-    const dropped = $(selector)[0];
+    const $dropped = $main.find(selector);
 
     if (position === false) {
-        positioned = autoPosition(dropped);
+        positioned = autoPosition($dropped[0]);
     } else {
-        dropped.style.left = roundToTen(position.left - offsetLeft - 10) + 'px';
-        dropped.style.top = roundToTen(position.top - offsetTop - 10) + 'px';
+        $dropped[0].style.left = roundToTen(position.left - offsetLeft - 10) + 'px';
+        $dropped[0].style.top = roundToTen(position.top - offsetTop - 10) + 'px';
         positioned = true;
     }
 
     if (positioned) {
-        activePages[currentTab].blocks[hash].rect = getRectWithOffset(dropped);
+        activePages[currentTab].blocks[hash].rect = getRectWithOffset($dropped[0]);
         activePages[currentTab].added.push(hash);
 
         setTimeout(function () {
-            initDraggableMain($(selector), $main);
+            initDraggableMain($dropped, $main);
         }, 100);
 
         return true;
@@ -403,7 +403,7 @@ function updateDeckData() {
 // Delete one block from the page
 function removeBlockFromPage(hash) {
     delete activePages[currentTab].blocks[hash].rect;
-    $('[data-hash="' + hash + '"]').remove();
+    $main.find('[data-hash="' + hash + '"]').remove();
     appendDeckItemHtml(hash, activePages[currentTab].blocks[hash].text);
 }
 
@@ -681,7 +681,7 @@ function flushDeckItems() {
             howlDb[hash].unload();
             delete howlDb[hash];
             delete activePages[currentTab].blocks[hash];
-            $('[data-hash="' + hash + '"]').remove();
+            $('.deck-items[data-page="' + currentTab + '"] .simplebar-content').empty();
         }
     });
 
@@ -880,6 +880,7 @@ $(function () {
         const selector = '[data-page="' + currentTab + '"]';
         $('.main, .deck-items, #search-wrapper > .search').hide();
         $main = $('.main' + selector);
+        updateDeckData();
         $(selector).show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
@@ -1175,8 +1176,8 @@ $(function () {
     }).on('click', '.block-rename', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-hash="' + hash + '"]';
-            $(selector).find('.sound-text').trigger('edit');
+            const $selector = $main.find('[data-hash="' + hash + '"]');
+            $selector.find('.sound-text').trigger('edit');
         }
     }).on('click', '.tab-rename', function () {
         if (isEditMode()) {
