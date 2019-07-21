@@ -777,7 +777,6 @@ function initTabTooltip(element) {
         content: getTabTooltipHtml(hash),
         arrow: true,
         aria: null,
-        distance: 0,
         interactive: true,
         placement: 'bottom'
     });
@@ -786,7 +785,15 @@ function initTabTooltip(element) {
 // Make tab text editable
 function initEditableTab($tab) {
     $tab.find('.text').editable(function (value) {
-        return value.replace(/\s+/g, ' ').trim();
+        const val = value.replace(/\s+/g, ' ').trim();
+        const hash = getStringHash(val);
+
+        if (_.keys(activePages).includes(hash)) {
+            showNotification('Такой таб уже есть!', true);
+            return activePages[$tab.attr('data-page')].name;
+        }
+
+        return val;
     }, {
         type: 'textarea',
         tooltip: null,
@@ -797,17 +804,19 @@ function initEditableTab($tab) {
             settings.cols = element.textContent.length + 5;
         },
         callback: function (value) {
-            const oldHash = $(this).closest('.tab').attr('data-page');
-            const newHash = getStringHash(value);
-            activePages[newHash] = activePages[oldHash];
-            activePages[newHash].hash = newHash;
-            activePages[newHash].name = value;
-            delete activePages[oldHash];
-            config.delete('pages.' + oldHash);
-            currentTab = newHash;
-            config.set('currentTab', currentTab);
-            $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
-            $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
+            if (activePages[$tab.attr('data-page')].name !== value) {
+                const oldHash = $(this).closest('.tab').attr('data-page');
+                const newHash = getStringHash(value);
+                activePages[newHash] = activePages[oldHash];
+                activePages[newHash].hash = newHash;
+                activePages[newHash].name = value;
+                delete activePages[oldHash];
+                config.delete('pages.' + oldHash);
+                currentTab = newHash;
+                config.set('currentTab', currentTab);
+                $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
+                $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
+            }
         }
     });
 }
