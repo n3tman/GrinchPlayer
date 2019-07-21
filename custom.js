@@ -207,7 +207,7 @@ function isCollision(target, offsetTop, offsetLeft) {
 // Automatically move block to free space
 function autoPosition(block) {
     const mainWidth = $main.width();
-    const mainHeight = $main.height() - $('#tabs').outerHeight();
+    const mainHeight = $main.height();
     const offsetTop = getTopOffset();
     const offsetLeft = getLeftOffset();
     let success = true;
@@ -826,6 +826,12 @@ function getRandomString(length) {
     return getStringHash(_.random(1000000).toString()).slice(0, length);
 }
 
+// Reset deck list
+function resetDeckList() {
+    activePages[currentTab].list.search();
+    $('.search-' + currentTab).val('');
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -899,8 +905,7 @@ $(function () {
         }
     }).on('click', '.tab', function (e) {
         // Tab change event
-        activePages[currentTab].list.search();
-        $('.search-' + currentTab).val('');
+        resetDeckList();
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';
@@ -1256,8 +1261,9 @@ $(function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
         // Batch add several blocks from the top
+        resetDeckList();
         const num = $('#batch-num').val();
-        const $items = $('.deck-items .panel-block');
+        const $items = $('.deck-items[data-page="' + currentTab + '"] .panel-block');
         let count = 0;
 
         if (num > 0 && $items.length > 0) {
@@ -1278,7 +1284,7 @@ $(function () {
             lastAddedHash = '';
             updateDeckData();
         } else {
-            showNotification('Ошибка: нет числа или список пуст', true);
+            showNotification('Нет числа или список пуст', true);
         }
     }).on('click', '.sort', function () {
         // Sort deck items
