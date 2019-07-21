@@ -546,7 +546,7 @@ function initNewPageBlocks(hash) {
 
             if (activePages[currentTab].list.searched) {
                 activePages[currentTab].list.search();
-                $('#deck-search').val('').focus();
+                $('.search-' + currentTab).val('').focus();
             }
 
             addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
@@ -761,15 +761,20 @@ function getTabHtml(text, hash) {
         '<span class="text">' + text + '</span></a></li>';
 }
 
+// Get tab tooltip html
+function getTabTooltipHtml(hash) {
+    return '<div class="tab-controls" data-for="' + hash + '">' +
+        '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
+        '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
+        '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>';
+}
+
 // Show tab tooltips in Edit mode
 function initTabTooltip(element) {
     const hash = element.dataset.page;
 
     tippy(element, {
-        content: '<div class="tab-controls" data-for="' + hash + '">' +
-            '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
-            '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
-            '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>',
+        content: getTabTooltipHtml(hash),
         arrow: true,
         aria: null,
         distance: 0,
@@ -792,7 +797,17 @@ function initEditableTab($tab) {
             settings.cols = element.textContent.length + 5;
         },
         callback: function (value) {
-            console.log(value);
+            const oldHash = $(this).closest('.tab').attr('data-page');
+            const newHash = getStringHash(value);
+            activePages[newHash] = activePages[oldHash];
+            activePages[newHash].hash = newHash;
+            activePages[newHash].name = value;
+            delete activePages[oldHash];
+            config.delete('pages.' + oldHash);
+            currentTab = newHash;
+            config.set('currentTab', currentTab);
+            $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
+            $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
         }
     });
 }
@@ -875,6 +890,8 @@ $(function () {
         }
     }).on('click', '.tab', function (e) {
         // Tab change event
+        activePages[currentTab].list.search();
+        $('.search-' + currentTab).val('');
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';

@@ -632,7 +632,6 @@ textarea:focus {
         }
 
         .input {
-            display: none;
             padding-top: 0.25em;
             border: 0;
             border-bottom: 1px solid $border;
@@ -767,6 +766,10 @@ textarea:focus {
     .bottom {
         height: 50px;
         border-bottom: 0;
+    }
+
+    .search.input {
+        display: none;
     }
 }
 
