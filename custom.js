@@ -1149,61 +1149,66 @@ $(function () {
                 const file = iconvlite.decode(fs.readFileSync(files[0]), 'win1251');
                 const parsed = path.parse(files[0]);
                 const pageName = path.basename(parsed.dir);
-                const lines = file.split(/\r?\n/);
-                let lineNum = 0;
-                let counter = 0;
+                const pageHash = getStringHash(pageName);
 
-                const page = {
-                    type: 'page',
-                    hash: getStringHash(pageName),
-                    name: pageName,
-                    added: [],
-                    blocks: {}
-                };
+                if (pageExists(pageHash)) {
+                    $main.removeClass('is-loading');
+                    showNotification('Такая страница уже есть!', true);
+                } else {
+                    const lines = file.split(/\r?\n/);
+                    let lineNum = 0;
+                    let counter = 0;
 
-                lines.forEach(function (line, i) {
-                    if (i !== 0 && line.trim().length > 0) {
-                        const parts = line.split('*');
-                        const filePath = parsed.dir + '\\' + parts[0];
-                        lineNum++;
+                    const page = {
+                        type: 'page',
+                        hash: pageHash,
+                        name: pageName,
+                        added: [],
+                        blocks: {}
+                    };
 
-                        if (fs.existsSync(filePath)) {
-                            const hash = getFileHash(filePath);
+                    lines.forEach(function (line, i) {
+                        if (i !== 0 && line.trim().length > 0) {
+                            const parts = line.split('*');
+                            const filePath = parsed.dir + '\\' + parts[0];
+                            lineNum++;
 
-                            if (!{}.hasOwnProperty.call(page.blocks, hash)) {
-                                const left = Number(parts[1]);
+                            if (fs.existsSync(filePath)) {
+                                const hash = getFileHash(filePath);
 
-                                counter++;
+                                if (!{}.hasOwnProperty.call(page.blocks, hash)) {
+                                    const left = Number(parts[1]);
 
-                                page.blocks[hash] = {};
-                                page.blocks[hash].path = filePath;
-                                page.blocks[hash].text = parts[5];
+                                    counter++;
 
-                                page.blocks[hash].rect = {
-                                    left: left + 10,
-                                    top: Number(parts[2]) + 10,
-                                    width: Number(parts[3]),
-                                    height: Number(parts[4])
-                                };
+                                    page.blocks[hash] = {};
+                                    page.blocks[hash].path = filePath;
+                                    page.blocks[hash].text = parts[5];
 
-                                if (left >= 0) {
-                                    page.added.push(hash);
+                                    page.blocks[hash].rect = {
+                                        left: left + 10,
+                                        top: Number(parts[2]) + 10,
+                                        width: Number(parts[3]),
+                                        height: Number(parts[4])
+                                    };
+
+                                    if (left >= 0) {
+                                        page.added.push(hash);
+                                    }
                                 }
                             }
                         }
+                    });
+
+                    if (counter > 0) {
+                        loadSavedPage(page);
                     }
-                });
 
-                if (counter > 0) {
-                    flushAddedBlocks();
-                    flushDeckItems();
-                    loadSavedPage(page);
+                    $main.removeClass('is-loading');
+
+                    showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
+                        'Пропущено: <b>' + (lineNum - counter) + '</b>');
                 }
-
-                $main.removeClass('is-loading');
-
-                showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
-                    'Пропущено: <b>' + (lineNum - counter) + '</b>');
             }
         });
     });
@@ -1215,8 +1220,8 @@ $(function () {
     $body.on('click', '.block-delete', function () {
         if (isEditMode()) {
             const hash = $(this).parent().data('for');
-            const selector = '[data-hash="' + hash + '"]';
-            $(selector)[0]._tippy.destroy();
+            const $selector = $main.find('[data-hash="' + hash + '"]');
+            $selector[0]._tippy.destroy();
             removeBlockFromPage(hash);
             _.pull(activePages[currentTab].added, hash);
             updateDeckData();
