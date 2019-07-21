@@ -502,7 +502,11 @@ function initNewPageBlocks(hash) {
     const selector = '[data-page="' + hash + '"]';
     $('#controls').before('<div class="main" data-page="' + hash + '">');
     $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
-    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" type="text" data-page="' + hash + '" placeholder="фильтр">');
+    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" ' +
+        'type="text" data-page="' + hash + '" placeholder="фильтр">');
+    $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '">' +
+        '<a class="sort sort-' + hash + '" data-sort="sound-text">по алфавиту</a>' +
+        '<a class="sort by-length desc sort-' + hash + '">по длине</a></p>');
 
     const $tabSelector = $('.tab' + selector);
     const $mainSelector = $('.main' + selector);
@@ -513,7 +517,8 @@ function initNewPageBlocks(hash) {
     activePages[hash].list = new List('deck', {
         valueNames: ['sound-text'],
         listClass: 'list-' + hash,
-        searchClass: 'search-' + hash
+        searchClass: 'search-' + hash,
+        sortClass: 'sort-' + hash
     });
 
     initTabTooltip($tabSelector[0]);
@@ -909,7 +914,7 @@ $(function () {
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';
-        $('.main, .deck-items, #search-wrapper > .search').hide();
+        $('.main, .deck-items, #search-wrapper > .search, #deck > .panel-tabs').hide();
         $main = $('.main' + selector);
         updateDeckData();
         $(selector).show();

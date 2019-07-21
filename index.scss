@@ -681,7 +681,12 @@ textarea:focus {
     }
 
     .panel-tabs {
+        & {
+            display: none;
+        }
+
         a {
+            display: inline-block;
             height: 30px;
             padding: 3px 15px 0;
             user-select: none;
