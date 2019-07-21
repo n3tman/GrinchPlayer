@@ -793,8 +793,8 @@ function initEditableTab($tab) {
         const val = value.replace(/\s+/g, ' ').trim();
         const hash = getStringHash(val);
 
-        if (_.keys(activePages).includes(hash)) {
-            showNotification('Такой таб уже есть!', true);
+        if (pageExists(hash)) {
+            showNotification('Такая страница уже есть!', true);
             return activePages[$tab.attr('data-page')].name;
         }
 
@@ -835,6 +835,11 @@ function getRandomString(length) {
 function resetDeckList() {
     activePages[currentTab].list.search();
     $('.search-' + currentTab).val('');
+}
+
+// Check if page with Hash already exists
+function pageExists(hash) {
+    return _.keys(allPages).includes(hash) || _.keys(activePages).includes(hash);
 }
 
 // ================== //
@@ -910,7 +915,10 @@ $(function () {
         }
     }).on('click', '.tab', function (e) {
         // Tab change event
-        resetDeckList();
+        if (activePages[currentTab] !== undefined) {
+            resetDeckList();
+        }
+
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';
@@ -1011,7 +1019,7 @@ $(function () {
 
     // Export current page to a file
     $('#page-export').click(function () {
-        const pageName = 'Тестовая страница';
+        const pageName = activePages[currentTab].name;
         const fileName = getPageName(pageName);
 
         $main.addClass('is-loading');
@@ -1070,31 +1078,35 @@ $(function () {
                 let json = JSON.parse(fs.readFileSync(files[0]));
 
                 if (json.type && json.type === 'page' && files.length > 0) {
-                    let counter = 0;
-                    const filesNum = _.size(json.blocks);
-
-                    showFolderSelectionDialog(function (files) {
-                        for (const file of files) {
-                            const hash = getFileHash(file);
-                            if ({}.hasOwnProperty.call(json.blocks, hash)) {
-                                json.blocks[hash].path = path.win32.normalize(file);
-                                counter++;
-                            }
-                        }
-
-                        json = filterBlocksWithoutPath(json);
-
-                        if (counter > 0) {
-                            flushAddedBlocks();
-                            flushDeckItems();
-                            loadSavedPage(json);
-                        }
-                    }, function () {
+                    if (pageExists(json.hash)) {
                         $main.removeClass('is-loading');
-                        showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
-                            'Пропущено: <b>' + (filesNum - counter) + '</b>');
-                    });
+                        showNotification('Такая страница уже есть!', true);
+                    } else {
+                        let counter = 0;
+                        const filesNum = _.size(json.blocks);
+
+                        showFolderSelectionDialog(function (files) {
+                            for (const file of files) {
+                                const hash = getFileHash(file);
+                                if ({}.hasOwnProperty.call(json.blocks, hash)) {
+                                    json.blocks[hash].path = path.win32.normalize(file);
+                                    counter++;
+                                }
+                            }
+
+                            json = filterBlocksWithoutPath(json);
+
+                            if (counter > 0) {
+                                loadSavedPage(json);
+                            }
+                        }, function () {
+                            $main.removeClass('is-loading');
+                            showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
+                                'Пропущено: <b>' + (filesNum - counter) + '</b>');
+                        });
+                    }
                 } else {
+                    $main.removeClass('is-loading');
                     showNotification('Ошибка импортирования', true);
                 }
             }
