@@ -13230,14 +13230,23 @@ textarea:focus {
 .panel .count {
   font-weight: bold;
 }
+.panel .panel-search {
+  margin-bottom: 0;
+}
 .panel .panel-search .input,
 .panel .panel-search .icon {
   height: 30px;
 }
-.panel .panel-search .input {
-  padding-top: 0.25em;
+.panel .panel-search .input,
+.panel .panel-search .button {
   border: 0;
   border-bottom: 1px solid #4E5D6C;
+}
+.panel .panel-search .input {
+  padding-top: 0.25em;
+}
+.panel .panel-search .button {
+  height: 30px;
 }
 
 .panel.navigator {
@@ -13250,6 +13259,12 @@ textarea:focus {
 }
 .panel.navigator .panel-block:first-child {
   border-top: 0;
+}
+.panel.navigator .pages {
+  height: 50%;
+}
+.panel.navigator .projects {
+  height: 30%;
 }
 
 .has-left .wrapper {

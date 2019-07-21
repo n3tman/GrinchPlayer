@@ -626,15 +626,27 @@ textarea:focus {
     }
 
     .panel-search {
+        & {
+            margin-bottom: 0;
+        }
+
         .input,
         .icon {
             height: 30px;
         }
 
-        .input {
-            padding-top: 0.25em;
+        .input,
+        .button {
             border: 0;
             border-bottom: 1px solid $border;
+        }
+
+        .input {
+            padding-top: 0.25em;
+        }
+
+        .button {
+            height: 30px;
         }
     }
 }
@@ -656,6 +668,14 @@ textarea:focus {
 
     .panel-block:first-child {
         border-top: 0;
+    }
+
+    .pages {
+        height: 50%;
+    }
+
+    .projects {
+        height: 30%;
     }
 }
 

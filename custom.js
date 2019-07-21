@@ -36,6 +36,8 @@ let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
 
+let pageSearch;
+
 window.$ = require('jquery');
 window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
@@ -316,7 +318,7 @@ function appendDeckItemHtml(hash, text, pageHash) {
 // Init Howl object and add it to howlDB
 function addInitHowl(hash, soundPath) {
     if ({}.hasOwnProperty.call(howlDb, hash)) {
-        console.log('Howl already loaded: ' + hash);
+        // 1 console.log('Howl already loaded: ' + hash);
     } else {
         howlDb[hash] = new hp.Howl({
             src: [soundPath],
@@ -948,6 +950,20 @@ $(function () {
             $tabList.find('li:first').click();
         }
     }, 100);
+
+    // Load page names to navigator
+    _.keys(allPages).forEach(function (hash) {
+        const name = allPages[hash].name;
+        const html = '<a class="panel-block" data-page="' + hash + '">' +
+            '<span class="text">' + name + '</span></a>';
+        $(html).appendTo('#page-search .items');
+    });
+
+    // Init page search
+    pageSearch = new List('page-search', {
+        valueNames: ['text'],
+        listClass: 'items'
+    });
 
     // Freeze editing if not in Edit mode
     if (!isEditMode()) {
