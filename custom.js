@@ -851,8 +851,13 @@ function initEditableTab($tab) {
                 activePages[newHash].name = value;
                 delete activePages[oldHash];
                 config.delete('pages.' + oldHash);
-                currentTab = newHash;
-                config.set('currentTab', currentTab);
+
+                if (currentTab === oldHash) {
+                    currentTab = newHash;
+                    config.set('currentTab', currentTab);
+                }
+
+                $('.page[data-page="' + oldHash + '"]').text(value);
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
                 $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
             }
@@ -989,6 +994,17 @@ $(function () {
         $(e.currentTarget).addClass('is-active');
     });
 
+    // Load page names to navigator
+    _.keys(allPages).forEach(function (hash) {
+        addPageToList(hash, allPages[hash].name);
+    });
+
+    // Init page search
+    pageSearch = new List('page-search', {
+        valueNames: ['text'],
+        listClass: 'items'
+    });
+
     // Load pages info from config
     const tabs = config.get('activeTabs');
     if (tabs.length > 0) {
@@ -1007,17 +1023,6 @@ $(function () {
             $tabList.find('li:first').click();
         }
     }, 100);
-
-    // Load page names to navigator
-    _.keys(allPages).forEach(function (hash) {
-        addPageToList(hash, allPages[hash].name);
-    });
-
-    // Init page search
-    pageSearch = new List('page-search', {
-        valueNames: ['text'],
-        listClass: 'items'
-    });
 
     // Freeze editing if not in Edit mode
     if (!isEditMode()) {
@@ -1164,7 +1169,7 @@ $(function () {
                                 }
                             }
 
-                            json = filterBlocksWithoutPath(json);
+                            json = _.omit(filterBlocksWithoutPath(json), ['type']);
 
                             if (counter > 0) {
                                 loadSavedPage(json);
@@ -1230,7 +1235,6 @@ $(function () {
                     let counter = 0;
 
                     const page = {
-                        type: 'page',
                         hash: pageHash,
                         name: pageName,
                         added: [],

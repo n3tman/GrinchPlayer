@@ -13263,6 +13263,7 @@ textarea:focus {
 }
 .panel.navigator .panel-block {
   padding: 0.25em 0.75em;
+  user-select: none;
 }
 .panel.navigator .panel-block:first-child {
   border-top: 0;
