@@ -23,11 +23,10 @@ const deckClass = 'has-right';
 const sideClass = 'has-left';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
-
-const allPages = config.get('pages') || {};
 const activePages = {};
 const pageSearch = {};
 
+let allPages = config.get('pages') || {};
 let currentTab = config.get('currentTab') || '';
 let $main;
 let $tabList;
@@ -421,6 +420,8 @@ function saveAllData(skipNotify) {
     });
 
     config.set('activeTabs', activeTabs);
+
+    allPages = config.get('pages');
 
     if (!skipNotify) {
         showNotification('Данные сохранены в базу!');
@@ -885,6 +886,8 @@ function initEditableTab($tab) {
                 $('.page[data-page="' + oldHash + '"] > .text').text(value);
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
                 $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
+
+                saveAllData(true);
             }
         }
     });
@@ -1381,6 +1384,7 @@ $(function () {
         $parent.remove();
         updatePageSearch();
 
+        delete allPages[hash];
         config.delete('pages.' + hash);
     });
 
