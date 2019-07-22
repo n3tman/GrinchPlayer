@@ -410,7 +410,7 @@ function removeBlockFromPage(hash) {
 }
 
 // Save all pages/projects/settings to config
-function saveAllData() {
+function saveAllData(skipNotify) {
     const activeTabs = $('#tabs .tab').map(function () {
         return this.dataset.page;
     }).get();
@@ -422,7 +422,9 @@ function saveAllData() {
 
     config.set('activeTabs', activeTabs);
 
-    showNotification('Данные сохранены в базу!');
+    if (!skipNotify) {
+        showNotification('Данные сохранены в базу!');
+    }
 }
 
 // Show a dialog for folder selection, return sounds
@@ -461,6 +463,10 @@ function loadSavedPage(page, skipTab) {
         $tabList.append(tabHtml);
     }
 
+    if (!savedExists(page.hash)) {
+        addPageToList(page.hash, page.name, true);
+    }
+
     initNewPageBlocks(pageHash);
 
     if (_.size(page.blocks) > 0) {
@@ -478,6 +484,8 @@ function loadSavedPage(page, skipTab) {
             updateDeckData();
         }
     }
+
+    saveAllData(true);
 }
 
 // Add new empty page
@@ -492,6 +500,8 @@ function addNewEmptyPage($element) {
         $element.after(tabHtml);
     }
 
+    addPageToList(hash, text, true);
+
     activePages[hash] = {
         hash: hash,
         name: text,
@@ -500,6 +510,8 @@ function addNewEmptyPage($element) {
     };
 
     initNewPageBlocks(hash);
+
+    saveAllData(true);
 }
 
 // Init everything for a new page
@@ -563,6 +575,23 @@ function initNewPageBlocks(hash) {
             updateDeckData();
         }
     });
+}
+
+// Add new page to the list
+function addPageToList(hash, text, reindex) {
+    const html = '<a class="panel-block page" data-page="' + hash + '">' +
+        '<span class="text">' + text + '</span></a>';
+    $(html).appendTo('#page-search .items').draggable({
+        appendTo: 'body',
+        revert: 'invalid',
+        scroll: false,
+        helper: 'clone',
+        connectToSortable: '#tabs > ul'
+    });
+
+    if (reindex) {
+        pageSearch.reIndex();
+    }
 }
 
 // ==================== //
@@ -847,6 +876,11 @@ function pageExists(hash) {
     return _.keys(allPages).includes(hash) || _.keys(activePages).includes(hash);
 }
 
+// Check if page has already been added to DB
+function savedExists(hash) {
+    return _.keys(allPages).includes(hash);
+}
+
 // Check if page with Hash has been already added
 function activeExists(hash) {
     return _.keys(activePages).includes(hash);
@@ -860,7 +894,7 @@ function activeExists(hash) {
 
 // Do actions before window is closed or reloaded
 window.addEventListener('beforeunload', function () {
-    saveAllData();
+    saveAllData(true);
 });
 
 // ================================= //
@@ -976,16 +1010,7 @@ $(function () {
 
     // Load page names to navigator
     _.keys(allPages).forEach(function (hash) {
-        const name = allPages[hash].name;
-        const html = '<a class="panel-block page" data-page="' + hash + '">' +
-            '<span class="text">' + name + '</span></a>';
-        $(html).appendTo('#page-search .items').draggable({
-            appendTo: 'body',
-            revert: 'invalid',
-            scroll: false,
-            helper: 'clone',
-            connectToSortable: '#tabs > ul'
-        });
+        addPageToList(hash, allPages[hash].name);
     });
 
     // Init page search
