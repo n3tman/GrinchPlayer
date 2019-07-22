@@ -12779,6 +12779,10 @@ textarea:focus {
   outline: none;
 }
 
+[disabled].button {
+  cursor: inherit;
+}
+
 .ui-draggable-dragging {
   background: #2B3E50;
   width: 200px;
@@ -12791,6 +12795,9 @@ textarea:focus {
   border-top: 1px solid #4E5D6C;
   border-bottom: 1px solid #4E5D6C;
   width: auto;
+}
+.ui-draggable-dragging.panel-block.page .button {
+  display: none;
 }
 
 .notification {
@@ -13273,6 +13280,15 @@ textarea:focus {
 }
 .panel.navigator .pages > .items {
   height: calc(100% - 65px);
+}
+.panel.navigator .pages .page {
+  position: relative;
+  padding-left: 45px;
+}
+.panel.navigator .page > .button {
+  position: absolute;
+  left: 0;
+  height: 100%;
 }
 .panel.navigator .projects {
   height: 30%;

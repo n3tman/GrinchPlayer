@@ -62,6 +62,10 @@ textarea:focus {
     outline: none;
 }
 
+[disabled].button {
+    cursor: inherit;
+}
+
 .ui-draggable-dragging {
     background: $background;
     width: 200px;
@@ -70,10 +74,16 @@ textarea:focus {
 }
 
 .ui-draggable-dragging.panel-block.page {
-    padding: 0.25em 0.75em;
-    border-top: 1px solid $border;
-    border-bottom: 1px solid $border;
-    width: auto;
+    & {
+        padding: 0.25em 0.75em;
+        border-top: 1px solid $border;
+        border-bottom: 1px solid $border;
+        width: auto;
+    }
+
+    .button {
+        display: none;
+    }
 }
 
 .notification {
@@ -684,6 +694,17 @@ textarea:focus {
 
     .pages > .items {
         height: calc(100% - 65px);
+    }
+
+    .pages .page {
+        position: relative;
+        padding-left: 45px;
+    }
+
+    .page > .button {
+        position: absolute;
+        left: 0;
+        height: 100%;
     }
 
     .projects {

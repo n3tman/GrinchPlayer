@@ -26,6 +26,7 @@ const howlDb = {};
 
 const allPages = config.get('pages') || {};
 const activePages = {};
+const pageSearch = {};
 
 let currentTab = config.get('currentTab') || '';
 let $main;
@@ -35,8 +36,6 @@ let notifyHandle;
 let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
-
-let pageSearch = {};
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -80,6 +79,7 @@ function toggleEditMode() {
             this._tippy.enable();
         });
         $tabList.sortable('enable');
+        $('.page-remove').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -317,7 +317,7 @@ function appendDeckItemHtml(hash, text, pageHash) {
 
 // Init Howl object and add it to howlDB
 function addInitHowl(hash, soundPath) {
-    if ({}.hasOwnProperty.call(howlDb, hash)) {
+    if (_.keys(howlDb).includes(hash)) {
         // 1 console.log('Howl already loaded: ' + hash);
     } else {
         howlDb[hash] = new hp.Howl({
@@ -336,7 +336,7 @@ function addDeckItemFromFile(soundPath) {
     const hash = getFileHash(soundPath);
     const text = path.parse(soundPath).name;
 
-    if ({}.hasOwnProperty.call(activePages[currentTab].blocks, hash)) {
+    if (_.keys(activePages[currentTab].blocks).includes(hash)) {
         console.log(text + ' === ' + activePages[currentTab].blocks[hash].text + '\n----------\n');
     } else {
         activePages[currentTab].blocks[hash] = {
@@ -580,6 +580,7 @@ function initNewPageBlocks(hash) {
 // Add new page to the list
 function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
+        '<button class="button is-dark page-remove"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span></a>';
     $(html).appendTo('#page-search .simplebar-content').draggable({
         appendTo: 'body',
@@ -591,6 +592,30 @@ function addPageToList(hash, text, reindex) {
 
     if (reindex) {
         updatePageSearch();
+    }
+}
+
+// Delete tab from active pages
+function deleteTab(hash) {
+    if (isEditMode()) {
+        const selector = '[data-page="' + hash + '"]';
+        const $tab = $('.tab' + selector);
+        const $prevTab = $tab.prev();
+        $tab[0]._tippy.destroy();
+        $(selector).not('.page').remove();
+        reorderTabs();
+
+        delete activePages[hash];
+
+        if ($tabList.find('li').length === 0) {
+            addNewEmptyPage();
+        }
+
+        if ($prevTab.length > 0) {
+            $prevTab.click();
+        } else {
+            $tabList.find('li:first').click();
+        }
     }
 }
 
@@ -737,15 +762,15 @@ function freezePageEditing(blocks, tabs) {
         this._tippy.hide();
         this._tippy.disable();
     });
-
     $tabList.sortable('disable');
+    $('.page-remove').prop('disabled', true);
 }
 
 // Remove blocks without path from json
 function filterBlocksWithoutPath(json) {
     _.keys(json.blocks).forEach(function (hash) {
         const block = json.blocks[hash];
-        if (!{}.hasOwnProperty.call(block, 'path')) {
+        if (!_.keys(block).includes('path')) {
             delete json.blocks[hash];
             if (json.added.includes(hash)) {
                 _.pull(json.added, hash);
@@ -857,7 +882,7 @@ function initEditableTab($tab) {
                     config.set('currentTab', currentTab);
                 }
 
-                $('.page[data-page="' + oldHash + '"]').text(value);
+                $('.page[data-page="' + oldHash + '"] > .text').text(value);
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
                 $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
             }
@@ -921,7 +946,7 @@ $(function () {
 
     const lastState = config.get('lastState') || {};
     [editClass, deckClass, sideClass].forEach(function (className) {
-        if ({}.hasOwnProperty.call(lastState, className) && lastState[className] === true) {
+        if (_.keys(lastState).includes(className) && lastState[className] === true) {
             toggleSidebarClasses(className);
         }
     });
@@ -962,6 +987,8 @@ $(function () {
         cancel: '',
         scroll: false,
         tolerance: 'pointer',
+        delay: 200,
+        distance: 10,
         start: function (event, ui) {
             if (!ui.item.hasClass('panel-block')) {
                 ui.item[0]._tippy.hide();
@@ -1172,7 +1199,7 @@ $(function () {
                         showFolderSelectionDialog(function (files) {
                             for (const file of files) {
                                 const hash = getFileHash(file);
-                                if ({}.hasOwnProperty.call(json.blocks, hash)) {
+                                if (_.keys(json.blocks).includes(hash)) {
                                     json.blocks[hash].path = path.win32.normalize(file);
                                     counter++;
                                 }
@@ -1259,7 +1286,7 @@ $(function () {
                             if (fs.existsSync(filePath)) {
                                 const hash = getFileHash(filePath);
 
-                                if (!{}.hasOwnProperty.call(page.blocks, hash)) {
+                                if (!_.keys(page.blocks).includes(hash)) {
                                     const left = Number(parts[1]);
 
                                     counter++;
@@ -1323,28 +1350,9 @@ $(function () {
             $(selector).find('.text').trigger('edit');
         }
     }).on('click', '.tab-delete', function () {
-        if (isEditMode()) {
-            const hash = $(this).parent().attr('data-for');
-            const selector = '[data-page="' + hash + '"]';
-            const $tab = $('.tab' + selector);
-            const $prevTab = $tab.prev();
-            $tab[0]._tippy.destroy();
-            $(selector).not('.page').remove();
-            reorderTabs();
-
-            delete activePages[hash];
-            currentTab = '';
-
-            if ($tabList.find('li').length === 0) {
-                addNewEmptyPage();
-            }
-
-            if ($prevTab.length > 0) {
-                $prevTab.click();
-            } else {
-                $tabList.find('li:first').click();
-            }
-        }
+        const hash = $(this).parent().attr('data-for');
+        deleteTab(hash);
+        saveAllData(true);
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
             const hash = $(this).parent().attr('data-for');
@@ -1357,6 +1365,23 @@ $(function () {
         if (e.which === 13) {
             e.target.blur();
         }
+    });
+
+    // ----------- //
+    //  Navigator  //
+    // ----------- //
+
+    $('#page-search').on('click', '.page-remove', function () {
+        const $parent = $(this).parent();
+        const hash = $parent.attr('data-page');
+        if (_.keys(activePages).includes(hash)) {
+            deleteTab(hash);
+        }
+
+        $parent.remove();
+        updatePageSearch();
+
+        config.delete('pages.' + hash);
     });
 
     // -------------- //
