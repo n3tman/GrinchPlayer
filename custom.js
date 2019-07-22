@@ -452,12 +452,15 @@ function showFolderSelectionDialog(callback, finish) {
 }
 
 // Load saved page
-function loadSavedPage(page) {
+function loadSavedPage(page, skipTab) {
     const pageHash = page.hash;
-    const tabHtml = $(getTabHtml(page.name, pageHash));
-
     activePages[pageHash] = page;
-    $tabList.append(tabHtml);
+
+    if (!skipTab) {
+        const tabHtml = $(getTabHtml(page.name, pageHash));
+        $tabList.append(tabHtml);
+    }
+
     initNewPageBlocks(pageHash);
 
     if (_.size(page.blocks) > 0) {
@@ -546,7 +549,7 @@ function initNewPageBlocks(hash) {
             }
         }
     }).droppable({
-        accept: '.panel-block',
+        accept: '.deck .panel-block',
         drop: function (e, ui) {
             const offsetTop = getTopOffset();
             const offsetLeft = getLeftOffset();
@@ -844,6 +847,11 @@ function pageExists(hash) {
     return _.keys(allPages).includes(hash) || _.keys(activePages).includes(hash);
 }
 
+// Check if page with Hash has been already added
+function activeExists(hash) {
+    return _.keys(activePages).includes(hash);
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -864,7 +872,7 @@ window.addEventListener('beforeunload', function () {
 $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
-    $tabList = $('#tabs ul');
+    $tabList = $('#tabs > ul');
 
     const lastState = config.get('lastState') || {};
     [editClass, deckClass, sideClass].forEach(function (className) {
@@ -910,9 +918,24 @@ $(function () {
         scroll: false,
         tolerance: 'pointer',
         start: function (event, ui) {
-            ui.item[0]._tippy.hide();
+            if (!ui.item.hasClass('panel-block')) {
+                ui.item[0]._tippy.hide();
+            }
         },
-        stop: function () {
+        stop: function (event, ui) {
+            if (ui.item.hasClass('panel-block')) {
+                const hash = ui.item.attr('data-page');
+
+                if (activeExists(hash)) {
+                    showNotification('Такой таб уже есть!', true);
+                    ui.item.remove();
+                } else {
+                    const text = ui.item.text();
+                    ui.item.replaceWith(getTabHtml(text, hash));
+                    loadSavedPage(allPages[hash], true);
+                }
+            }
+
             reorderTabs();
         }
     }).on('click', '.tab', function (e) {
@@ -924,7 +947,7 @@ $(function () {
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';
-        $('.main, .deck-items, #search-wrapper > .search, #deck > .panel-tabs').hide();
+        $('[data-page]').not('.tab, .page').hide();
         $main = $('.main' + selector);
         updateDeckData();
         $(selector).show();
@@ -954,9 +977,15 @@ $(function () {
     // Load page names to navigator
     _.keys(allPages).forEach(function (hash) {
         const name = allPages[hash].name;
-        const html = '<a class="panel-block" data-page="' + hash + '">' +
+        const html = '<a class="panel-block page" data-page="' + hash + '">' +
             '<span class="text">' + name + '</span></a>';
-        $(html).appendTo('#page-search .items');
+        $(html).appendTo('#page-search .items').draggable({
+            appendTo: 'body',
+            revert: 'invalid',
+            scroll: false,
+            helper: 'clone',
+            connectToSortable: '#tabs > ul'
+        });
     });
 
     // Init page search
@@ -1250,18 +1279,19 @@ $(function () {
         }
     }).on('click', '.tab-rename', function () {
         if (isEditMode()) {
-            const hash = $(this).parent().data('for');
+            const hash = $(this).parent().attr('data-for');
             const selector = '.tab[data-page="' + hash + '"]';
             $(selector)[0]._tippy.hide();
             $(selector).find('.text').trigger('edit');
         }
     }).on('click', '.tab-delete', function () {
         if (isEditMode()) {
-            const hash = $(this).parent().data('for');
+            const hash = $(this).parent().attr('data-for');
             const selector = '[data-page="' + hash + '"]';
-            const $prevTab = $('.tab' + selector).prev();
-            $(selector)[0]._tippy.destroy();
-            $(selector).remove();
+            const $tab = $('.tab' + selector);
+            const $prevTab = $tab.prev();
+            $tab[0]._tippy.destroy();
+            $(selector).not('.page').remove();
             reorderTabs();
 
             delete activePages[hash];
@@ -1279,7 +1309,7 @@ $(function () {
         }
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
-            const hash = $(this).parent().data('for');
+            const hash = $(this).parent().attr('data-for');
             const selector = '.tab[data-page="' + hash + '"]';
             $(selector)[0]._tippy.hide();
             addNewEmptyPage($(selector));

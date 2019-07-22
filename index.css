@@ -12783,7 +12783,14 @@ textarea:focus {
   background: #2B3E50;
   width: 200px;
   padding: 0;
-  z-index: 100;
+  z-index: 3000;
+}
+
+.ui-draggable-dragging.panel-block.page {
+  padding: 0.25em 0.75em;
+  border-top: 1px solid #4E5D6C;
+  border-bottom: 1px solid #4E5D6C;
+  width: auto;
 }
 
 .notification {
