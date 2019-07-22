@@ -13271,6 +13271,9 @@ textarea:focus {
 .panel.navigator .pages {
   height: 50%;
 }
+.panel.navigator .pages > .items {
+  height: calc(100% - 65px);
+}
 .panel.navigator .projects {
   height: 30%;
 }

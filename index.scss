@@ -682,6 +682,10 @@ textarea:focus {
         height: 50%;
     }
 
+    .pages > .items {
+        height: calc(100% - 65px);
+    }
+
     .projects {
         height: 30%;
     }

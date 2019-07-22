@@ -36,7 +36,7 @@ let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
 
-let pageSearch;
+let pageSearch = {};
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -581,7 +581,7 @@ function initNewPageBlocks(hash) {
 function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
         '<span class="text">' + text + '</span></a>';
-    $(html).appendTo('#page-search .items').draggable({
+    $(html).appendTo('#page-search .simplebar-content').draggable({
         appendTo: 'body',
         revert: 'invalid',
         scroll: false,
@@ -590,7 +590,7 @@ function addPageToList(hash, text, reindex) {
     });
 
     if (reindex) {
-        pageSearch.reIndex();
+        updatePageSearch();
     }
 }
 
@@ -891,6 +891,12 @@ function activeExists(hash) {
     return _.keys(activePages).includes(hash);
 }
 
+// Reinit page search
+function updatePageSearch() {
+    pageSearch.list.reIndex();
+    pageSearch.bar.recalculate();
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -994,16 +1000,19 @@ $(function () {
         $(e.currentTarget).addClass('is-active');
     });
 
+    // Init page search
+    pageSearch.bar = new SBar($('#page-search .items')[0]);
+    pageSearch.list = new List('page-search', {
+        valueNames: ['text'],
+        listClass: 'simplebar-content'
+    });
+
     // Load page names to navigator
     _.keys(allPages).forEach(function (hash) {
         addPageToList(hash, allPages[hash].name);
     });
 
-    // Init page search
-    pageSearch = new List('page-search', {
-        valueNames: ['text'],
-        listClass: 'items'
-    });
+    updatePageSearch();
 
     // Load pages info from config
     const tabs = config.get('activeTabs');
