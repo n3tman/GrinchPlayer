@@ -12990,13 +12990,24 @@ textarea:focus {
 }
 
 .tabs.is-toggle {
-  display: block;
+  display: flex;
   margin-bottom: 0;
   margin-left: -1px;
   box-shadow: inset 1px 0 0 1px #4E5D6C;
   overflow: hidden;
 }
+.tabs.is-toggle .buttons,
+.tabs.is-toggle .button {
+  margin: 0 !important;
+}
+.tabs.is-toggle .button {
+  height: calc(100% - 2px);
+  font-size: 1.5rem;
+  border-left: 1px solid #4E5D6C;
+  padding: 0.3rem 0.8rem;
+}
 .tabs.is-toggle ul {
+  flex: 1;
   flex-wrap: wrap;
   min-height: 35px;
 }

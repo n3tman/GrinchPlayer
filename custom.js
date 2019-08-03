@@ -61,7 +61,7 @@ function showNotification(text, error) {
     $notify.html(text).fadeIn();
     notifyHandle = setTimeout(function () {
         $notify.fadeOut();
-    }, 4000);
+    }, 3000);
 }
 
 // Confirm action
@@ -69,7 +69,6 @@ function confirmAction(text) {
     return dialog.showMessageBox({
         buttons: ['Нет', 'Да'],
         message: text,
-        type: 'question',
         cancelId: 3
     });
 }
@@ -1039,6 +1038,20 @@ $(function () {
         e.stopPropagation();
         const hash = $(this).closest('.tab').attr('data-page');
         deleteTab(hash);
+        saveAllData(true);
+    });
+
+    // Tab buttons
+    $('.add-tab').click(function () {
+        if (isEditMode()) {
+            addNewEmptyPage();
+        }
+    });
+
+    $('.close-tabs').click(function () {
+        _.keys(activePages).forEach(function (hash) {
+            deleteTab(hash);
+        });
         saveAllData(true);
     });
 

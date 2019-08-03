@@ -323,14 +323,27 @@ textarea:focus {
 
 .tabs.is-toggle {
     & {
-        display: block;
+        display: flex;
         margin-bottom: 0;
         margin-left: -1px;
         box-shadow: inset 1px 0 0 1px $border;
         overflow: hidden;
     }
 
+    .buttons,
+    .button {
+        margin: 0 !important;
+    }
+
+    .button {
+        height: calc(100% - 2px);
+        font-size: 1.5rem;
+        border-left: 1px solid $border;
+        padding: 0.3rem 0.8rem;
+    }
+
     ul {
+        flex: 1;
         flex-wrap: wrap;
         min-height: 35px;
     }
