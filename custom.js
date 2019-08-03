@@ -28,6 +28,7 @@ const pageSearch = {};
 
 let allPages = config.get('pages') || {};
 let currentTab = config.get('currentTab') || '';
+let $wrapper;
 let $main;
 let $tabList;
 
@@ -87,6 +88,7 @@ function toggleEditMode() {
             this._tippy.enable();
         });
         $('.page-remove').prop('disabled', false);
+        $('.add-tab').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -428,6 +430,7 @@ function saveAllData(skipNotify) {
     });
 
     config.set('activeTabs', activeTabs);
+    config.set('currentTab', currentTab);
 
     allPages = config.get('pages');
 
@@ -616,11 +619,12 @@ function deleteTab(hash) {
     reorderTabs();
 
     delete activePages[hash];
+    currentTab = '';
 
     if ($prevTab.length > 0) {
         $prevTab.click();
     } else {
-        $tabList.find('li:first').click();
+        tabClick(true);
     }
 }
 
@@ -768,6 +772,7 @@ function freezePageEditing(blocks, tabs) {
         this._tippy.disable();
     });
     $('.page-remove').prop('disabled', true);
+    $('.add-tab').prop('disabled', true);
 }
 
 // Remove blocks without path from json
@@ -929,6 +934,24 @@ function updatePageSearch() {
     pageSearch.bar.recalculate();
 }
 
+// Click on tab
+function tabClick(hash) {
+    let search;
+
+    switch (hash) {
+        case true:
+            search = 'li:first';
+            break;
+        case false:
+            search = 'li:last';
+            break;
+        default:
+            search = '[data-page="' + hash + '"]';
+    }
+
+    $tabList.find(search).click();
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -950,6 +973,7 @@ $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
     $tabList = $('#tabs > ul');
+    $wrapper = $('.wrapper');
 
     const lastState = config.get('lastState') || {};
     [editClass, deckClass, sideClass].forEach(function (className) {
@@ -1012,6 +1036,7 @@ $(function () {
                     const text = ui.item.text();
                     ui.item.replaceWith(getTabHtml(text, hash));
                     loadSavedPage(allPages[hash], true);
+                    tabClick(hash);
 
                     if (!isEditMode()) {
                         freezePageEditing();
@@ -1047,14 +1072,17 @@ $(function () {
     $('.add-tab').click(function () {
         if (isEditMode()) {
             addNewEmptyPage();
+            tabClick(false);
         }
     });
 
     $('.close-tabs').click(function () {
-        saveAllData(true);
-        _.keys(activePages).forEach(function (hash) {
-            deleteTab(hash);
-        });
+        if (_.size(activePages) > 0) {
+            saveAllData(true);
+            _.keys(activePages).forEach(function (hash) {
+                deleteTab(hash);
+            });
+        }
     });
 
     // Init page search
@@ -1082,9 +1110,9 @@ $(function () {
     // Click current tab if it's saved in the config
     setTimeout(function () {
         if (currentTab.length > 0) {
-            $tabList.find('[data-page="' + currentTab + '"]').click();
+            tabClick(currentTab);
         } else {
-            $tabList.find('li:first').click();
+            tabClick(true);
         }
     }, 100);
 
@@ -1126,82 +1154,88 @@ $(function () {
 
     // Add block from single or multiple files
     $('#add-sound').click(function () {
-        $main.addClass('is-loading');
+        if (_.size(activePages) > 0) {
+            $wrapper.addClass('is-loading');
 
-        dialog.showOpenDialog({
-            title: 'Выберите звуки',
-            properties: ['openFile', 'multiSelections'],
-            filters: [{
-                name: 'Аудио: ' + audioExtensions.join(', '),
-                extensions: audioExtensions
-            }]
-        }, function (files) {
-            if (files === undefined) {
-                $main.removeClass('is-loading');
-            } else {
-                addFileBlocks(files);
-                $main.removeClass('is-loading');
-            }
-        });
+            dialog.showOpenDialog({
+                title: 'Выберите звуки',
+                properties: ['openFile', 'multiSelections'],
+                filters: [{
+                    name: 'Аудио: ' + audioExtensions.join(', '),
+                    extensions: audioExtensions
+                }]
+            }, function (files) {
+                if (files === undefined) {
+                    $wrapper.removeClass('is-loading');
+                } else {
+                    addFileBlocks(files);
+                    $wrapper.removeClass('is-loading');
+                }
+            });
+        }
     });
 
     // Add folder with sounds
     $('#add-folder').click(function () {
-        $main.addClass('is-loading');
+        if (_.size(activePages) > 0) {
+            $wrapper.addClass('is-loading');
 
-        showFolderSelectionDialog(function (files) {
-            addFileBlocks(files);
-        }, function () {
-            $main.removeClass('is-loading');
-        });
+            showFolderSelectionDialog(function (files) {
+                addFileBlocks(files);
+            }, function () {
+                $wrapper.removeClass('is-loading');
+            });
+        }
     });
 
     // Export current page to a file
     $('#page-export').click(function () {
-        const pageName = activePages[currentTab].name;
-        const fileName = getPageName(pageName);
+        if (_.size(activePages) > 0) {
+            const pageName = activePages[currentTab].name;
+            const fileName = getPageName(pageName);
 
-        $main.addClass('is-loading');
+            $wrapper.addClass('is-loading');
 
-        dialog.showSaveDialog({
-            title: 'Сохранить страницу в файл',
-            defaultPath: fileName,
-            filters: [{
-                name: 'JSON',
-                extensions: ['json']
-            }]
-        }, function (filePath) {
-            if (filePath === undefined) {
-                $main.removeClass('is-loading');
-            } else {
-                const json = {
-                    type: 'page',
-                    hash: getStringHash(pageName),
-                    name: pageName
-                };
-                const blocks = {};
+            dialog.showSaveDialog({
+                title: 'Сохранить страницу в файл',
+                defaultPath: fileName,
+                filters: [{
+                    name: 'JSON',
+                    extensions: ['json']
+                }]
+            }, function (filePath) {
+                if (filePath === undefined) {
+                    $wrapper.removeClass('is-loading');
+                } else {
+                    const json = {
+                        type: 'page',
+                        hash: getStringHash(pageName),
+                        name: pageName
+                    };
+                    const blocks = {};
 
-                if (activePages[currentTab].added.length > 0) {
-                    json.added = activePages[currentTab].added;
+                    if (activePages[currentTab].added.length > 0) {
+                        json.added = activePages[currentTab].added;
+                    }
+
+                    if (_.size(activePages[currentTab].blocks) > 0) {
+                        _.each(activePages[currentTab].blocks, function (block, hash) {
+                            blocks[hash] = _.omit(block, 'path');
+                        });
+                        json.blocks = blocks;
+                    }
+
+                    fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
+                    $wrapper.removeClass('is-loading');
+                    showNotification('Сохранено в <b>' + fileName + '</b>');
                 }
-
-                if (_.size(activePages[currentTab].blocks) > 0) {
-                    _.each(activePages[currentTab].blocks, function (block, hash) {
-                        blocks[hash] = _.omit(block, 'path');
-                    });
-                    json.blocks = blocks;
-                }
-
-                fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
-                $main.removeClass('is-loading');
-                showNotification('Сохранено в <b>' + fileName + '</b>');
-            }
-        });
+            });
+        }
     });
 
     // Import a page from a file
     $('#page-import').click(function () {
-        $main.addClass('is-loading');
+        $wrapper.addClass('is-loading');
 
         dialog.showOpenDialog({
             title: 'Выберите сохраненную страницу',
@@ -1212,13 +1246,13 @@ $(function () {
             }]
         }, function (files) {
             if (files === undefined) {
-                $main.removeClass('is-loading');
+                $wrapper.removeClass('is-loading');
             } else {
                 let json = JSON.parse(fs.readFileSync(files[0]));
 
                 if (json.type && json.type === 'page' && files.length > 0) {
                     if (pageExists(json.hash)) {
-                        $main.removeClass('is-loading');
+                        $wrapper.removeClass('is-loading');
                         showNotification('Такая страница уже есть!', true);
                     } else {
                         let counter = 0;
@@ -1237,15 +1271,16 @@ $(function () {
 
                             if (counter > 0) {
                                 loadSavedPage(json);
+                                tabClick(json.hash);
                             }
                         }, function () {
-                            $main.removeClass('is-loading');
+                            $wrapper.removeClass('is-loading');
                             showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
                                 'Пропущено: <b>' + (filesNum - counter) + '</b>');
                         });
                     }
                 } else {
-                    $main.removeClass('is-loading');
+                    $wrapper.removeClass('is-loading');
                     showNotification('Ошибка импортирования', true);
                 }
             }
@@ -1254,7 +1289,7 @@ $(function () {
 
     // Remove all added blocks
     $('#remove-main').click(function () {
-        if (activePages[currentTab].added.length > 0) {
+        if (_.size(activePages) > 0 && activePages[currentTab].added.length > 0) {
             const count = activePages[currentTab].added.length;
             stopCurrentSound();
             if (confirmAction('Удалить ВСЕ блоки со страницы в колоду?') === 1) {
@@ -1274,7 +1309,7 @@ $(function () {
 
     // Import one PPv2 file
     $('#add-pp').click(function () {
-        $main.addClass('is-loading');
+        $wrapper.addClass('is-loading');
 
         dialog.showOpenDialog({
             title: 'Выберите файл prank.txt из PrankPlayer v2',
@@ -1285,7 +1320,7 @@ $(function () {
             }]
         }, function (files) {
             if (files === undefined) {
-                $main.removeClass('is-loading');
+                $wrapper.removeClass('is-loading');
             } else {
                 const file = iconvlite.decode(fs.readFileSync(files[0]), 'win1251');
                 const parsed = path.parse(files[0]);
@@ -1293,7 +1328,7 @@ $(function () {
                 const pageHash = getStringHash(pageName);
 
                 if (pageExists(pageHash)) {
-                    $main.removeClass('is-loading');
+                    $wrapper.removeClass('is-loading');
                     showNotification('Такая страница уже есть!', true);
                 } else {
                     const lines = file.split(/\r?\n/);
@@ -1342,9 +1377,10 @@ $(function () {
 
                     if (counter > 0) {
                         loadSavedPage(page);
+                        tabClick(page.hash);
                     }
 
-                    $main.removeClass('is-loading');
+                    $wrapper.removeClass('is-loading');
 
                     showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
                         'Пропущено: <b>' + (lineNum - counter) + '</b>');
@@ -1420,6 +1456,7 @@ $(function () {
             showNotification('Такой таб уже есть!', true);
         } else {
             loadSavedPage(allPages[hash]);
+            tabClick(hash);
             if (!isEditMode()) {
                 freezePageEditing();
             }
@@ -1433,31 +1470,33 @@ $(function () {
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
-        // Batch add several blocks from the top
-        resetDeckList();
-        const num = $('#batch-num').val();
-        const $items = $('.deck-items[data-page="' + currentTab + '"] .panel-block');
-        let count = 0;
+        if (_.size(activePages) > 0) {
+            // Batch add several blocks from the top
+            resetDeckList();
+            const num = $('#batch-num').val();
+            const $items = $('.deck-items[data-page="' + currentTab + '"] .panel-block');
+            let count = 0;
 
-        if (num > 0 && $items.length > 0) {
-            $items.slice(0, num).each(function (i, elem) {
-                const hash = elem.dataset.hash;
-                const success = addSoundBlockFromDeck($(elem), false);
+            if (num > 0 && $items.length > 0) {
+                $items.slice(0, num).each(function (i, elem) {
+                    const hash = elem.dataset.hash;
+                    const success = addSoundBlockFromDeck($(elem), false);
 
-                if (success) {
-                    lastAddedHash = hash;
-                    count++;
-                } else {
-                    return false;
-                }
-            });
+                    if (success) {
+                        lastAddedHash = hash;
+                        count++;
+                    } else {
+                        return false;
+                    }
+                });
 
-            showNotification('Добавлено блоков: <b>' + count + '</b>');
+                showNotification('Добавлено блоков: <b>' + count + '</b>');
 
-            lastAddedHash = '';
-            updateDeckData();
-        } else {
-            showNotification('Нет числа или список пуст', true);
+                lastAddedHash = '';
+                updateDeckData();
+            } else {
+                showNotification('Нет числа или список пуст', true);
+            }
         }
     }).on('click', '.sort', function () {
         // Sort deck items
@@ -1494,7 +1533,7 @@ $(function () {
 
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
-        if (_.size(activePages[currentTab].blocks) > 0) {
+        if (_.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
             const before = _.size(activePages[currentTab].blocks);
             stopCurrentSound();
             if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
