@@ -500,6 +500,70 @@ function loadSavedPage(page, skipTab) {
     saveAllData(true);
 }
 
+// Load PPv2 page
+function loadPpv2(filePath) {
+    const file = iconvlite.decode(fs.readFileSync(filePath), 'win1251');
+    const parsed = path.parse(filePath);
+    const pageName = path.basename(parsed.dir);
+    const pageHash = getStringHash(pageName);
+
+    if (pageExists(pageHash)) {
+        return false;
+    }
+
+    const lines = file.split(/\r?\n/);
+    let lineNum = 0;
+    let counter = 0;
+
+    const page = {
+        hash: pageHash,
+        name: pageName,
+        added: [],
+        blocks: {}
+    };
+
+    lines.forEach(function (line, i) {
+        if (i !== 0 && line.trim().length > 0) {
+            const parts = line.split('*');
+            const filePath = parsed.dir + '\\' + parts[0];
+            lineNum++;
+
+            if (fs.existsSync(filePath)) {
+                const hash = getFileHash(filePath);
+
+                if (!_.keys(page.blocks).includes(hash)) {
+                    const left = Number(parts[1]);
+
+                    counter++;
+
+                    page.blocks[hash] = {};
+                    page.blocks[hash].path = filePath;
+                    page.blocks[hash].text = parts[5];
+
+                    page.blocks[hash].rect = {
+                        left: left + 10,
+                        top: Number(parts[2]) + 10,
+                        width: Number(parts[3]),
+                        height: Number(parts[4])
+                    };
+
+                    if (left >= 0) {
+                        page.added.push(hash);
+                    }
+                }
+            }
+        }
+    });
+
+    if (counter > 0) {
+        loadSavedPage(page);
+        tabClick(page.hash);
+    }
+
+    return 'Добавлено звуков: <b>' + counter + '</b>. ' +
+        'Пропущено: <b>' + (lineNum - counter) + '</b>';
+}
+
 // Add new empty page
 function addNewEmptyPage($element) {
     const text = 'Таб#' + getRandomString(5);
@@ -1322,68 +1386,42 @@ $(function () {
             if (files === undefined) {
                 $wrapper.removeClass('is-loading');
             } else {
-                const file = iconvlite.decode(fs.readFileSync(files[0]), 'win1251');
-                const parsed = path.parse(files[0]);
-                const pageName = path.basename(parsed.dir);
-                const pageHash = getStringHash(pageName);
-
-                if (pageExists(pageHash)) {
+                const result = loadPpv2(files[0]);
+                if (result) {
+                    $wrapper.removeClass('is-loading');
+                    showNotification(result);
+                } else {
                     $wrapper.removeClass('is-loading');
                     showNotification('Такая страница уже есть!', true);
-                } else {
-                    const lines = file.split(/\r?\n/);
-                    let lineNum = 0;
-                    let counter = 0;
+                }
+            }
+        });
+    });
 
-                    const page = {
-                        hash: pageHash,
-                        name: pageName,
-                        added: [],
-                        blocks: {}
-                    };
+    // Import multiple PPv2 files
+    $('#add-ppx').click(function () {
+        $wrapper.addClass('is-loading');
 
-                    lines.forEach(function (line, i) {
-                        if (i !== 0 && line.trim().length > 0) {
-                            const parts = line.split('*');
-                            const filePath = parsed.dir + '\\' + parts[0];
-                            lineNum++;
+        dialog.showOpenDialog({
+            title: 'Выберите папку со вложенными папками (напр. mp3)',
+            properties: ['openDirectory']
+        }, function (dirs) {
+            if (dirs === undefined) {
+                $wrapper.removeClass('is-loading');
+            } else {
+                const files = fg.sync('**/prank.txt', {
+                    cwd: dirs[0],
+                    caseSensitiveMatch: false,
+                    onlyFiles: true,
+                    absolute: true
+                });
 
-                            if (fs.existsSync(filePath)) {
-                                const hash = getFileHash(filePath);
-
-                                if (!_.keys(page.blocks).includes(hash)) {
-                                    const left = Number(parts[1]);
-
-                                    counter++;
-
-                                    page.blocks[hash] = {};
-                                    page.blocks[hash].path = filePath;
-                                    page.blocks[hash].text = parts[5];
-
-                                    page.blocks[hash].rect = {
-                                        left: left + 10,
-                                        top: Number(parts[2]) + 10,
-                                        width: Number(parts[3]),
-                                        height: Number(parts[4])
-                                    };
-
-                                    if (left >= 0) {
-                                        page.added.push(hash);
-                                    }
-                                }
-                            }
-                        }
+                if (files.length > 0) {
+                    files.forEach(function (file) {
+                        loadPpv2(file);
                     });
 
-                    if (counter > 0) {
-                        loadSavedPage(page);
-                        tabClick(page.hash);
-                    }
-
                     $wrapper.removeClass('is-loading');
-
-                    showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
-                        'Пропущено: <b>' + (lineNum - counter) + '</b>');
                 }
             }
         });
@@ -1437,7 +1475,7 @@ $(function () {
         const $parent = $(this).parent();
         const hash = $parent.attr('data-page');
 
-        if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы насовсем?') === 1) {
+        if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
             if (_.keys(activePages).includes(hash)) {
                 saveAllData(true);
                 deleteTab(hash);
