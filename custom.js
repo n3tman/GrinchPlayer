@@ -77,7 +77,6 @@ function toggleEditMode() {
         $blocks.add($tabs).each(function () {
             this._tippy.enable();
         });
-        $tabList.sortable('enable');
         $('.page-remove').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
@@ -598,25 +597,27 @@ function addPageToList(hash, text, reindex) {
 
 // Delete tab from active pages
 function deleteTab(hash) {
-    if (isEditMode()) {
-        const selector = '[data-page="' + hash + '"]';
-        const $tab = $('.tab' + selector);
-        const $prevTab = $tab.prev();
-        $tab[0]._tippy.destroy();
-        $(selector).not('.page').remove();
-        reorderTabs();
+    const selector = '[data-page="' + hash + '"]';
+    const $tab = $('.tab' + selector);
+    const $prevTab = $tab.prev();
+    $tab[0]._tippy.destroy();
+    $(selector).not('.page').remove();
+    reorderTabs();
 
-        delete activePages[hash];
+    delete activePages[hash];
 
-        if ($tabList.find('li').length === 0) {
-            addNewEmptyPage();
+    if ($tabList.find('li').length === 0) {
+        addNewEmptyPage();
+
+        if (!isEditMode()) {
+            freezePageEditing();
         }
+    }
 
-        if ($prevTab.length > 0) {
-            $prevTab.click();
-        } else {
-            $tabList.find('li:first').click();
-        }
+    if ($prevTab.length > 0) {
+        $prevTab.click();
+    } else {
+        $tabList.find('li:first').click();
     }
 }
 
@@ -763,7 +764,6 @@ function freezePageEditing(blocks, tabs) {
         this._tippy.hide();
         this._tippy.disable();
     });
-    $tabList.sortable('disable');
     $('.page-remove').prop('disabled', true);
 }
 
@@ -823,13 +823,14 @@ function getTabHtml(text, hash) {
         '<a class="link"><span class="icon fa-stack">' +
         '<i class="fa fa-circle fa-stack-2x"></i>' +
         '<strong class="fa-stack-1x">1</strong></span>' +
-        '<span class="text">' + text + '</span></a></li>';
+        '<span class="text">' + text + '</span>' +
+        '<span class="icon tab-remove"><i class="fa fa-times"></i></span>' +
+        '</a></li>';
 }
 
 // Get tab tooltip html
 function getTabTooltipHtml(hash) {
     return '<div class="tab-controls" data-for="' + hash + '">' +
-        '<button class="button tab-delete" title="Удалить"><i class="fa fa-minus-square"></i></button>' +
         '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
         '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>';
 }
@@ -1008,6 +1009,10 @@ $(function () {
                     const text = ui.item.text();
                     ui.item.replaceWith(getTabHtml(text, hash));
                     loadSavedPage(allPages[hash], true);
+
+                    if (!isEditMode()) {
+                        freezePageEditing();
+                    }
                 }
             }
 
@@ -1028,6 +1033,11 @@ $(function () {
         $(selector).show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
+    }).on('click', '.tab-remove', function (e) {
+        e.stopPropagation();
+        const hash = $(this).closest('.tab').attr('data-page');
+        deleteTab(hash);
+        saveAllData(true);
     });
 
     // Init page search
@@ -1352,10 +1362,6 @@ $(function () {
             $(selector)[0]._tippy.hide();
             $(selector).find('.text').trigger('edit');
         }
-    }).on('click', '.tab-delete', function () {
-        const hash = $(this).parent().attr('data-for');
-        deleteTab(hash);
-        saveAllData(true);
     }).on('click', '.tab-add', function () {
         if (isEditMode()) {
             const hash = $(this).parent().attr('data-for');

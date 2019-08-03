@@ -340,7 +340,12 @@ textarea:focus {
 
     .link {
         height: 35px;
-        padding: 0.5em 0.6em 0.5em 0.5em;
+        padding: 0.5em 0 0.5em 0.5em;
+    }
+
+    .icon:last-child {
+        padding: 0.3em 1em 0.3em 0.4em;
+        height: auto;
     }
 
     .link strong {
@@ -438,7 +443,7 @@ textarea:focus {
         z-index: 1;
         user-select: none;
         overflow: hidden;
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.2) !important;
+        box-shadow: inset 0 0 0 1px rgba($grey, 0.4) !important;
     }
 
     .sound-block:hover,
@@ -455,7 +460,7 @@ textarea:focus {
     }
 
     .sound-block {
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.6) !important;
+        box-shadow: inset 0 0 0 1px rgba($grey, 0.8) !important;
     }
 }
 
