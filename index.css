@@ -12998,6 +12998,7 @@ textarea:focus {
 }
 .tabs.is-toggle ul {
   flex-wrap: wrap;
+  min-height: 35px;
 }
 .tabs.is-toggle li:focus {
   outline: none;

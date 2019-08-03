@@ -64,6 +64,16 @@ function showNotification(text, error) {
     }, 4000);
 }
 
+// Confirm action
+function confirmAction(text) {
+    return dialog.showMessageBox({
+        buttons: ['Нет', 'Да'],
+        message: text,
+        type: 'question',
+        cancelId: 3
+    });
+}
+
 // Toggle edit mode
 function toggleEditMode() {
     const $blocks = $('.sound-block');
@@ -606,14 +616,6 @@ function deleteTab(hash) {
 
     delete activePages[hash];
 
-    if ($tabList.find('li').length === 0) {
-        addNewEmptyPage();
-
-        if (!isEditMode()) {
-            freezePageEditing();
-        }
-    }
-
     if ($prevTab.length > 0) {
         $prevTab.click();
     } else {
@@ -1060,8 +1062,6 @@ $(function () {
         tabs.forEach(function (hash) {
             loadSavedPage(allPages[hash]);
         });
-    } else {
-        addNewEmptyPage();
     }
 
     // Click current tab if it's saved in the config
@@ -1242,9 +1242,11 @@ $(function () {
         if (activePages[currentTab].added.length > 0) {
             const count = activePages[currentTab].added.length;
             stopCurrentSound();
-            flushAddedBlocks();
-            updateDeckData();
-            showNotification('Удалено со страницы: <b>' + count + '</b>');
+            if (confirmAction('Удалить ВСЕ блоки со страницы в колоду?') === 1) {
+                flushAddedBlocks();
+                updateDeckData();
+                showNotification('Удалено со страницы: <b>' + count + '</b>');
+            }
         } else {
             showNotification('Удалять нечего o_O', true);
         }
@@ -1383,15 +1385,18 @@ $(function () {
     $('#page-search').on('click', '.page-remove', function () {
         const $parent = $(this).parent();
         const hash = $parent.attr('data-page');
-        if (_.keys(activePages).includes(hash)) {
-            deleteTab(hash);
+
+        if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы насовсем?') === 1) {
+            if (_.keys(activePages).includes(hash)) {
+                deleteTab(hash);
+            }
+
+            $parent.remove();
+            updatePageSearch();
+
+            delete allPages[hash];
+            config.delete('pages.' + hash);
         }
-
-        $parent.remove();
-        updatePageSearch();
-
-        delete allPages[hash];
-        config.delete('pages.' + hash);
     });
 
     // -------------- //
@@ -1465,9 +1470,11 @@ $(function () {
         if (_.size(activePages[currentTab].blocks) > 0) {
             const before = _.size(activePages[currentTab].blocks);
             stopCurrentSound();
-            flushDeckItems();
-            showNotification('Удалено из колоды: <b>' + (before - _.size(activePages[currentTab].blocks)) + '</b>');
-            updateDeckData();
+            if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
+                flushDeckItems();
+                showNotification('Удалено из колоды: <b>' + (before - _.size(activePages[currentTab].blocks)) + '</b>');
+                updateDeckData();
+            }
         } else {
             showNotification('Удалять нечего o_O', true);
         }
