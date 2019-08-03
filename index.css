@@ -12946,6 +12946,7 @@ textarea:focus {
 
 .navbar.top .navbar-brand {
   min-height: 0;
+  width: 210px;
 }
 .navbar.top .navbar-brand .text {
   font-weight: bold;
@@ -12969,6 +12970,8 @@ textarea:focus {
 .navbar.top .window {
   padding: 0;
   margin-right: -4px;
+  width: 210px;
+  justify-content: flex-end;
 }
 .navbar.top .window .buttons {
   margin-bottom: 0;
@@ -12992,7 +12995,7 @@ textarea:focus {
 .tabs.is-toggle {
   display: flex;
   margin-bottom: 0;
-  margin-left: -1px;
+  margin-left: -2px;
   box-shadow: inset 1px 0 0 1px #4E5D6C;
   overflow: hidden;
 }
@@ -13003,6 +13006,7 @@ textarea:focus {
 .tabs.is-toggle .button {
   height: calc(100% - 2px);
   font-size: 1.5rem;
+  border: 0;
   border-left: 1px solid #4E5D6C;
   padding: 0.3rem 0.8rem;
 }
@@ -13263,6 +13267,9 @@ textarea:focus {
 .panel .panel-search {
   margin-bottom: 0;
 }
+.panel .panel-search .icon:first-child {
+  display: none;
+}
 .panel .panel-search .input,
 .panel .panel-search .icon {
   height: 30px;
@@ -13300,14 +13307,23 @@ textarea:focus {
 .panel.navigator .pages .page {
   position: relative;
   padding-left: 45px;
+  padding-right: 45px;
 }
 .panel.navigator .page > .button {
   position: absolute;
   left: 0;
   height: 100%;
 }
+.panel.navigator .page > .button:last-child {
+  right: 0;
+  left: auto;
+}
 .panel.navigator .projects {
   height: 30%;
+}
+.panel.navigator .page > .button,
+.panel.navigator .panel-search .button {
+  width: 35px;
 }
 
 .has-left .wrapper {

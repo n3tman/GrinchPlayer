@@ -590,7 +590,9 @@ function initNewPageBlocks(hash) {
 function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
         '<button class="button is-dark page-remove"><i class="fa fa-times"></i></button>' +
-        '<span class="text">' + text + '</span></a>';
+        '<span class="text">' + text + '</span>' +
+        '<button class="button is-dark page-add"><i class="fa fa-chevron-right"></i></button>' +
+        '</a>';
     $(html).appendTo('#page-search .simplebar-content').draggable({
         appendTo: 'body',
         revert: 'invalid',
@@ -1037,8 +1039,8 @@ $(function () {
     }).on('click', '.tab-remove', function (e) {
         e.stopPropagation();
         const hash = $(this).closest('.tab').attr('data-page');
-        deleteTab(hash);
         saveAllData(true);
+        deleteTab(hash);
     });
 
     // Tab buttons
@@ -1049,10 +1051,10 @@ $(function () {
     });
 
     $('.close-tabs').click(function () {
+        saveAllData(true);
         _.keys(activePages).forEach(function (hash) {
             deleteTab(hash);
         });
-        saveAllData(true);
     });
 
     // Init page search
@@ -1401,6 +1403,7 @@ $(function () {
 
         if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы насовсем?') === 1) {
             if (_.keys(activePages).includes(hash)) {
+                saveAllData(true);
                 deleteTab(hash);
             }
 
@@ -1409,6 +1412,17 @@ $(function () {
 
             delete allPages[hash];
             config.delete('pages.' + hash);
+        }
+    }).on('click', '.page-add', function () {
+        const $parent = $(this).parent();
+        const hash = $parent.attr('data-page');
+        if (activeExists(hash)) {
+            showNotification('Такой таб уже есть!', true);
+        } else {
+            loadSavedPage(allPages[hash]);
+            if (!isEditMode()) {
+                freezePageEditing();
+            }
         }
     });
 

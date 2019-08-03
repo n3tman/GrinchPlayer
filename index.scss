@@ -262,6 +262,7 @@ textarea:focus {
 .navbar.top .navbar-brand {
     & {
         min-height: 0;
+        width: 210px;
     }
 
     .text {
@@ -292,6 +293,8 @@ textarea:focus {
     & {
         padding: 0;
         margin-right: -4px;
+        width: 210px;
+        justify-content: flex-end;
     }
 
     .buttons {
@@ -325,7 +328,7 @@ textarea:focus {
     & {
         display: flex;
         margin-bottom: 0;
-        margin-left: -1px;
+        margin-left: -2px;
         box-shadow: inset 1px 0 0 1px $border;
         overflow: hidden;
     }
@@ -338,6 +341,7 @@ textarea:focus {
     .button {
         height: calc(100% - 2px);
         font-size: 1.5rem;
+        border: 0;
         border-left: 1px solid $border;
         padding: 0.3rem 0.8rem;
     }
@@ -666,6 +670,10 @@ textarea:focus {
             margin-bottom: 0;
         }
 
+        .icon:first-child {
+            display: none;
+        }
+
         .input,
         .icon {
             height: 30px;
@@ -718,6 +726,7 @@ textarea:focus {
     .pages .page {
         position: relative;
         padding-left: 45px;
+        padding-right: 45px;
     }
 
     .page > .button {
@@ -726,8 +735,18 @@ textarea:focus {
         height: 100%;
     }
 
+    .page > .button:last-child {
+        right: 0;
+        left: auto;
+    }
+
     .projects {
         height: 30%;
+    }
+
+    .page > .button,
+    .panel-search .button {
+        width: 35px;
     }
 }
 
