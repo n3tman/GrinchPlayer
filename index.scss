@@ -89,7 +89,7 @@ textarea:focus {
     font-size: 1.5rem;
     padding: 1rem 3rem;
     display: none;
-    z-index: 100;
+    z-index: 10000;
 }
 
 .sound-text {
@@ -894,5 +894,15 @@ textarea:focus {
 
     .panel.deck {
         right: 0;
+    }
+}
+
+.modal {
+    & {
+        z-index: 5000;
+    }
+
+    .list-item.is-active {
+        background: $grey-darker;
     }
 }

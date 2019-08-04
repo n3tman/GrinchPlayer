@@ -12803,7 +12803,7 @@ textarea:focus {
   font-size: 1.5rem;
   padding: 1rem 3rem;
   display: none;
-  z-index: 100;
+  z-index: 10000;
 }
 
 .sound-text {
@@ -13423,6 +13423,13 @@ textarea:focus {
 }
 .has-right .panel.deck {
   right: 0;
+}
+
+.modal {
+  z-index: 5000;
+}
+.modal .list-item.is-active {
+  background: #1f2d3b;
 }
 
 /*# sourceMappingURL=index.css.map */

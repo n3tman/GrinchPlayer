@@ -1,4 +1,4 @@
-/* global window, $, SBar, fancy, requestAnimationFrame */
+/* global window, navigator, $, SBar, fancy, requestAnimationFrame */
 
 'use strict';
 
@@ -8,14 +8,15 @@ const path = require('path');
 const fs = require('fs');
 const farmhash = require('farmhash');
 const filenamify = require('filenamify');
-const hp = require('howler');
 const hotkeys = require('hotkeys-js');
 const iconvlite = require('iconv-lite');
 const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
+
 const tippy = require('tippy.js/umd/index');
+const hp = require('./vendor/howler');
 const config = require('./config');
 
 const editClass = 'has-bottom';
@@ -25,9 +26,10 @@ const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 const activePages = {};
 const pageSearch = {};
+const allPages = config.get('pages') || {};
 
-let allPages = config.get('pages') || {};
 let currentTab = config.get('currentTab') || '';
+let deviceId = config.get('device') || 'default';
 let $wrapper;
 let $main;
 let $tabList;
@@ -182,11 +184,11 @@ function initDraggableMain($element, $main) {
                 autoSizeText($element);
             }
         });
-    }, 400);
+    }, 200);
 
     setTimeout(function () {
         autoSizeText($element);
-    }, 200);
+    }, 500);
 }
 
 // Check block for collision with others
@@ -334,6 +336,7 @@ function addInitHowl(hash, soundPath) {
         howlDb[hash] = new hp.Howl({
             src: [soundPath],
             html5: true,
+            sinkId: deviceId,
             preload: false,
             onplay: function () {
                 requestAnimationFrame(updateAudioStep);
@@ -1482,6 +1485,8 @@ $(function () {
         if (e.which === 13) {
             e.target.blur();
         }
+    }).on('click', '.modal-background, .modal .delete', function () {
+        $('.modal.is-active').removeClass('is-active');
     });
 
     // ----------- //
@@ -1626,6 +1631,46 @@ $(function () {
                 addFileBlocks(fileArray);
             }
         }
+    });
+
+    // --------------- //
+    //  Set device ID  //
+    // --------------- //
+
+    $('#devices').on('click', '.list-item', function () {
+        const id = this.dataset.id;
+        const classList = this.classList;
+        if (!classList.contains('is-active')) {
+            deviceId = id;
+            config.set('device', id);
+            hp.Howler.setDevice(id);
+            $(this).parent().find('.is-active').removeClass('is-active');
+            classList.add('is-active');
+            showNotification('Устройство установлено!');
+        }
+    });
+
+    $('#set-device').click(function () {
+        const $devices = $('#devices');
+        const $list = $devices.find('.list');
+
+        $list.empty();
+
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            const audioDevices = devices.filter(function (device) {
+                return device.kind === 'audiooutput';
+            });
+
+            audioDevices.forEach(function (audioDevice) {
+                const id = audioDevice.deviceId;
+                const classes = id === deviceId ? 'list-item is-active' : 'list-item';
+                const html = '<a class="' + classes + '" data-id="' + id + '">' +
+                    audioDevice.label + '</a>';
+                $list.append(html);
+            });
+
+            $devices.addClass('is-active');
+        });
     });
 
     // --------- //
