@@ -96,22 +96,29 @@ textarea:focus {
     & {
         text-align: center;
         width: 100%;
-        padding: 2px;
-        line-height: 18px;
+        height: 100%;
+        box-sizing: border-box;
+        line-height: 1;
         z-index: 1;
         word-break: break-word;
     }
 
     textarea {
         text-align: center;
-        font-size: 1rem;
-        line-height: 18px;
+        font-size: inherit;
+        line-height: 1;
         background: transparent;
         color: $light;
         resize: none;
         border: 0;
         overflow: hidden;
         vertical-align: middle;
+    }
+
+    form,
+    textarea {
+        width: 100%;
+        height: 100%;
     }
 }
 
@@ -872,6 +879,11 @@ textarea:focus {
 
     .search.input {
         display: none;
+    }
+
+    .sound-text {
+        padding: 2px;
+        line-height: normal;
     }
 }
 

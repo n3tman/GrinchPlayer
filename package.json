@@ -26,6 +26,7 @@
 		"electron-store": "^3.3.0",
 		"electron-unhandled": "^2.2.0",
 		"electron-util": "^0.12.0",
+		"fancy-textfill": "^1.2.5",
 		"farmhash": "^3.0.0",
 		"fast-glob": "^3.0.2",
 		"filenamify": "^4.1.0",

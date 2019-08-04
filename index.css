@@ -12809,21 +12809,27 @@ textarea:focus {
 .sound-text {
   text-align: center;
   width: 100%;
-  padding: 2px;
-  line-height: 18px;
+  height: 100%;
+  box-sizing: border-box;
+  line-height: 1;
   z-index: 1;
   word-break: break-word;
 }
 .sound-text textarea {
   text-align: center;
-  font-size: 1rem;
-  line-height: 18px;
+  font-size: inherit;
+  line-height: 1;
   background: transparent;
   color: whitesmoke;
   resize: none;
   border: 0;
   overflow: hidden;
   vertical-align: middle;
+}
+.sound-text form,
+.sound-text textarea {
+  width: 100%;
+  height: 100%;
 }
 
 .drag {
@@ -13406,6 +13412,10 @@ textarea:focus {
 }
 .panel.deck .search.input {
   display: none;
+}
+.panel.deck .sound-text {
+  padding: 2px;
+  line-height: normal;
 }
 
 .has-right .wrapper {

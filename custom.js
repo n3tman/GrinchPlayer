@@ -1,4 +1,4 @@
-/* global window, $, SBar, requestAnimationFrame */
+/* global window, $, SBar, fancy, requestAnimationFrame */
 
 'use strict';
 
@@ -42,6 +42,7 @@ window.jQuery = require('jquery');
 window.jQueryUI = require('jquery-ui-dist/jquery-ui');
 window.SBar = require('simplebar');
 window.jEditable = require('jquery-jeditable');
+window.fancy = require('fancy-textfill/dist/fancy-text-fill');
 
 // ================== //
 //                    //
@@ -123,7 +124,10 @@ function initDraggableMain($element, $main) {
             const hash = e.target.dataset.hash;
             activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
             e.target._tippy.enable();
-        }
+        },
+        resize: _.debounce(function () {
+            autoSizeText($element);
+        }, 200)
     }).mousedown(function (e) {
         if (e.which === 3 && isEditMode()) {
             const $target = $(e.currentTarget).find('.ui-resizable-se');
@@ -170,21 +174,19 @@ function initDraggableMain($element, $main) {
             onblur: 'submit',
             width: '100%',
             onedit: function (settings) {
-                settings.rows = _.round($text.height() / 18);
+                const fontSize = parseInt($text.css('font-size'), 10);
+                settings.rows = _.round($text.height() / fontSize);
             },
             callback: function (value) {
-                const textHeight = $text.outerHeight();
-                const blockHeight = $element.outerHeight();
-
-                if (textHeight > blockHeight) {
-                    $element.outerHeight(roundToTen(textHeight));
-                }
-
-                activePages[currentTab].blocks[hash].rect = getRectWithOffset($element[0]);
                 activePages[currentTab].blocks[hash].text = value;
+                autoSizeText($element);
             }
         });
-    }, 300);
+    }, 400);
+
+    setTimeout(function () {
+        autoSizeText($element);
+    }, 200);
 }
 
 // Check block for collision with others
@@ -709,6 +711,17 @@ function isDeckActive() {
 // Check if left sidebar is active
 function isSideActive() {
     return $('body').hasClass(sideClass);
+}
+
+// Autosize text inside block
+function autoSizeText($block) {
+    const $text = $block.find('.sound-text');
+
+    fancy.fillParentContainer($text[0], {
+        maxFontSize: 120,
+        maxWidth: $block.width() - 2,
+        maxHeight: $block.height() - 2
+    });
 }
 
 // Sets width of audio overlay
