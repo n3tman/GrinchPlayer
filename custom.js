@@ -425,14 +425,12 @@ function saveAllData(skipNotify) {
     }).get();
 
     activeTabs.forEach(function (hash) {
-        const page = _.omit(activePages[hash], ['bar', 'list']);
-        config.set('pages.' + hash, page);
+        allPages[hash] = _.omit(activePages[hash], ['bar', 'list']);
     });
 
     config.set('activeTabs', activeTabs);
     config.set('currentTab', currentTab);
-
-    allPages = config.get('pages');
+    config.set('pages', allPages);
 
     if (!skipNotify) {
         showNotification('Данные сохранены в базу!');
@@ -673,8 +671,8 @@ function addPageToList(hash, text, reindex) {
     }
 }
 
-// Delete tab from active pages
-function deleteTab(hash) {
+// Close the tab
+function closeTab(hash) {
     const selector = '[data-page="' + hash + '"]';
     const $tab = $('.tab' + selector);
     const $prevTab = $tab.prev();
@@ -1129,7 +1127,7 @@ $(function () {
         e.stopPropagation();
         const hash = $(this).closest('.tab').attr('data-page');
         saveAllData(true);
-        deleteTab(hash);
+        closeTab(hash);
     });
 
     // Tab buttons
@@ -1144,7 +1142,7 @@ $(function () {
         if (_.size(activePages) > 0) {
             saveAllData(true);
             _.keys(activePages).forEach(function (hash) {
-                deleteTab(hash);
+                closeTab(hash);
             });
         }
     });
@@ -1236,6 +1234,8 @@ $(function () {
                     $wrapper.removeClass('is-loading');
                 }
             });
+        } else {
+            showNotification('Нет активной страницы', true);
         }
     });
 
@@ -1249,6 +1249,8 @@ $(function () {
             }, function () {
                 $wrapper.removeClass('is-loading');
             });
+        } else {
+            showNotification('Нет активной страницы', true);
         }
     });
 
@@ -1294,6 +1296,8 @@ $(function () {
                     showNotification('Сохранено в <b>' + fileName + '</b>');
                 }
             });
+        } else {
+            showNotification('Нет активной страницы', true);
         }
     });
 
@@ -1478,7 +1482,7 @@ $(function () {
         if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
             if (_.keys(activePages).includes(hash)) {
                 saveAllData(true);
-                deleteTab(hash);
+                closeTab(hash);
             }
 
             $parent.remove();
@@ -1636,5 +1640,27 @@ $(function () {
     // Save all data
     addHotkey('ctrl+s', function () {
         saveAllData();
+    });
+
+    // Close current wab
+    addHotkey('ctrl+w', function () {
+        saveAllData(true);
+        closeTab(currentTab);
+    });
+
+    // Quick switch keys
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (num) {
+        addHotkey(num.toString(), function () {
+            $tabList.find('li').eq(num - 1).click();
+        });
+    });
+
+    // Global scope
+    hotkeys('*', function (e) {
+        if (e.code.includes('Numpad')) {
+            e.preventDefault();
+            const num = e.code.slice(-1);
+            $tabList.find('li').eq(num - 1).click();
+        }
     });
 });
