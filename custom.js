@@ -87,6 +87,7 @@ function toggleEditMode() {
 
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
+        $('.main').selectable('enable');
         $blocks.add($tabs).each(function () {
             this._tippy.enable();
         });
@@ -100,19 +101,43 @@ function toggleEditMode() {
 // Initialize draggable/resizable block
 function initDraggableMain($element, $main) {
     const hash = $element.data('hash');
+    let oldPos;
 
     $element.draggable({
         grid: [10, 10],
         containment: 'parent',
         stack: '.sound-block',
         scroll: false,
-        start: function (e) {
+        start: function (e, ui) {
             e.target._tippy.hide();
             e.target._tippy.disable();
+            oldPos = ui.position;
+        },
+        drag: function (e, ui) {
+            if (e.target.classList.contains('ui-selected') && oldPos !== ui.position) {
+                const topOffset = ui.position.top - oldPos.top;
+                const leftOffset = ui.position.left - oldPos.left;
+
+                $('.ui-selected').not(this).each(function () {
+                    $(this).css({
+                        top: this.offsetTop + topOffset,
+                        left: this.offsetLeft + leftOffset
+                    });
+                });
+
+                oldPos = ui.position;
+            }
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
             activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
+
+            if (e.target.classList.contains('ui-selected')) {
+                $('.ui-selected').not(this).each(function () {
+                    activePages[currentTab].blocks[this.dataset.hash].rect = getRectWithOffset(this);
+                });
+            }
+
             e.target._tippy.enable();
         }
     }).resizable({
@@ -535,7 +560,10 @@ function loadPpv2(filePath) {
                 const hash = getFileHash(filePath);
 
                 if (!_.keys(page.blocks).includes(hash)) {
-                    const left = Number(parts[1]);
+                    const left = Number(parts[1]) + 10;
+                    const top = Number(parts[2]) + 10;
+                    const width = Number(parts[3]);
+                    const height = Number(parts[4]);
 
                     counter++;
 
@@ -543,14 +571,16 @@ function loadPpv2(filePath) {
                     page.blocks[hash].path = filePath;
                     page.blocks[hash].text = parts[5];
 
-                    page.blocks[hash].rect = {
-                        left: left + 10,
-                        top: Number(parts[2]) + 10,
-                        width: Number(parts[3]),
-                        height: Number(parts[4])
-                    };
+                    if (left >= 10) {
+                        page.blocks[hash].rect = {
+                            left: left,
+                            top: top,
+                            bottom: top + height,
+                            right: left + width,
+                            width: width,
+                            height: height
+                        };
 
-                    if (left >= 0) {
                         page.added.push(hash);
                     }
                 }
@@ -653,6 +683,8 @@ function initNewPageBlocks(hash) {
             addSoundBlockFromDeck(ui.draggable, ui.position, offsetTop, offsetLeft);
             updateDeckData();
         }
+    }).selectable({
+        filter: '.sound-block'
     });
 }
 
@@ -721,7 +753,7 @@ function autoSizeText($block) {
     const $text = $block.find('.sound-text');
 
     fancy.fillParentContainer($text[0], {
-        maxFontSize: 120,
+        maxFontSize: 200,
         maxWidth: $block.width() - 2,
         maxHeight: $block.height() - 2
     });
@@ -845,6 +877,7 @@ function freezePageEditing(blocks, tabs) {
     const $tabs = tabs || $('#tabs .tab');
 
     $blocks.draggable('disable').resizable('disable');
+    $('.main').selectable('disable');
     $blocks.add($tabs).each(function () {
         this._tippy.hide();
         this._tippy.disable();
@@ -1719,6 +1752,18 @@ $(function () {
             e.preventDefault();
             const num = e.code.slice(-1);
             $tabList.find('li').eq(num - 1).click();
+        }
+    });
+
+    // Remove selected blocks
+    addHotkey('delete', function () {
+        if (isEditMode()) {
+            $('.ui-selected').each(function () {
+                const hash = this.dataset.hash;
+                removeBlockFromPage(hash);
+                _.pull(activePages[currentTab].added, hash);
+                updateDeckData();
+            });
         }
     });
 });

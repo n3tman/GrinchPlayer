@@ -12795,6 +12795,19 @@ textarea:focus {
   display: none;
 }
 
+.ui-selectable-helper {
+  border: 2px dotted rgba(92, 184, 92, 0.7);
+  background: rgba(92, 184, 92, 0.1) !important;
+}
+
+.ui-selecting {
+  background: rgba(92, 184, 92, 0.2) !important;
+}
+
+.ui-selected {
+  background: rgba(92, 184, 92, 0.3) !important;
+}
+
 .notification {
   position: absolute;
   right: 20px;
@@ -13179,6 +13192,7 @@ textarea:focus {
 }
 .level-center i {
   margin-right: 0.6rem;
+  margin-top: 2px;
   font-size: 1.3rem;
 }
 
