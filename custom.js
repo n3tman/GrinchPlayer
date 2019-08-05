@@ -1424,6 +1424,11 @@ $(function () {
         saveAllData();
     });
 
+    // Show help
+    $('#show-help').click(function () {
+        $('#help').addClass('is-active');
+    });
+
     // Import one PPv2 file
     $('#add-pp').click(function () {
         $wrapper.addClass('is-loading');

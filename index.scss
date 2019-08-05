@@ -414,9 +414,17 @@ textarea:focus {
         padding: 0.5em 0 0.5em 0.5em;
     }
 
+    .icon {
+        opacity: 0.5;
+    }
+
     .icon:last-child {
         padding: 0.3em 1em 0.3em 0.4em;
         height: auto;
+    }
+
+    .icon:last-child:hover {
+        color: $green;
     }
 
     .link strong {
@@ -911,6 +919,10 @@ textarea:focus {
     }
 }
 
+// ------------------ //
+//  Modals
+// ------------------ //
+
 .modal {
     & {
         z-index: 5000;
@@ -919,4 +931,21 @@ textarea:focus {
     .list-item.is-active {
         background: $grey-darker;
     }
+
+    ul:not(:last-child) {
+        margin-bottom: 0;
+    }
+
+    h3:not(:first-child) {
+        margin-top: 1rem;
+    }
+}
+
+.modal-card-head,
+.modal-card-body {
+    padding: 0.8rem;
+}
+
+.modal-card {
+    width: auto;
 }

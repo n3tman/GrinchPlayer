@@ -13073,9 +13073,15 @@ textarea:focus {
   height: 35px;
   padding: 0.5em 0 0.5em 0.5em;
 }
+.tabs.is-toggle .icon {
+  opacity: 0.5;
+}
 .tabs.is-toggle .icon:last-child {
   padding: 0.3em 1em 0.3em 0.4em;
   height: auto;
+}
+.tabs.is-toggle .icon:last-child:hover {
+  color: #5cb85c;
 }
 .tabs.is-toggle .link strong {
   letter-spacing: -1px;
@@ -13444,6 +13450,21 @@ textarea:focus {
 }
 .modal .list-item.is-active {
   background: #1f2d3b;
+}
+.modal ul:not(:last-child) {
+  margin-bottom: 0;
+}
+.modal h3:not(:first-child) {
+  margin-top: 1rem;
+}
+
+.modal-card-head,
+.modal-card-body {
+  padding: 0.8rem;
+}
+
+.modal-card {
+  width: auto;
 }
 
 /*# sourceMappingURL=index.css.map */
