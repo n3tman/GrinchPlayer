@@ -1235,13 +1235,16 @@ $(function () {
     // Deck toggle
     $('#deck-toggle').click(function () {
         const size = mainWindow.getSize();
+        const pos = mainWindow.getPosition();
 
         toggleSidebarClasses(deckClass);
         config.set('lastState.' + deckClass, isDeckActive());
 
         if (isDeckActive()) {
+            mainWindow.setPosition(pos[0] - 250, pos[1]);
             mainWindow.setSize(size[0] + 250, size[1]);
         } else {
+            mainWindow.setPosition(pos[0] + 250, pos[1]);
             mainWindow.setSize(size[0] - 250, size[1]);
         }
     });
@@ -1249,16 +1252,13 @@ $(function () {
     // Toggle left sidebar
     $('#left-toggle').click(function () {
         const size = mainWindow.getSize();
-        const position = mainWindow.getPosition();
 
         toggleSidebarClasses(sideClass);
         config.set('lastState.' + sideClass, isSideActive());
 
         if (isSideActive()) {
-            mainWindow.setPosition(position[0] - 250, position[1]);
             mainWindow.setSize(size[0] + 250, size[1]);
         } else {
-            mainWindow.setPosition(position[0] + 250, position[1]);
             mainWindow.setSize(size[0] - 250, size[1]);
         }
     });
@@ -1525,6 +1525,14 @@ $(function () {
         }
     }).on('click', '.modal-background, .modal .delete', function () {
         $('.modal.is-active').removeClass('is-active');
+    }).keydown(function (e) {
+        if (e.which === 9) {
+            e.preventDefault();
+        }
+    }).on('wheel', function (e) {
+        if (e.ctrlKey) {
+            const delta = e.originalEvent.deltaY;
+        }
     });
 
     // ----------- //
