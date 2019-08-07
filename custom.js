@@ -20,8 +20,6 @@ const hp = require('./vendor/howler');
 const config = require('./config');
 
 const editClass = 'has-bottom';
-const deckClass = 'has-right';
-const sideClass = 'has-left';
 const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
 const howlDb = {};
 const activePages = {};
@@ -83,7 +81,7 @@ function toggleEditMode() {
     const $tabs = $('#tabs .tab');
 
     toggleSidebarClasses(editClass);
-    config.set('lastState.' + editClass, isEditMode());
+    config.set('editMode', isEditMode());
 
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
@@ -738,22 +736,12 @@ function isEditMode() {
     return $('body').hasClass(editClass);
 }
 
-// Check if deck is active
-function isDeckActive() {
-    return $('body').hasClass(deckClass);
-}
-
-// Check if left sidebar is active
-function isSideActive() {
-    return $('body').hasClass(sideClass);
-}
-
 // Autosize text inside block
 function autoSizeText($block) {
     const $text = $block.find('.sound-text');
 
     fancy.fillParentContainer($text[0], {
-        maxFontSize: 200,
+        maxFontSize: 400,
         maxWidth: $block.width() - 2,
         maxHeight: $block.height() - 2
     });
@@ -903,30 +891,17 @@ function filterBlocksWithoutPath(json) {
 
 // Get height of all the top blocks
 function getTopOffset() {
-    return $('#header').outerHeight() + $('#tabs').outerHeight();
+    return $('#tabs').outerHeight();
 }
 
 // Get height of all the bottom blocks
 function getLeftOffset() {
-    return isSideActive() ? 250 : 0;
+    return 250;
 }
 
 // Toggle sidebar classes
 function toggleSidebarClasses(name) {
-    const $body = $('body');
-
-    switch (name) {
-        case editClass:
-            $('#page-edit .fa').toggleClass('fa-edit fa-check-square-o');
-            break;
-        case sideClass:
-            $('#left-toggle .fa').toggleClass('fa-chevron-left fa-chevron-right');
-            break;
-        default:
-        //
-    }
-
-    $body.toggleClass(name);
+    $('body').toggleClass(name);
 }
 
 // Update numbers in tabs
@@ -1086,12 +1061,10 @@ $(function () {
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
 
-    const lastState = config.get('lastState') || {};
-    [editClass, deckClass, sideClass].forEach(function (className) {
-        if (_.keys(lastState).includes(className) && lastState[className] === true) {
-            toggleSidebarClasses(className);
-        }
-    });
+    const editMode = config.get('editMode') || false;
+    if (editMode === true) {
+        toggleSidebarClasses(editClass);
+    }
 
     // Window controls
     $('#win-minimize').click(function () {
@@ -1231,37 +1204,6 @@ $(function () {
     if (!isEditMode()) {
         freezePageEditing();
     }
-
-    // Deck toggle
-    $('#deck-toggle').click(function () {
-        const size = mainWindow.getSize();
-        const pos = mainWindow.getPosition();
-
-        toggleSidebarClasses(deckClass);
-        config.set('lastState.' + deckClass, isDeckActive());
-
-        if (isDeckActive()) {
-            mainWindow.setPosition(pos[0] - 250, pos[1]);
-            mainWindow.setSize(size[0] + 250, size[1]);
-        } else {
-            mainWindow.setPosition(pos[0] + 250, pos[1]);
-            mainWindow.setSize(size[0] - 250, size[1]);
-        }
-    });
-
-    // Toggle left sidebar
-    $('#left-toggle').click(function () {
-        const size = mainWindow.getSize();
-
-        toggleSidebarClasses(sideClass);
-        config.set('lastState.' + sideClass, isSideActive());
-
-        if (isSideActive()) {
-            mainWindow.setSize(size[0] + 250, size[1]);
-        } else {
-            mainWindow.setSize(size[0] - 250, size[1]);
-        }
-    });
 
     // Add block from single or multiple files
     $('#add-sound').click(function () {
@@ -1531,7 +1473,7 @@ $(function () {
         }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
-            const delta = e.originalEvent.deltaY;
+            // Zoom const delta = e.originalEvent.deltaY;
         }
     });
 
@@ -1725,20 +1667,7 @@ $(function () {
 
     // Toggle edit mode
     addHotkey('space', function () {
-        if (isDeckActive()) {
-            $('#deck-toggle').click();
-        } else {
-            toggleEditMode();
-        }
-    });
-
-    // Toggle deck
-    addHotkey('ctrl+space', function () {
-        if (!isEditMode()) {
-            toggleEditMode();
-        }
-
-        $('#deck-toggle').click();
+        toggleEditMode();
     });
 
     // Save all data

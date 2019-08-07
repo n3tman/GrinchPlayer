@@ -217,13 +217,18 @@ textarea:focus {
 }
 
 // ------------------ //
-//  Wrapper
+//  Layout
 // ------------------ //
+
+.layout {
+    display: flex;
+    height: 100%;
+}
 
 .wrapper {
     & {
-        height: calc(100% - 30px);
         position: relative;
+        flex: 1;
     }
 
     &.is-loading {
@@ -275,7 +280,7 @@ textarea:focus {
     left: 0;
     min-width: 100%;
     position: absolute;
-    z-index: 20;
+    z-index: 2000;
     padding: 0;
     border-bottom: 0 !important;
     border-radius: 6px 6px 0 0;
@@ -300,81 +305,6 @@ textarea:focus {
 }
 
 // ------------------ //
-//  Navbar Top
-// ------------------ //
-
-.navbar.top {
-    padding: 4px;
-    min-height: 30px;
-    height: 30px;
-    user-select: none;
-    justify-content: space-between;
-    box-shadow: 0 1px 0 1px $border;
-}
-
-.navbar.top .navbar-brand {
-    & {
-        min-height: 0;
-        width: 210px;
-    }
-
-    .text {
-        font-weight: bold;
-        margin-left: $size-small;
-    }
-}
-
-.navbar.top .about {
-    & {
-        font-size: 1.1rem;
-        color: $success;
-        flex-grow: 1;
-        justify-content: center;
-    }
-
-    i {
-        margin-right: 0.6rem;
-        font-size: 1.3rem;
-    }
-
-    .author {
-        font-weight: bold;
-    }
-}
-
-.navbar.top .window {
-    & {
-        padding: 0;
-        margin-right: -4px;
-        width: 210px;
-        justify-content: flex-end;
-    }
-
-    .buttons {
-        margin-bottom: 0;
-    }
-
-    .button {
-        background: transparent;
-        border: 0;
-        opacity: 0.7;
-        margin: 0 !important;
-        padding-top: 3px;
-        height: 30px;
-    }
-
-    .button:hover {
-        opacity: 1;
-        background: $grey-darker;
-    }
-
-    i {
-        font-size: $size-large;
-        margin: 0;
-    }
-}
-
-// ------------------ //
 //  Tabs
 // ------------------ //
 
@@ -385,6 +315,10 @@ textarea:focus {
         margin-left: -2px;
         box-shadow: inset 1px 0 0 1px $border;
         overflow: hidden;
+    }
+
+    .tab {
+        -webkit-app-region: no-drag;
     }
 
     .buttons,
@@ -529,7 +463,6 @@ textarea:focus {
         width: 100%;
         height: 130px;
         bottom: -100px;
-        transition: bottom 0.5s;
         background-color: rgba($navbar-background-color, 0.95);
         z-index: 2000;
         user-select: none;
@@ -661,7 +594,7 @@ textarea:focus {
     }
 }
 
-.has-bottom:not(.has-right) .navbar.level {
+.has-bottom .navbar.level {
     & {
         bottom: 0;
     }
@@ -671,24 +604,15 @@ textarea:focus {
     }
 }
 
-.has-right .navbar.level {
-    .deck-toggle {
-        margin-top: -30px !important;
-        color: $green !important;
-    }
-}
-
 // ------------------ //
 //  Panels
 // ------------------ //
 
 .panel {
     & {
-        position: absolute;
         width: 250px;
-        height: calc(100% - 30px);
-        top: 30px;
         background-color: $grey-darker;
+        margin-bottom: 0 !important;
         z-index: 2000;
     }
 
@@ -738,8 +662,6 @@ textarea:focus {
 
 .panel.navigator {
     & {
-        left: -250px;
-        transition: left 0.3s ease-in-out 0.2s;
         border-right: 2px solid $border;
     }
 
@@ -787,13 +709,42 @@ textarea:focus {
     }
 }
 
-.has-left {
-    .wrapper {
-        margin-left: 250px;
+.navbar-brand {
+    & {
+        min-height: 0;
+        display: flex;
+        justify-content: center;
     }
 
-    .panel.navigator {
-        left: 0;
+    img {
+        height: 100%;
+        width: auto;
+    }
+
+    .text {
+        font-weight: bold;
+        margin-left: $size-small;
+    }
+}
+
+.about {
+    & {
+        height: 30px;
+        font-size: 1.1rem;
+        color: $success;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    i {
+        font-size: 1.3rem;
+        margin-right: 5px;
+    }
+
+    .author {
+        font-weight: bold;
+        margin-left: 5px;
     }
 }
 
@@ -803,9 +754,11 @@ textarea:focus {
 
 .panel.deck {
     & {
-        right: -250px;
-        transition: right 0.3s ease-in-out 0.2s;
         border-left: 2px solid $border;
+    }
+
+    .phrases {
+        background: transparent;
     }
 
     .panel-tabs {
@@ -845,7 +798,7 @@ textarea:focus {
     .deck-items {
         & {
             display: none;
-            height: calc(100% - 180px);
+            height: calc(100% - 185px);
         }
 
         .panel-block {
@@ -864,14 +817,15 @@ textarea:focus {
     .batch {
         & {
             padding: 0;
-            height: 35px;
+            height: 30px;
         }
 
         .button {
             background: transparent;
-            height: 35px;
+            height: 30px;
             border: 0;
             color: $input-color;
+            padding: 0 0.75em;
         }
 
         .button:hover {
@@ -882,6 +836,7 @@ textarea:focus {
 
     .batch .input {
         & {
+            height: 30px;
             border: 0;
         }
 
@@ -897,8 +852,13 @@ textarea:focus {
     }
 
     .bottom {
-        height: 50px;
+        height: 35px;
         border-bottom: 0;
+    }
+
+    .bottom .button {
+        height: 30px;
+        padding: 0 0.75em;
     }
 
     .search.input {
@@ -911,13 +871,30 @@ textarea:focus {
     }
 }
 
-.has-right {
-    .wrapper {
-        margin-right: 250px;
+.window.buttons {
+    & {
+        padding: 0;
+        margin-bottom: 0;
+        justify-content: flex-end;
     }
 
-    .panel.deck {
-        right: 0;
+    .button {
+        background: transparent;
+        border: 0;
+        opacity: 0.7;
+        margin: 0 !important;
+        padding-top: 0;
+        height: 30px;
+    }
+
+    .button:hover {
+        opacity: 1;
+        background: $grey-darker;
+    }
+
+    i {
+        font-size: $size-large;
+        margin: 0;
     }
 }
 

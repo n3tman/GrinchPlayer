@@ -8,167 +8,156 @@
 </head>
 <body>
 
-<nav class="navbar top" id="header" aria-label="main navigation">
-    <div class="navbar-item navbar-brand drag">
-        <img src="static/icon-64.png" alt="GrinchPlayer">
-        <span class="text is-size-5">GrinchPlayer</span>
-    </div>
-    <div class="navbar-item about drag"><i class="fa fa-phone-volume"></i>
-        Технопранк-плеер by&nbsp; <span class="author">Nik</span></div>
-    <div class="navbar-item window no-drag">
-        <div class="buttons">
-            <button class="button" id="win-minimize"><i class="fa fa-window-minimize"></i></button>
-            <button class="button" id="win-maximize"><i class="fa fa-window-maximize"></i></button>
-            <button class="button" id="win-close"><i class="fa fa-window-close"></i></button>
+<div class="layout">
+    <nav class="panel navigator" id="navigator">
+        <div class="panel-heading navbar-brand drag">
+            <img src="static/icon-64.png" alt="GrinchPlayer">
+            <span class="text is-size-5">GrinchPlayer</span>
         </div>
-    </div>
-</nav>
+        <div class="about"><i class="fa fa-phone-volume"></i>
+            Технопранк-плеер by <span class="author">Nik</span>
+        </div>
+        <div class="pages" id="page-search">
+            <p class="panel-heading">Страницы</p>
+            <div class="panel-search field has-addons">
+                <p class="control has-icons-left">
+                    <input class="input search" type="text" placeholder="фильтр">
+                    <span class="icon is-left">
+                        <i class="fa fa-search"></i>
+                    </span>
+                </p>
+                <p class="control">
+                    <button class="button is-dark sort" data-sort="text">
+                        <i class="fa fa-sort-alpha-asc"></i>
+                    </button>
+                </p>
+            </div>
+            <div class="items"></div>
+        </div>
 
-<nav class="panel navigator" id="navigator">
-    <div class="pages" id="page-search">
-        <p class="panel-heading">Страницы</p>
-        <div class="panel-search field has-addons">
-            <p class="control has-icons-left">
-                <input class="input search" type="text" placeholder="фильтр">
+        <div class="projects" id="project-search">
+            <p class="panel-heading">Проекты</p>
+            <div class="panel-search field has-addons">
+                <p class="control has-icons-left">
+                    <input class="input search" type="text" placeholder="фильтр">
+                    <span class="icon is-left">
+                        <i class="fa fa-search"></i>
+                    </span>
+                </p>
+                <p class="control">
+                    <button class="button is-dark sort" data-sort="text">
+                        <i class="fa fa-sort-alpha-asc"></i>
+                    </button>
+                </p>
+            </div>
+            <div class="items">
+                <a class="panel-block">...в разработке...</a>
+            </div>
+        </div>
+
+        <div class="selection" id="selection">
+            <p class="panel-heading">Информация</p>
+            <div class="items"></div>
+        </div>
+    </nav>
+
+    <div class="wrapper">
+        <div class="notification is-success"></div>
+
+        <div class="tabs is-toggle drag" id="tabs">
+            <ul></ul>
+            <div class="buttons no-drag">
+                <button class="button is-dark add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>
+                <button class="button is-dark close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>
+            </div>
+        </div>
+
+        <nav class="level navbar" id="controls">
+            <div class="level-center">
+                <div class="level-top">
+                    <a class="navbar-item" id="set-device"><i class="fa fa-gear"></i> Устройство вывода</a>
+
+                    <a class="navbar-item" id="show-help"><i class="fa fa-question-circle"></i> Помощь</a>
+
+                    <div class="navbar-item has-dropdown has-dropdown-up is-hoverable">
+                        <a class="navbar-link"><i class="fa fa-external-link"></i> Ссылки</a>
+
+                        <div class="navbar-dropdown">
+                            <a class="navbar-item" id="youtube"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
+                            <a class="navbar-item" id="discord"><i class="fa fa-discord-alt"></i> Discord</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="level-bottom">
+                    <div class="group add">
+                        <div class="text"><i class="fa fa-plus-square-o"></i> Добавить</div>
+                        <div class="buttons">
+                            <button class="button" id="add-sound" title="Добавить файлы"><i class="fa fa-file-o"></i> Файлы</button>
+                            <button class="button" id="add-folder" title="Добавить папки"><i class="fa fa-folder-o"></i> Папки</button>
+                            <button class="button" id="add-pp" title="Добавить файл из PrankPlayer v2"><i class="fa fa-bullhorn"></i> PPv2</button>
+                            <button class="button" id="add-ppx" title="Добавить все PPv2 в папках"><i class="fa fa-tty"></i> Nx PPv2</button>
+                        </div>
+                    </div>
+                    <div class="group page">
+                        <div class="text"><i class="fa fa-table"></i> Страница</div>
+                        <div class="buttons">
+                            <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Удалить</button>
+                            <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
+                            <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
+                            <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="level-right">
+                <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
+                    <i class="fa fa-edit"></i>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <nav class="panel deck" id="deck">
+        <div class="panel-heading window buttons drag">
+            <button class="button no-drag" id="win-minimize"><i class="fa fa-window-minimize"></i></button>
+            <button class="button no-drag" id="win-maximize"><i class="fa fa-window-maximize"></i></button>
+            <button class="button no-drag" id="win-close"><i class="fa fa-window-close"></i></button>
+        </div>
+        <p class="panel-heading phrases">
+            Осталось фраз: <span class="count">0</span>
+        </p>
+        <div class="panel-block batch">
+            <div class="field has-addons">
+                <p class="control">
+                    <button class="button is-dark is-static">Добавить</button>
+                </p>
+                <p class="control is-expanded">
+                    <input class="input" type="number" min="1" id="batch-num">
+                </p>
+                <p class="control">
+                    <button class="button is-dark is-static">фраз</button>
+                </p>
+                <p class="control">
+                    <button class="button is-dark" id="batch-btn" title="Добавить на страницу">
+                        <i class="fa fa-plus"></i>
+                    </button>
+                </p>
+            </div>
+        </div>
+        <div class="panel-search">
+            <p class="control has-icons-left" id="search-wrapper">
                 <span class="icon is-left">
                     <i class="fa fa-search"></i>
                 </span>
             </p>
-            <p class="control">
-                <button class="button is-dark sort" data-sort="text">
-                    <i class="fa fa-sort-alpha-asc"></i>
-                </button>
-            </p>
         </div>
-        <div class="items"></div>
-    </div>
-
-    <div class="projects" id="project-search">
-        <p class="panel-heading">Проекты</p>
-        <div class="panel-search field has-addons">
-            <p class="control has-icons-left">
-                <input class="input search" type="text" placeholder="фильтр">
-                <span class="icon is-left">
-                    <i class="fa fa-search"></i>
-                </span>
-            </p>
-            <p class="control">
-                <button class="button is-dark sort" data-sort="text">
-                    <i class="fa fa-sort-alpha-asc"></i>
-                </button>
-            </p>
-        </div>
-        <div class="items">
-            <a class="panel-block">...в разработке...</a>
-        </div>
-    </div>
-
-    <div class="selection" id="selection">
-        <p class="panel-heading">Информация</p>
-        <div class="items"></div>
-    </div>
-</nav>
-
-<div class="wrapper">
-    <div class="notification is-success"></div>
-
-    <div class="tabs is-toggle" id="tabs">
-        <ul></ul>
-        <div class="buttons">
-            <button class="button is-dark add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>
-            <button class="button is-dark close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>
-        </div>
-    </div>
-
-    <nav class="level navbar" id="controls">
-        <div class="level-left">
-            <button class="button is-medium is-dark" id="left-toggle" title="Сайдбар">
-                <i class="fa fa-chevron-left"></i>
-            </button>
-        </div>
-        <div class="level-center">
-            <div class="level-top">
-                <a class="navbar-item" id="set-device"><i class="fa fa-gear"></i> Устройство вывода</a>
-
-                <a class="navbar-item" id="show-help"><i class="fa fa-question-circle"></i> Помощь</a>
-
-                <div class="navbar-item has-dropdown has-dropdown-up is-hoverable">
-                    <a class="navbar-link"><i class="fa fa-external-link"></i> Ссылки</a>
-
-                    <div class="navbar-dropdown">
-                        <a class="navbar-item" id="youtube"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
-                        <a class="navbar-item" id="discord"><i class="fa fa-discord-alt"></i> Discord</a>
-                    </div>
-                </div>
-            </div>
-            <div class="level-bottom">
-                <div class="group add">
-                    <div class="text"><i class="fa fa-plus-square-o"></i> Добавить</div>
-                    <div class="buttons">
-                        <button class="button" id="add-sound" title="Добавить файлы"><i class="fa fa-file-o"></i> Файлы</button>
-                        <button class="button" id="add-folder" title="Добавить папки"><i class="fa fa-folder-o"></i> Папки</button>
-                        <button class="button" id="add-pp" title="Добавить файл из PrankPlayer v2"><i class="fa fa-bullhorn"></i> PPv2</button>
-                        <button class="button" id="add-ppx" title="Добавить все PPv2 в папках"><i class="fa fa-tty"></i> Nx PPv2</button>
-                    </div>
-                </div>
-                <div class="group page">
-                    <div class="text"><i class="fa fa-table"></i> Страница</div>
-                    <div class="buttons">
-                        <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Удалить</button>
-                        <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
-                        <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
-                        <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="level-right">
-            <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
-                <i class="fa fa-edit"></i>
-            </button>
-
-            <button class="button deck-toggle is-medium is-dark" id="deck-toggle" title="Колода">
-                <i class="fa fa-list"></i>
+        <div class="panel-block bottom" id="deck-bottom">
+            <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
+                Очистить
             </button>
         </div>
     </nav>
 </div>
-
-<nav class="panel deck" id="deck">
-    <p class="panel-heading">
-        Осталось фраз: <span class="count">0</span>
-    </p>
-    <div class="panel-block batch">
-        <div class="field has-addons">
-            <p class="control">
-                <button class="button is-dark is-static">Добавить</button>
-            </p>
-            <p class="control is-expanded">
-                <input class="input" type="number" min="1" id="batch-num">
-            </p>
-            <p class="control">
-                <button class="button is-dark is-static">фраз</button>
-            </p>
-            <p class="control">
-                <button class="button is-dark" id="batch-btn" title="Добавить на страницу">
-                    <i class="fa fa-plus"></i>
-                </button>
-            </p>
-        </div>
-    </div>
-    <div class="panel-search">
-        <p class="control has-icons-left" id="search-wrapper">
-            <span class="icon is-left">
-                <i class="fa fa-search"></i>
-            </span>
-        </p>
-    </div>
-    <div class="panel-block bottom" id="deck-bottom">
-        <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
-            Очистить
-        </button>
-    </div>
-</nav>
 
 <div class="modal" id="devices">
     <div class="modal-background"></div>
