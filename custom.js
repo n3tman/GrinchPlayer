@@ -466,6 +466,14 @@ function showFolderSelectionDialog(callback, finish) {
     });
 }
 
+// Add page to database
+function addPageToDatabase(page) {
+    if (!savedExists(page.hash)) {
+        addPageToList(page.hash, page.name, true);
+        allPages[page.hash] = page;
+    }
+}
+
 // Load saved page
 function loadSavedPage(page, skipTab) {
     const pageHash = page.hash;
@@ -476,9 +484,7 @@ function loadSavedPage(page, skipTab) {
         $tabList.append(tabHtml);
     }
 
-    if (!savedExists(page.hash)) {
-        addPageToList(page.hash, page.name, true);
-    }
+    addPageToDatabase(page);
 
     initNewPageBlocks(pageHash);
 
@@ -564,8 +570,7 @@ function loadPpv2(filePath) {
     });
 
     if (counter > 0) {
-        loadSavedPage(page);
-        tabClick(page.hash);
+        addPageToDatabase(page);
     }
 
     return 'Добавлено звуков: <b>' + counter + '</b>. ' +
@@ -697,6 +702,10 @@ function closeTab(hash) {
     $(selector).not('.page').remove();
     reorderTabs();
 
+    _.keys(activePages[hash].blocks).forEach(function (blockHash) {
+        howlDb[blockHash].unload();
+    });
+
     delete activePages[hash];
     currentTab = '';
 
@@ -737,7 +746,7 @@ function setAudioOverlay(width) {
 // Update block audio animation
 function updateAudioStep() {
     const sound = howlDb[lastPlayedHash];
-    if (sound !== undefined) {
+    if (sound !== undefined && sound.state() !== 'unloaded') {
         const seek = sound.seek() || 0;
         const width = (_.round((seek / sound.duration()) * 100, 3) || 0) + '%';
 
@@ -832,7 +841,6 @@ function flushDeckItems() {
     _.keys(activePages[currentTab].blocks).forEach(function (hash) {
         if (!activePages[currentTab].added.includes(hash)) {
             howlDb[hash].unload();
-            delete howlDb[hash];
             delete activePages[currentTab].blocks[hash];
             $('.deck-items[data-page="' + currentTab + '"] .simplebar-content').empty();
         }
@@ -1357,6 +1365,7 @@ $(function () {
             } else {
                 const result = loadPpv2(files[0]);
                 if (result) {
+                    saveAllData(true);
                     $wrapper.removeClass('is-loading');
                     showNotification(result);
                 } else {
@@ -1389,7 +1398,7 @@ $(function () {
                     files.forEach(function (file) {
                         loadPpv2(file);
                     });
-
+                    saveAllData(true);
                     $wrapper.removeClass('is-loading');
                 }
             }
@@ -1618,10 +1627,17 @@ $(function () {
         closeTab(currentTab);
     });
 
-    // Quick switch keys
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (num) {
-        addHotkey(num.toString(), function () {
-            $tabList.find('li').eq(num - 1).click();
+    // Quick switch keys 1-10
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(function (val, i) {
+        addHotkey(val.toString(), function () {
+            $tabList.find('li').eq(i).click();
+        });
+    });
+
+    // Quick switch keys 11-20
+    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'].forEach(function (val, i) {
+        addHotkey(val, function () {
+            $tabList.find('li').eq(i + 10).click();
         });
     });
 
