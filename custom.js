@@ -15,7 +15,6 @@ const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
 
-const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
@@ -87,9 +86,6 @@ function toggleEditMode() {
         $blocks.draggable('enable').resizable('enable');
         $('.deck-items .panel-block').draggable('enable');
         $('.main').selectable('enable');
-        $blocks.add($tabs).each(function () {
-            this._tippy.enable();
-        });
         $('.page-remove').prop('disabled', false);
         $('.add-tab').prop('disabled', false);
     } else {
@@ -98,7 +94,7 @@ function toggleEditMode() {
 }
 
 // Initialize draggable/resizable block
-function initDraggableMain($element, $main) {
+function initDraggableMain($element) {
     const hash = $element.data('hash');
     let oldPos;
 
@@ -108,8 +104,6 @@ function initDraggableMain($element, $main) {
         stack: '.sound-block',
         scroll: false,
         start: function (e, ui) {
-            e.target._tippy.hide();
-            e.target._tippy.disable();
             oldPos = ui.position;
         },
         drag: function (e, ui) {
@@ -136,20 +130,13 @@ function initDraggableMain($element, $main) {
                     activePages[currentTab].blocks[this.dataset.hash].rect = getRectWithOffset(this);
                 });
             }
-
-            e.target._tippy.enable();
         }
     }).resizable({
         grid: [10, 10],
         containment: 'parent',
-        start: function (e) {
-            e.target._tippy.hide();
-            e.target._tippy.disable();
-        },
         stop: function (e) {
             const hash = e.target.dataset.hash;
             activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
-            e.target._tippy.enable();
         },
         resize: _.debounce(function () {
             autoSizeText($element);
@@ -172,19 +159,6 @@ function initDraggableMain($element, $main) {
         if (isEditMode()) {
             playSound(e.currentTarget);
         }
-    });
-
-    // Show tooltip with buttons in Edit mode
-    tippy($element[0], {
-        content: '<div class="block-controls" data-for="' + hash + '">' +
-            '<button class="button block-rename" title="Переименовать"><i class="fa fa-pencil"></i></button>' +
-            '<button class="button block-delete" title="Удалить"><i class="fa fa-times"></i></button></div>',
-        arrow: true,
-        aria: null,
-        distance: 0,
-        interactive: true,
-        placement: 'right',
-        boundary: $main[0]
     });
 
     // Make text editable in place on button click
@@ -306,7 +280,7 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
         activePages[currentTab].added.push(hash);
 
         setTimeout(function () {
-            initDraggableMain($dropped, $main);
+            initDraggableMain($dropped);
         }, 100);
 
         return true;
@@ -333,7 +307,7 @@ function addSavedSoundBlock(hash, pageHash) {
         width: rect.width
     });
 
-    initDraggableMain($mainSelector.find(selector), $mainSelector);
+    initDraggableMain($mainSelector.find(selector));
 }
 
 // Append HTML of the item to the deck
@@ -650,7 +624,6 @@ function initNewPageBlocks(hash) {
         sortClass: 'sort-' + hash
     });
 
-    initTabTooltip($tabSelector[0]);
     initEditableTab($tabSelector);
     $tabList.sortable('refresh');
     reorderTabs();
@@ -658,6 +631,11 @@ function initNewPageBlocks(hash) {
     $mainSelector.on('click', '.sound-block', function () {
         if (!isEditMode()) {
             playSound(this);
+        }
+    }).on('contextmenu', '.sound-block', function (e) {
+        e.preventDefault();
+        if (isEditMode()) {
+            $(e.currentTarget).find('.sound-text').trigger('edit');
         }
     }).on('contextmenu', function (e) {
         // Pause/play already playing sound
@@ -716,7 +694,6 @@ function closeTab(hash) {
     const selector = '[data-page="' + hash + '"]';
     const $tab = $('.tab' + selector);
     const $prevTab = $tab.prev();
-    $tab[0]._tippy.destroy();
     $(selector).not('.page').remove();
     reorderTabs();
 
@@ -865,17 +842,12 @@ function flushDeckItems() {
 }
 
 // Prevent dragging/resizing of the main blocks
-function freezePageEditing(blocks, tabs) {
+function freezePageEditing(blocks) {
     const $blocks = blocks || $('.sound-block');
-    const $tabs = tabs || $('#tabs .tab');
 
     $blocks.draggable('disable').resizable('disable');
     $('.deck-items .panel-block').draggable('disable');
     $('.main').selectable('disable');
-    $blocks.add($tabs).each(function () {
-        this._tippy.hide();
-        this._tippy.disable();
-    });
     $('.page-remove').prop('disabled', true);
     $('.add-tab').prop('disabled', true);
 }
@@ -937,26 +909,6 @@ function getTabHtml(text, hash) {
         '</a></li>';
 }
 
-// Get tab tooltip html
-function getTabTooltipHtml(hash) {
-    return '<div class="tab-controls" data-for="' + hash + '">' +
-        '<button class="button tab-rename" title="Переименовать"><i class="fa fa-pencil-square"></i></button>' +
-        '<button class="button tab-add" title="Добавить справа"><i class="fa fa-plus-square"></i></button></div>';
-}
-
-// Show tab tooltips in Edit mode
-function initTabTooltip(element) {
-    const hash = element.dataset.page;
-
-    tippy(element, {
-        content: getTabTooltipHtml(hash),
-        arrow: true,
-        aria: null,
-        interactive: true,
-        placement: 'bottom'
-    });
-}
-
 // Make tab text editable
 function initEditableTab($tab) {
     $tab.find('.text').editable(function (value) {
@@ -985,6 +937,8 @@ function initEditableTab($tab) {
                 activePages[newHash] = activePages[oldHash];
                 activePages[newHash].hash = newHash;
                 activePages[newHash].name = value;
+
+                delete allPages[oldHash];
                 delete activePages[oldHash];
                 config.delete('pages.' + oldHash);
 
@@ -995,7 +949,6 @@ function initEditableTab($tab) {
 
                 $('.page[data-page="' + oldHash + '"] > .text').text(value);
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
-                $('.tab[data-page="' + newHash + '"]')[0]._tippy.setContent(getTabTooltipHtml(newHash));
 
                 saveAllData(true);
             }
@@ -1119,11 +1072,6 @@ $(function () {
         tolerance: 'pointer',
         delay: 200,
         distance: 10,
-        start: function (event, ui) {
-            if (!ui.item.hasClass('panel-block')) {
-                ui.item[0]._tippy.hide();
-            }
-        },
         stop: function (event, ui) {
             if (ui.item.hasClass('panel-block')) {
                 const hash = ui.item.attr('data-page');
@@ -1160,6 +1108,11 @@ $(function () {
         $(selector).show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
+    }).on('contextmenu', '.tab', function (e) {
+        e.preventDefault();
+        if (isEditMode()) {
+            $(e.currentTarget).find('.text').trigger('edit');
+        }
     }).on('click', '.tab-remove', function (e) {
         e.stopPropagation();
         const hash = $(this).closest('.tab').attr('data-page');
@@ -1447,36 +1400,7 @@ $(function () {
     //  Body events  //
     // ------------- //
 
-    $body.on('click', '.block-delete', function () {
-        if (isEditMode()) {
-            const hash = $(this).parent().data('for');
-            const $selector = $main.find('[data-hash="' + hash + '"]');
-            $selector[0]._tippy.destroy();
-            removeBlockFromPage(hash);
-            _.pull(activePages[currentTab].added, hash);
-            updateDeckData();
-        }
-    }).on('click', '.block-rename', function () {
-        if (isEditMode()) {
-            const hash = $(this).parent().data('for');
-            const $selector = $main.find('[data-hash="' + hash + '"]');
-            $selector.find('.sound-text').trigger('edit');
-        }
-    }).on('click', '.tab-rename', function () {
-        if (isEditMode()) {
-            const hash = $(this).parent().attr('data-for');
-            const selector = '.tab[data-page="' + hash + '"]';
-            $(selector)[0]._tippy.hide();
-            $(selector).find('.text').trigger('edit');
-        }
-    }).on('click', '.tab-add', function () {
-        if (isEditMode()) {
-            const hash = $(this).parent().attr('data-for');
-            const selector = '.tab[data-page="' + hash + '"]';
-            $(selector)[0]._tippy.hide();
-            addNewEmptyPage($(selector));
-        }
-    }).on('keypress', '.sound-text textarea, .text textarea', function (e) {
+    $body.on('keypress', '.sound-text textarea, .text textarea', function (e) {
         // Prevent new line on Enter key
         if (e.which === 13) {
             e.target.blur();
