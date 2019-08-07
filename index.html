@@ -10,9 +10,9 @@
 
 <div class="layout">
     <nav class="panel navigator" id="navigator">
-        <div class="panel-heading navbar-brand drag">
-            <img src="static/icon-64.png" alt="GrinchPlayer">
-            <span class="text is-size-5">GrinchPlayer</span>
+        <div class="panel-heading navbar-brand">
+            <img class="drag" src="static/icon-64.png" alt="GrinchPlayer">
+            <span class="text is-size-5 drag">GrinchPlayer</span>
         </div>
         <div class="about"><i class="fa fa-phone-volume"></i>
             Технопранк-плеер by <span class="author">Nik</span>
@@ -55,9 +55,14 @@
             </div>
         </div>
 
-        <div class="selection" id="selection">
+        <div class="info" id="info">
             <p class="panel-heading">Информация</p>
-            <div class="items"></div>
+            <div class="items">
+                <a class="panel-block" id="set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>
+                <a class="panel-block" id="show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>
+                <a class="panel-block" id="discord" title="Обсуждение в #grinch-player"><i class="fa fa-discord-alt"></i> Discord</a>
+                <a class="panel-block" id="youtube" title="Канал Гринча"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
+            </div>
         </div>
     </nav>
 
@@ -74,20 +79,6 @@
 
         <nav class="level navbar" id="controls">
             <div class="level-center">
-                <div class="level-top">
-                    <a class="navbar-item" id="set-device"><i class="fa fa-gear"></i> Устройство вывода</a>
-
-                    <a class="navbar-item" id="show-help"><i class="fa fa-question-circle"></i> Помощь</a>
-
-                    <div class="navbar-item has-dropdown has-dropdown-up is-hoverable">
-                        <a class="navbar-link"><i class="fa fa-external-link"></i> Ссылки</a>
-
-                        <div class="navbar-dropdown">
-                            <a class="navbar-item" id="youtube"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>
-                            <a class="navbar-item" id="discord"><i class="fa fa-discord-alt"></i> Discord</a>
-                        </div>
-                    </div>
-                </div>
                 <div class="level-bottom">
                     <div class="group add">
                         <div class="text"><i class="fa fa-plus-square-o"></i> Добавить</div>

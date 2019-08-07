@@ -53,6 +53,11 @@ html, body {
     border-right: 0;
 }
 
+.button:focus:not(:active),
+.button.is-focused:not(:active) {
+    box-shadow: none;
+}
+
 textarea:focus {
     outline: none;
 }
@@ -70,7 +75,8 @@ textarea:focus {
 
 .ui-draggable-dragging.panel-block.page {
     & {
-        padding: 0.25em 0.75em;
+        height: 30px;
+        padding: 2.5px 0.75em;
         border-top: 1px solid $border;
         border-bottom: 1px solid $border;
         width: auto;
@@ -272,36 +278,6 @@ textarea:focus {
 .navbar-link {
     display: flex;
     align-items: center;
-}
-
-.navbar-dropdown {
-    display: none;
-    font-size: 0.875rem;
-    left: 0;
-    min-width: 100%;
-    position: absolute;
-    z-index: 2000;
-    padding: 0;
-    border-bottom: 0 !important;
-    border-radius: 6px 6px 0 0;
-    border-top: none;
-    bottom: 100%;
-    box-shadow: 0 -8px 8px rgba($black, 0.1);
-    top: auto;
-    background-color: $navbar-dropdown-background-color;
-}
-
-.navbar-item.has-dropdown {
-    align-items: stretch;
-}
-
-.navbar-item.is-hoverable:focus .navbar-dropdown,
-.navbar-item.is-hoverable:hover .navbar-dropdown {
-    display: block;
-}
-
-.navbar-item.has-dropdown-up .navbar-link::after {
-    transform: rotate(135deg) translate(0.25em, -0.25em);
 }
 
 // ------------------ //
@@ -666,7 +642,7 @@ textarea:focus {
     }
 
     .panel-block {
-        padding: 0.25em 0.75em;
+        padding: 2.5px 0.75em;
         user-select: none;
     }
 
@@ -675,7 +651,7 @@ textarea:focus {
     }
 
     .pages {
-        height: 50%;
+        height: calc(60% - 60px);
     }
 
     .pages > .items {
@@ -700,7 +676,15 @@ textarea:focus {
     }
 
     .projects {
-        height: 30%;
+        height: calc(40% - 150px);
+    }
+
+    .info {
+        height: 150px;
+    }
+
+    .info .fa {
+        margin-right: 0.75em;
     }
 
     .page > .button,
