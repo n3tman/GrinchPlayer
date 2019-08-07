@@ -13048,7 +13048,7 @@ textarea:focus {
 
 .main {
   display: none;
-  height: calc(100% - 30px);
+  height: 100%;
   position: relative;
 }
 .main .sound-block {

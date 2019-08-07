@@ -508,6 +508,8 @@ function loadSavedPage(page, skipTab) {
 
     initNewPageBlocks(pageHash);
 
+    updateMainHeight();
+
     if (_.size(page.blocks) > 0) {
         _.each(page.blocks, function (block, hash) {
             if (page.added.includes(hash)) {
@@ -618,6 +620,8 @@ function addNewEmptyPage($element) {
     };
 
     initNewPageBlocks(hash);
+
+    updateMainHeight();
 
     saveAllData(true);
 }
@@ -901,6 +905,15 @@ function getLeftOffset() {
     return 250;
 }
 
+// Update height of the main block
+function updateMainHeight() {
+    setTimeout(function () {
+        $('.main').css({
+            height: 'calc(100% - ' + getTopOffset() + 'px)'
+        });
+    }, 500);
+}
+
 // Toggle sidebar classes
 function toggleSidebarClasses(name) {
     $('body').toggleClass(name);
@@ -1150,6 +1163,7 @@ $(function () {
     }).on('click', '.tab-remove', function (e) {
         e.stopPropagation();
         const hash = $(this).closest('.tab').attr('data-page');
+        updateMainHeight();
         saveAllData(true);
         closeTab(hash);
     });
