@@ -639,7 +639,7 @@ function initNewPageBlocks(hash) {
         }
     }).on('contextmenu', '.sound-block', function (e) {
         e.preventDefault();
-        if (isEditMode()) {
+        if (isEditMode() && e.ctrlKey) {
             $(e.currentTarget).find('.sound-text').trigger('edit');
         }
     }).on('contextmenu', function (e) {
