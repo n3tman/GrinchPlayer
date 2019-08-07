@@ -8,7 +8,7 @@
 
 **Windows**
 
-[**Download**](https://github.com/user/repo/releases/latest) the `.exe` file.
+[**Download**](https://github.com/n3tman/GrinchPlayer/releases/latest) the `.exe` file.
 
 ---
 
