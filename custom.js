@@ -1,4 +1,4 @@
-/* global window, navigator, $, SBar, fancy, requestAnimationFrame */
+/* global window, document, navigator, $, SBar, fancy, requestAnimationFrame */
 
 'use strict';
 
@@ -85,6 +85,7 @@ function toggleEditMode() {
 
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
+        $('.deck-items .panel-block').draggable('enable');
         $('.main').selectable('enable');
         $blocks.add($tabs).each(function () {
             this._tippy.enable();
@@ -624,8 +625,8 @@ function addNewEmptyPage($element) {
 // Init everything for a new page
 function initNewPageBlocks(hash) {
     const selector = '[data-page="' + hash + '"]';
-    $('#controls').before('<div class="main" data-page="' + hash + '">');
-    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
+    $('.wrapper').append('<div class="main" data-page="' + hash + '">');
+    $('.edit-mode').before('<div class="deck-items" data-page="' + hash + '"></div>');
     $('#search-wrapper').prepend('<input class="input search search-' + hash + '" ' +
         'type="text" data-page="' + hash + '" placeholder="фильтр">');
     $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '">' +
@@ -865,6 +866,7 @@ function freezePageEditing(blocks, tabs) {
     const $tabs = tabs || $('#tabs .tab');
 
     $blocks.draggable('disable').resizable('disable');
+    $('.deck-items .panel-block').draggable('disable');
     $('.main').selectable('disable');
     $blocks.add($tabs).each(function () {
         this._tippy.hide();
@@ -1475,6 +1477,8 @@ $(function () {
         if (e.ctrlKey) {
             // Zoom const delta = e.originalEvent.deltaY;
         }
+    }).on('mouseenter', '.main', function () {
+        document.activeElement.blur();
     });
 
     // ----------- //
@@ -1518,7 +1522,7 @@ $(function () {
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
-        if (_.size(activePages) > 0) {
+        if (isEditMode() && _.size(activePages) > 0) {
             // Batch add several blocks from the top
             resetDeckList();
             const num = $('#batch-num').val();
@@ -1577,28 +1581,8 @@ $(function () {
                 $this.addClass(order);
             }
         }
-    });
-
-    // Unload and remove sounds from the deck
-    $('#remove-deck').click(function () {
-        if (_.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
-            const before = _.size(activePages[currentTab].blocks);
-            stopCurrentSound();
-            if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
-                flushDeckItems();
-                showNotification('Удалено из колоды: <b>' + (before - _.size(activePages[currentTab].blocks)) + '</b>');
-                updateDeckData();
-            }
-        } else {
-            showNotification('Удалять нечего o_O', true);
-        }
-    });
-
-    // ----------------------------- //
-    //  Drag and drop files/folders  //
-    // ----------------------------- //
-
-    $('#deck, #controls').on('dragover', false).on('drop', function (e) {
+    }).on('dragover', false).on('drop', function (e) {
+        // Drag and drop files/folders
         if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;
             let fileArray = [];
@@ -1618,6 +1602,21 @@ $(function () {
             if (fileArray.length > 0) {
                 addFileBlocks(fileArray);
             }
+        }
+    });
+
+    // Unload and remove sounds from the deck
+    $('#remove-deck').click(function () {
+        if (isEditMode() && _.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
+            const before = _.size(activePages[currentTab].blocks);
+            stopCurrentSound();
+            if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
+                flushDeckItems();
+                showNotification('Удалено из колоды: <b>' + (before - _.size(activePages[currentTab].blocks)) + '</b>');
+                updateDeckData();
+            }
+        } else {
+            showNotification('Удалять нечего o_O', true);
         }
     });
 

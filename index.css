@@ -12770,6 +12770,11 @@ html, body {
   border-right: 0;
 }
 
+.panel-heading .fa, .panel-heading .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-heading a::before {
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
+
 .button:focus:not(:active),
 .button.is-focused:not(:active) {
   box-shadow: none;
@@ -13045,7 +13050,6 @@ textarea:focus {
   display: none;
   height: calc(100% - 30px);
   position: relative;
-  padding-bottom: 40px;
 }
 .main .sound-block {
   position: absolute !important;
@@ -13073,127 +13077,6 @@ textarea:focus {
 }
 .has-bottom .main .sound-block {
   box-shadow: inset 0 0 0 1px rgba(78, 93, 108, 0.8) !important;
-}
-
-.navbar.level {
-  display: flex;
-  position: absolute;
-  right: 0;
-  width: 100%;
-  height: 130px;
-  bottom: -100px;
-  background-color: rgba(43, 62, 80, 0.95);
-  z-index: 2000;
-  user-select: none;
-}
-.navbar.level .button .fa, .navbar.level .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar.level .button a::before {
-  margin-right: 0.5rem;
-}
-
-.level-center {
-  width: 100%;
-}
-.level-center .level-top,
-.level-center .level-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-evenly;
-}
-.level-center .level-top {
-  border-top: 2px solid #4E5D6C;
-  border-bottom: 2px solid #4E5D6C;
-}
-.level-center .level-bottom {
-  height: calc(100% - 30px);
-}
-.level-center .level-top,
-.level-center .navbar-item {
-  font-size: 1.1rem;
-  height: 30px;
-}
-.level-center .navbar-dropdown .navbar-item {
-  padding: 0.5rem 1rem;
-}
-.level-center .navbar-item.has-dropdown,
-.level-center .navbar-dropdown {
-  padding: 0;
-  border-bottom: 0 !important;
-}
-.level-center .navbar-link {
-  padding-right: 3rem;
-}
-.level-center i {
-  margin-right: 0.6rem;
-  margin-top: 2px;
-  font-size: 1.3rem;
-}
-
-.level-bottom .group {
-  display: flex;
-  align-items: center;
-}
-.level-bottom .text i {
-  display: block;
-  text-align: center;
-  font-size: 3rem;
-  margin-right: 0;
-}
-.level-bottom .buttons {
-  margin-left: 1rem;
-  margin-bottom: 0;
-}
-.level-bottom .add .buttons {
-  width: 250px;
-}
-.level-bottom .page .buttons {
-  width: 270px;
-}
-.level-bottom .button {
-  margin: 0.3rem;
-}
-.level-bottom .buttons .button {
-  margin-right: 0.3rem !important;
-}
-
-.navbar .level-right,
-.navbar .level-left {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-}
-.navbar .level-right .button,
-.navbar .level-left .button {
-  width: 30px;
-  height: 30px;
-  margin: 0;
-  padding: 0;
-  border: 2px solid #4E5D6C;
-}
-.navbar .level-right .button + .button,
-.navbar .level-left .button + .button {
-  margin-top: 30px;
-}
-.navbar .level-right .button .fa, .navbar .level-right .button .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .navbar .level-right .button a::before,
-.navbar .level-left .button .fa,
-.navbar .level-left .button .panel.deck .panel-tabs a::before,
-.panel.deck .panel-tabs .navbar .level-left .button a::before {
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.navbar .level-right .button {
-  border-right: 0;
-}
-
-.navbar .level-left .button {
-  border-left: 0;
-}
-
-.has-bottom .navbar.level {
-  bottom: 0;
-}
-.has-bottom .navbar.level .edit {
-  color: #5cb85c;
 }
 
 .panel {
@@ -13339,7 +13222,8 @@ textarea:focus {
 }
 .panel.deck .deck-items {
   display: none;
-  height: calc(100% - 185px);
+  height: calc(100% - 155px);
+  transition: height 0.3s;
 }
 .panel.deck .deck-items .panel-block {
   position: relative;
@@ -13378,8 +13262,10 @@ textarea:focus {
   border-left: 1px solid #4E5D6C;
 }
 .panel.deck .bottom {
-  height: 35px;
+  height: 40px;
   border-bottom: 0;
+  border-top: 0;
+  padding: 5px;
 }
 .panel.deck .bottom .button {
   height: 30px;
@@ -13391,6 +13277,37 @@ textarea:focus {
 .panel.deck .sound-text {
   padding: 2px;
   line-height: normal;
+}
+.panel.deck .panel-heading.edit {
+  border-top: 1px solid #4E5D6C;
+  border-bottom: 0;
+}
+.panel.deck .buttons.edit {
+  padding: 5px 0 0 5px;
+  margin-bottom: 0;
+  align-items: center;
+  justify-content: center;
+}
+.panel.deck .buttons.edit .button {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  height: 30px;
+  padding: 0 10px;
+}
+.panel.deck .buttons.edit .fa, .panel.deck .buttons.edit .panel-tabs a::before, .panel.deck .panel-tabs .buttons.edit a::before {
+  margin-right: 5px;
+}
+
+.edit-mode {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.has-bottom .edit-mode {
+  opacity: 1;
+}
+.has-bottom .panel.deck .deck-items {
+  height: calc(100% - 400px);
 }
 
 .window.buttons {

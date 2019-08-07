@@ -76,36 +76,6 @@
                 <button class="button is-dark close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>
             </div>
         </div>
-
-        <nav class="level navbar" id="controls">
-            <div class="level-center">
-                <div class="level-bottom">
-                    <div class="group add">
-                        <div class="text"><i class="fa fa-plus-square-o"></i> Добавить</div>
-                        <div class="buttons">
-                            <button class="button" id="add-sound" title="Добавить файлы"><i class="fa fa-file-o"></i> Файлы</button>
-                            <button class="button" id="add-folder" title="Добавить папки"><i class="fa fa-folder-o"></i> Папки</button>
-                            <button class="button" id="add-pp" title="Добавить файл из PrankPlayer v2"><i class="fa fa-bullhorn"></i> PPv2</button>
-                            <button class="button" id="add-ppx" title="Добавить все PPv2 в папках"><i class="fa fa-tty"></i> Nx PPv2</button>
-                        </div>
-                    </div>
-                    <div class="group page">
-                        <div class="text"><i class="fa fa-table"></i> Страница</div>
-                        <div class="buttons">
-                            <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Удалить</button>
-                            <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
-                            <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
-                            <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="level-right">
-                <button class="button edit is-medium is-dark" id="page-edit" title="Редактировать">
-                    <i class="fa fa-edit"></i>
-                </button>
-            </div>
-        </nav>
     </div>
 
     <nav class="panel deck" id="deck">
@@ -142,10 +112,30 @@
                 </span>
             </p>
         </div>
-        <div class="panel-block bottom" id="deck-bottom">
-            <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
-                Очистить
-            </button>
+        <div class="edit-mode">
+            <div class="panel-block bottom" id="deck-bottom">
+                <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
+                    Очистить
+                </button>
+            </div>
+            <div class="panel-heading edit">
+                <i class="fa fa-plus-square-o"></i> Добавить
+            </div>
+            <div class="buttons edit">
+                <button class="button" id="add-sound" title="Добавить файлы в колоду"><i class="fa fa-file-o"></i> Файлы</button>
+                <button class="button" id="add-folder" title="Добавить папки в колоду"><i class="fa fa-folder-o"></i> Папки</button>
+                <button class="button" id="add-pp" title="Добавить страницу из PrankPlayer v2"><i class="fa fa-bullhorn"></i> PPv2</button>
+                <button class="button" id="add-ppx" title="Добавить все PPv2 страницы в папках"><i class="fa fa-tty"></i> Nx PPv2</button>
+            </div>
+            <div class="panel-heading edit">
+                <i class="fa fa-table"></i> Страница
+            </div>
+            <div class="buttons edit">
+                <button class="button" id="remove-main" title="Очистить страницу"><i class="fa fa-window-close-o"></i> Удалить</button>
+                <button class="button" id="save-all" title="Сохранить изменения"><i class="fa fa-floppy-o"></i> Сохранить</button>
+                <button class="button" id="page-import" title="Импортировать страницу"><i class="fa fa-sign-in"></i> Импорт</button>
+                <button class="button" id="page-export" title="Экспортировать страницу"><i class="fa fa-sign-out"></i> Экспорт</button>
+            </div>
         </div>
     </nav>
 </div>

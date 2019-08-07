@@ -53,6 +53,11 @@ html, body {
     border-right: 0;
 }
 
+.panel-heading .fa {
+    vertical-align: middle;
+    padding-bottom: 2px;
+}
+
 .button:focus:not(:active),
 .button.is-focused:not(:active) {
     box-shadow: none;
@@ -390,7 +395,6 @@ textarea:focus {
         display: none;
         height: calc(100% - 30px);
         position: relative;
-        padding-bottom: 40px;
     }
 
     .sound-block {
@@ -424,159 +428,6 @@ textarea:focus {
 
     .sound-block {
         box-shadow: inset 0 0 0 1px rgba($grey, 0.8) !important;
-    }
-}
-
-// ------------------ //
-//  Navbar Bottom
-// ------------------ //
-
-.navbar.level {
-    & {
-        display: flex;
-        position: absolute;
-        right: 0;
-        width: 100%;
-        height: 130px;
-        bottom: -100px;
-        background-color: rgba($navbar-background-color, 0.95);
-        z-index: 2000;
-        user-select: none;
-    }
-
-    .button .fa {
-        margin-right: 0.5rem;
-    }
-}
-
-.level-center {
-    & {
-        width: 100%;
-    }
-
-    .level-top,
-    .level-bottom {
-        display: flex;
-        align-items: center;
-        justify-content: space-evenly;
-    }
-
-    .level-top {
-        border-top: 2px solid $border;
-        border-bottom: 2px solid $border;
-    }
-
-    .level-bottom {
-        height: calc(100% - 30px);
-    }
-
-    .level-top,
-    .navbar-item {
-        font-size: 1.1rem;
-        height: 30px;
-    }
-
-    .navbar-dropdown .navbar-item {
-        padding: 0.5rem 1rem;
-    }
-
-    .navbar-item.has-dropdown,
-    .navbar-dropdown {
-        padding: 0;
-        border-bottom: 0 !important;
-    }
-
-    .navbar-link {
-        padding-right: 3rem;
-    }
-
-    i {
-        margin-right: 0.6rem;
-        margin-top: 2px;
-        font-size: 1.3rem;
-    }
-}
-
-.level-bottom {
-    .group {
-        display: flex;
-        align-items: center;
-    }
-
-    .text i {
-        display: block;
-        text-align: center;
-        font-size: 3rem;
-        margin-right: 0;
-    }
-
-    .buttons {
-        margin-left: 1rem;
-        margin-bottom: 0;
-    }
-
-    .add .buttons {
-        width: 250px;
-    }
-
-    .page .buttons {
-        width: 270px;
-    }
-
-    .button {
-        margin: 0.3rem;
-    }
-
-    .buttons .button {
-        margin-right: 0.3rem !important;
-    }
-}
-
-.navbar .level-right,
-.navbar .level-left {
-    & {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-    }
-
-    .button {
-        width: 30px;
-        height: 30px;
-        margin: 0;
-        padding: 0;
-        border: 2px solid $border;
-    }
-
-    .button + .button {
-        margin-top: 30px;
-    }
-
-    .button .fa {
-        font-size: $size-large;
-        margin: 0;
-    }
-}
-
-.navbar .level-right {
-    .button {
-        border-right: 0;
-    }
-}
-
-.navbar .level-left {
-    .button {
-        border-left: 0;
-    }
-}
-
-.has-bottom .navbar.level {
-    & {
-        bottom: 0;
-    }
-
-    .edit {
-        color: $green;
     }
 }
 
@@ -782,7 +633,8 @@ textarea:focus {
     .deck-items {
         & {
             display: none;
-            height: calc(100% - 185px);
+            height: calc(100% - 155px);
+            transition: height 0.3s;
         }
 
         .panel-block {
@@ -836,8 +688,10 @@ textarea:focus {
     }
 
     .bottom {
-        height: 35px;
+        height: 40px;
         border-bottom: 0;
+        border-top: 0;
+        padding: 5px;
     }
 
     .bottom .button {
@@ -852,6 +706,46 @@ textarea:focus {
     .sound-text {
         padding: 2px;
         line-height: normal;
+    }
+
+    .panel-heading.edit {
+        border-top: $panel-item-border;
+        border-bottom: 0;
+    }
+
+    .buttons.edit {
+        & {
+            padding: 5px 0 0 5px;
+            margin-bottom: 0;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .button {
+            margin-right: 5px;
+            margin-bottom: 5px;
+            height: 30px;
+            padding: 0 10px;
+        }
+
+        .fa {
+            margin-right: 5px;
+        }
+    }
+}
+
+.edit-mode {
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.has-bottom {
+    .edit-mode {
+        opacity: 1;
+    }
+
+    .panel.deck .deck-items {
+        height: calc(100% - 400px);
     }
 }
 
