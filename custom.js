@@ -19,7 +19,7 @@ const hp = require('./vendor/howler');
 const config = require('./config');
 
 const editClass = 'has-bottom';
-const audioExtensions = ['mp3', 'wav', 'ogg', 'flac'];
+const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
 const activePages = {};
 const pageSearch = {};
@@ -1191,7 +1191,7 @@ $(function () {
                 title: 'Выберите звуки',
                 properties: ['openFile', 'multiSelections'],
                 filters: [{
-                    name: 'Аудио: ' + audioExtensions.join(', '),
+                    name: 'Аудио',
                     extensions: audioExtensions
                 }]
             }, function (files) {
