@@ -2,7 +2,7 @@
 
 'use strict';
 
-const {remote, shell} = require('electron');
+const {webFrame, remote, shell} = require('electron');
 const {dialog} = require('electron').remote;
 const path = require('path');
 const fs = require('fs');
@@ -62,7 +62,7 @@ function showNotification(text, error) {
     $notify.html(text).fadeIn();
     notifyHandle = setTimeout(function () {
         $notify.fadeOut();
-    }, 3000);
+    }, 2000);
 }
 
 // Confirm action
@@ -1168,12 +1168,19 @@ $(function () {
         });
     }
 
-    // Click current tab if it's saved in the config
+    // Set zoom if it's in the config
+    const zoom = config.get('zoom');
+
+    // Click current tab if it's saved in the config + zoom
     setTimeout(function () {
         if (currentTab.length > 0) {
             tabClick(currentTab);
         } else {
             tabClick(true);
+        }
+
+        if (zoom !== undefined) {
+            webFrame.setZoomFactor(zoom);
         }
     }, 100);
 
@@ -1422,7 +1429,18 @@ $(function () {
         }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
-            // Zoom const delta = e.originalEvent.deltaY;
+            const delta = e.originalEvent.deltaY;
+            let zoom = webFrame.getZoomFactor();
+            if (delta < 0) {
+                zoom += 0.01;
+            } else {
+                zoom -= 0.01;
+            }
+
+            zoom = _.round(zoom, 2);
+            webFrame.setZoomFactor(zoom);
+            showNotification('Текущий зум: ' + _.round(zoom * 100) + '%');
+            config.set('zoom', zoom);
         }
     }).on('mouseenter', '.main', function () {
         document.activeElement.blur();
