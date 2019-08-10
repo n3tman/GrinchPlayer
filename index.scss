@@ -492,6 +492,19 @@ textarea:focus {
             height: 30px;
         }
     }
+
+    .panel-block {
+        padding: 2.5px 0.75em;
+        user-select: none;
+    }
+
+    .panel-block:first-child {
+        border-top: 0;
+    }
+
+    .panel-block:last-child {
+        border-bottom: 0;
+    }
 }
 
 // ------------------ //
@@ -501,15 +514,6 @@ textarea:focus {
 .panel.navigator {
     & {
         border-right: 2px solid $border;
-    }
-
-    .panel-block {
-        padding: 2.5px 0.75em;
-        user-select: none;
-    }
-
-    .panel-block:first-child {
-        border-top: 0;
     }
 
     .pages {
@@ -542,15 +546,7 @@ textarea:focus {
     }
 
     .projects {
-        height: calc(40% - 150px);
-    }
-
-    .info {
-        height: 150px;
-    }
-
-    .info .fa {
-        margin-right: 0.75em;
+        height: 40%;
     }
 
     .page > .button,
@@ -648,7 +644,7 @@ textarea:focus {
     .deck-items {
         & {
             display: none;
-            height: calc(100% - 155px);
+            height: calc(100% - 340px);
             transition: height 0.3s;
         }
 
@@ -658,10 +654,6 @@ textarea:focus {
             margin-left: 25px;
             width: 200px;
             user-select: none;
-        }
-
-        .panel-block:first-child {
-            border-top: 0;
         }
     }
 
@@ -747,6 +739,14 @@ textarea:focus {
             margin-right: 5px;
         }
     }
+
+    .info {
+        height: 150px;
+    }
+
+    .info .fa {
+        margin-right: 0.75em;
+    }
 }
 
 .edit-mode {
@@ -760,7 +760,7 @@ textarea:focus {
     }
 
     .panel.deck .deck-items {
-        height: calc(100% - 400px);
+        height: calc(100% - 550px);
     }
 }
 

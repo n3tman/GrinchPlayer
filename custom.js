@@ -327,9 +327,13 @@ function appendDeckItemHtml(hash, text, pageHash) {
         helper: 'clone',
         delay: 200,
         distance: 10
-    }).one('dblclick', function (e) {
-        addSoundBlockFromDeck($(e.currentTarget), false);
-        updateDeckData();
+    }).on('dblclick', function (e) {
+        const $target = $(e.currentTarget);
+        if (isEditMode()) {
+            addSoundBlockFromDeck($target, false);
+            updateDeckData();
+            $target.off('dblclick');
+        }
     });
 }
 
@@ -619,7 +623,7 @@ function addNewEmptyPage($element) {
 function initNewPageBlocks(hash) {
     const selector = '[data-page="' + hash + '"]';
     $('.wrapper').append('<div class="main" data-page="' + hash + '">');
-    $('.edit-mode').before('<div class="deck-items" data-page="' + hash + '"></div>');
+    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
     $('#search-wrapper').prepend('<input class="input search search-' + hash + '" ' +
         'type="text" data-page="' + hash + '" placeholder="фильтр">');
     $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '">' +
@@ -1653,8 +1657,6 @@ $(function () {
                     updateDeckData();
                 });
             }
-        } else {
-            showNotification('Удалять нечего o_O', true, 1500);
         }
     });
 
