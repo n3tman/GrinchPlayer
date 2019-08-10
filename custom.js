@@ -1052,7 +1052,6 @@ function tabClick(hash) {
             search = '[data-page="' + hash + '"]';
     }
 
-    $('.ui-selected').removeClass('ui-selected');
     $tabList.find(search).click();
 }
 
@@ -1165,6 +1164,7 @@ $(function () {
             resetDeckList();
         }
 
+        $('.ui-selected').removeClass('ui-selected');
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         const selector = '[data-page="' + currentTab + '"]';
@@ -1725,7 +1725,6 @@ $(function () {
     // Quick switch keys 1-10
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(function (val, i) {
         addHotkey(val.toString(), function () {
-            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(i).click();
         });
     });
@@ -1733,7 +1732,6 @@ $(function () {
     // Quick switch keys 11-20
     keyboardArray.forEach(function (val, i) {
         addHotkey(val, function () {
-            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(i + 10).click();
         });
     });
@@ -1743,7 +1741,6 @@ $(function () {
         if (e.code.includes('Numpad')) {
             e.preventDefault();
             const num = e.code.slice(-1);
-            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(num - 1).click();
         }
 
