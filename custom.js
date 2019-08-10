@@ -18,6 +18,7 @@ const List = require('list.js');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
+const keyboardArray = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
 const editClass = 'has-bottom';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
@@ -922,7 +923,11 @@ function toggleSidebarClasses(name) {
 // Update numbers in tabs
 function reorderTabs() {
     $('#tabs .tab').each(function (index) {
-        $(this).find('strong').text(index + 1);
+        if (index < 10 || index > 35) {
+            $(this).find('strong').text(index + 1);
+        } else {
+            $(this).find('strong').text(keyboardArray[index - 10].toUpperCase());
+        }
     });
 }
 
@@ -1422,7 +1427,7 @@ $(function () {
                 });
 
                 if (files.length > 0) {
-                    let addedCount = 0
+                    let addedCount = 0;
                     let skippedCount = 0;
                     let pageCount = 0;
 
@@ -1679,7 +1684,7 @@ $(function () {
     });
 
     // Quick switch keys 11-20
-    ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'].forEach(function (val, i) {
+    keyboardArray.forEach(function (val, i) {
         addHotkey(val, function () {
             $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(i + 10).click();
