@@ -50,9 +50,10 @@ window.fancy = require('fancy-textfill/dist/fancy-text-fill');
 // ================== //
 
 // Show notification
-function showNotification(text, error) {
+function showNotification(text, error, time) {
     clearTimeout(notifyHandle);
     const $notify = $('.notification');
+    const timer = time ? time : 4000;
 
     $notify.removeClass('is-danger');
     if (error === true) {
@@ -62,7 +63,7 @@ function showNotification(text, error) {
     $notify.html(text).fadeIn();
     notifyHandle = setTimeout(function () {
         $notify.fadeOut();
-    }, 2000);
+    }, timer);
 }
 
 // Confirm action
@@ -436,7 +437,7 @@ function saveAllData(skipNotify) {
     config.set('pages', allPages);
 
     if (!skipNotify) {
-        showNotification('Данные сохранены в базу!');
+        showNotification('Данные сохранены в базу!', false, 2000);
     }
 }
 
@@ -573,8 +574,11 @@ function loadPpv2(filePath) {
         addPageToDatabase(page);
     }
 
-    return 'Добавлено звуков: <b>' + counter + '</b>. ' +
-        'Пропущено: <b>' + (lineNum - counter) + '</b>';
+    return {
+        added: counter,
+        skipped: lineNum - counter,
+        name: pageName
+    };
 }
 
 // Add new empty page
@@ -727,7 +731,7 @@ function updateZoom(delta) {
 
     zoom = _.round(zoom, 2);
     webFrame.setZoomFactor(zoom);
-    showNotification('Текущий зум: ' + _.round(zoom * 100) + '%');
+    showNotification('Текущий зум: ' + _.round(zoom * 100) + '%', false, 1500);
     config.set('zoom', zoom);
 }
 
@@ -940,7 +944,7 @@ function initEditableTab($tab) {
         const hash = getStringHash(val);
 
         if (pageExists(hash)) {
-            showNotification('Такая страница уже есть!', true);
+            showNotification('Такая страница уже есть!', true, 1500);
             return activePages[$tab.attr('data-page')].name;
         }
 
@@ -1102,7 +1106,7 @@ $(function () {
                 const hash = ui.item.attr('data-page');
 
                 if (activeExists(hash)) {
-                    showNotification('Такой таб уже есть!', true);
+                    showNotification('Такой таб уже есть!', true, 1500);
                     ui.item.remove();
                 } else {
                     const text = ui.item.text();
@@ -1227,7 +1231,7 @@ $(function () {
                 }
             });
         } else {
-            showNotification('Нет активной страницы', true);
+            showNotification('Нет активной страницы', true, 1500);
         }
     });
 
@@ -1242,7 +1246,7 @@ $(function () {
                 $wrapper.removeClass('is-loading');
             });
         } else {
-            showNotification('Нет активной страницы', true);
+            showNotification('Нет активной страницы', true, 1500);
         }
     });
 
@@ -1289,7 +1293,7 @@ $(function () {
                 }
             });
         } else {
-            showNotification('Нет активной страницы', true);
+            showNotification('Нет активной страницы', true, 1500);
         }
     });
 
@@ -1313,7 +1317,7 @@ $(function () {
                 if (json.type && json.type === 'page' && files.length > 0) {
                     if (pageExists(json.hash)) {
                         $wrapper.removeClass('is-loading');
-                        showNotification('Такая страница уже есть!', true);
+                        showNotification('Такая страница уже есть!', true, 1500);
                     } else {
                         let counter = 0;
                         const filesNum = _.size(json.blocks);
@@ -1330,18 +1334,17 @@ $(function () {
                             json = _.omit(filterBlocksWithoutPath(json), ['type']);
 
                             if (counter > 0) {
-                                loadSavedPage(json);
-                                tabClick(json.hash);
+                                addPageToDatabase(json);
                             }
                         }, function () {
                             $wrapper.removeClass('is-loading');
-                            showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
-                                'Пропущено: <b>' + (filesNum - counter) + '</b>');
+
+                            showNotification('Добавлена страница <b>' + json.name + '</b>. &nbsp;Звуков: <b>' + counter + '</b>, пропущено: <b>' + (filesNum - counter) + '</b>');
                         }, 'Выберите папку со звуками для страницы "' + json.name + '"');
                     }
                 } else {
                     $wrapper.removeClass('is-loading');
-                    showNotification('Ошибка импортирования', true);
+                    showNotification('Ошибка импортирования', true, 1500);
                 }
             }
         });
@@ -1355,10 +1358,10 @@ $(function () {
             if (confirmAction('Удалить ВСЕ блоки со страницы в колоду?') === 1) {
                 flushAddedBlocks();
                 updateDeckData();
-                showNotification('Удалено со страницы: <b>' + count + '</b>');
+                showNotification('Удалено со страницы: <b>' + count + '</b>', 3000);
             }
         } else {
-            showNotification('Удалять нечего o_O', true);
+            showNotification('Удалять нечего o_O', true, 1500);
         }
     });
 
@@ -1391,10 +1394,10 @@ $(function () {
                 if (result) {
                     saveAllData(true);
                     $wrapper.removeClass('is-loading');
-                    showNotification(result);
+                    showNotification('Добавлена страница <b>' + result.name + '</b>. &nbsp;Звуков: <b>' + result.added + '</b>, пропущено: <b>' + result.skipped + '</b>');
                 } else {
                     $wrapper.removeClass('is-loading');
-                    showNotification('Такая страница уже есть!', true);
+                    showNotification('Такая страница уже есть!', true, 1500);
                 }
             }
         });
@@ -1419,9 +1422,22 @@ $(function () {
                 });
 
                 if (files.length > 0) {
+                    let addedCount = 0
+                    let skippedCount = 0;
+                    let pageCount = 0;
+
                     files.forEach(function (file) {
-                        loadPpv2(file);
+                        const result = loadPpv2(file);
+                        if (result) {
+                            pageCount++;
+                            addedCount += result.added;
+                            skippedCount += result.skipped;
+                        }
                     });
+
+                    showNotification('Добавлено страниц: <b>' + pageCount + '</b>. &nbsp;Звуков: <b>' +
+                        addedCount + '</b>, пропущено: <b>' + skippedCount + '</b>', false, 5000);
+
                     saveAllData(true);
                 }
 
@@ -1478,7 +1494,7 @@ $(function () {
         const $parent = $(this).parent();
         const hash = $parent.attr('data-page');
         if (activeExists(hash)) {
-            showNotification('Такой таб уже есть!', true);
+            showNotification('Такой таб уже есть!', true, 1500);
         } else {
             loadSavedPage(allPages[hash]);
             tabClick(hash);
@@ -1515,12 +1531,12 @@ $(function () {
                     }
                 });
 
-                showNotification('Добавлено блоков: <b>' + count + '</b>');
+                showNotification('Добавлено блоков: <b>' + count + '</b>', 3000);
 
                 lastAddedHash = '';
                 updateDeckData();
             } else {
-                showNotification('Нет числа или список пуст', true);
+                showNotification('Нет числа или список пуст', true, 2000);
             }
         }
     }).on('click', '.sort', function () {
@@ -1585,11 +1601,12 @@ $(function () {
             stopCurrentSound();
             if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
                 flushDeckItems();
-                showNotification('Удалено из колоды: <b>' + (before - _.size(activePages[currentTab].blocks)) + '</b>');
+                showNotification('Удалено из колоды: <b>' +
+                    (before - _.size(activePages[currentTab].blocks)) + '</b>', false, 3000);
                 updateDeckData();
             }
         } else {
-            showNotification('Удалять нечего o_O', true);
+            showNotification('Удалять нечего o_O', true, 1500);
         }
     });
 
@@ -1606,7 +1623,7 @@ $(function () {
             hp.Howler.setDevice(id);
             $(this).parent().find('.is-active').removeClass('is-active');
             classList.add('is-active');
-            showNotification('Устройство установлено!');
+            showNotification('Устройство установлено!', 1500);
         }
     });
 
