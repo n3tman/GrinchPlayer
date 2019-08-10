@@ -12928,17 +12928,25 @@ textarea:focus {
   position: relative;
   flex: 1;
 }
-.wrapper.is-loading:before {
+.wrapper:before, .wrapper:after {
   content: "";
   display: block;
+  z-index: 5000;
+  transition: opacity 0.4s;
+  opacity: 0;
+  user-select: none;
+  pointer-events: none;
+}
+.wrapper:before {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.8;
   background-color: #2B3E50;
-  z-index: 5000;
+}
+.wrapper.is-loading:before {
+  opacity: 0.8;
 }
 .wrapper.is-loading:after {
   animation: spinAround 500ms infinite linear;
@@ -12958,7 +12966,7 @@ textarea:focus {
   height: 5em;
   border-width: 0.4em;
   zoom: 2;
-  z-index: 5000;
+  opacity: 1;
 }
 
 .navbar {
