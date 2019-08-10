@@ -521,6 +521,10 @@ textarea:focus {
         height: 100%;
     }
 
+    .page > .button:not([disabled]):hover {
+        color: $green;
+    }
+
     .page > .button:last-child {
         right: 0;
         left: auto;

@@ -13141,6 +13141,9 @@ textarea:focus {
   left: 0;
   height: 100%;
 }
+.panel.navigator .page > .button:not([disabled]):hover {
+  color: #5cb85c;
+}
 .panel.navigator .page > .button:last-child {
   right: 0;
   left: auto;

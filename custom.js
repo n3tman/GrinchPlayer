@@ -441,11 +441,11 @@ function saveAllData(skipNotify) {
 }
 
 // Show a dialog for folder selection, return sounds
-function showFolderSelectionDialog(callback, finish) {
+function showFolderSelectionDialog(callback, finish, title) {
     let files = [];
 
     dialog.showOpenDialog({
-        title: 'Выберите папки со звуками',
+        title: title ? title : 'Выберите папки со звуками',
         properties: ['openDirectory', 'multiSelections']
     }, function (dirs) {
         if (dirs === undefined) {
@@ -716,6 +716,21 @@ function closeTab(hash) {
     }
 }
 
+// Update zoom of the page
+function updateZoom(delta) {
+    let zoom = webFrame.getZoomFactor();
+    if (delta < 0) {
+        zoom += 0.01;
+    } else {
+        zoom -= 0.01;
+    }
+
+    zoom = _.round(zoom, 2);
+    webFrame.setZoomFactor(zoom);
+    showNotification('Текущий зум: ' + _.round(zoom * 100) + '%');
+    config.set('zoom', zoom);
+}
+
 // ==================== //
 //                      //
 //   Helper Functions   //
@@ -855,6 +870,7 @@ function freezePageEditing(blocks) {
 
     $blocks.draggable('disable').resizable('disable');
     $('.deck-items .panel-block').draggable('disable');
+    $('.ui-selected').removeClass('ui-selected');
     $('.main').selectable('disable');
     $('.page-remove').prop('disabled', true);
     $('.add-tab').prop('disabled', true);
@@ -1011,6 +1027,7 @@ function tabClick(hash) {
             search = '[data-page="' + hash + '"]';
     }
 
+    $('.ui-selected').removeClass('ui-selected');
     $tabList.find(search).click();
 }
 
@@ -1182,7 +1199,7 @@ $(function () {
         if (zoom !== undefined) {
             webFrame.setZoomFactor(zoom);
         }
-    }, 100);
+    }, 200);
 
     // Freeze editing if not in Edit mode
     if (!isEditMode()) {
@@ -1320,7 +1337,7 @@ $(function () {
                             $wrapper.removeClass('is-loading');
                             showNotification('Добавлено звуков: <b>' + counter + '</b>. ' +
                                 'Пропущено: <b>' + (filesNum - counter) + '</b>');
-                        });
+                        }, 'Выберите папку со звуками для страницы "' + json.name + '"');
                     }
                 } else {
                     $wrapper.removeClass('is-loading');
@@ -1406,8 +1423,9 @@ $(function () {
                         loadPpv2(file);
                     });
                     saveAllData(true);
-                    $wrapper.removeClass('is-loading');
                 }
+
+                $wrapper.removeClass('is-loading');
             }
         });
     });
@@ -1430,17 +1448,7 @@ $(function () {
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
             const delta = e.originalEvent.deltaY;
-            let zoom = webFrame.getZoomFactor();
-            if (delta < 0) {
-                zoom += 0.01;
-            } else {
-                zoom -= 0.01;
-            }
-
-            zoom = _.round(zoom, 2);
-            webFrame.setZoomFactor(zoom);
-            showNotification('Текущий зум: ' + _.round(zoom * 100) + '%');
-            config.set('zoom', zoom);
+            updateZoom(delta);
         }
     }).on('mouseenter', '.main', function () {
         document.activeElement.blur();
@@ -1648,6 +1656,7 @@ $(function () {
     // Quick switch keys 1-10
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 0].forEach(function (val, i) {
         addHotkey(val.toString(), function () {
+            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(i).click();
         });
     });
@@ -1655,6 +1664,7 @@ $(function () {
     // Quick switch keys 11-20
     ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'].forEach(function (val, i) {
         addHotkey(val, function () {
+            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(i + 10).click();
         });
     });
@@ -1664,7 +1674,16 @@ $(function () {
         if (e.code.includes('Numpad')) {
             e.preventDefault();
             const num = e.code.slice(-1);
+            $('.ui-selected').removeClass('ui-selected');
             $tabList.find('li').eq(num - 1).click();
+        }
+
+        if (e.key === '-') {
+            updateZoom(1);
+        }
+
+        if (e.key === '=' || e.key === '+') {
+            updateZoom(-1);
         }
     });
 
