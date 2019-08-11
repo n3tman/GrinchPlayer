@@ -27,8 +27,10 @@ const activePages = {};
 const pageSearch = {};
 const projectSearch = {};
 const allPages = config.get('pages') || {};
+const allProjects = config.get('projects') || {};
 
 let currentTab = config.get('currentTab') || '';
+let currentProject = config.get('currentProject') || '';
 let deviceId = config.get('device') || 'default';
 let $wrapper;
 let $main;
@@ -435,9 +437,7 @@ function removeBlockFromPage(hash) {
 
 // Save all pages/projects/settings to config
 function saveAllData(skipNotify) {
-    const activeTabs = $('#tabs .tab').map(function () {
-        return this.dataset.page;
-    }).get();
+    const activeTabs = getActiveTabs();
 
     activeTabs.forEach(function (hash) {
         allPages[hash] = _.omit(activePages[hash], ['bar', 'list']);
@@ -480,7 +480,7 @@ function showFolderSelectionDialog(callback, finish, title) {
 
 // Add page to database
 function addPageToDatabase(page) {
-    if (!savedExists(page.hash)) {
+    if (!savedPageExists(page.hash)) {
         addPageToList(page.hash, page.name, true);
         allPages[page.hash] = page;
     }
@@ -705,7 +705,7 @@ function addPageToList(hash, text, reindex) {
         distance: 10
     }).dblclick(function (e) {
         const hash = e.currentTarget.dataset.page;
-        if (activeExists(hash)) {
+        if (activePageExists(hash)) {
             showNotification('Такой таб уже есть!', true, 1500);
         } else {
             actionWithLoading(function () {
@@ -716,6 +716,45 @@ function addPageToList(hash, text, reindex) {
 
     if (reindex) {
         updatePageSearch();
+    }
+}
+
+// Add new page to the list
+function addProjectToList(hash, text, reindex) {
+    const html = '<a class="panel-block page" data-proj="' + hash + '">' +
+        '<button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>' +
+        '<span class="text">' + text + '</span>' +
+        '<button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>' +
+        '</a>';
+
+    $(html).appendTo('#project-search .simplebar-content');
+
+    if (reindex) {
+        updateProjectSearch();
+    }
+}
+
+// Action to perform when saving a project
+function projectSaveAction(that) {
+    const $modal = $(that).closest('.modal');
+    const text = $modal.find('input').val().trim();
+    if (text.length > 0) {
+        const hash = getStringHash(text);
+        allProjects[hash] = {
+            name: text,
+            pages: getActiveTabs()
+        };
+        config.set('projects', allProjects);
+        currentProject = hash;
+        config.set('currentProject', currentProject);
+
+        if (!projectExists(hash)) {
+            addProjectToList(hash, text, true);
+        }
+
+        $('#project-search .is-active').removeClass('is-active');
+        $('[data-proj="' + hash + '"]').addClass('is-active');
+        $modal.removeClass('is-active');
     }
 }
 
@@ -754,6 +793,98 @@ function updateZoom(delta) {
     webFrame.setZoomFactor(zoom);
     showNotification('Текущий зум: ' + _.round(zoom * 100) + '%', false, 1500);
     config.set('zoom', zoom);
+}
+
+// Make tab text editable
+function initEditableTab($tab) {
+    $tab.find('.text').editable(function (value) {
+        const val = value.replace(/\s+/g, ' ').trim();
+        const hash = getStringHash(val);
+
+        if (pageExists(hash)) {
+            showNotification('Такая страница уже есть!', true, 1500);
+            return activePages[$tab.attr('data-page')].name;
+        }
+
+        return val;
+    }, {
+        type: 'textarea',
+        tooltip: null,
+        rows: 1,
+        event: 'edit',
+        onblur: 'submit',
+        onedit: function (settings, element) {
+            settings.cols = element.textContent.length + 5;
+        },
+        callback: function (value) {
+            if (activePages[$tab.attr('data-page')].name !== value) {
+                const oldHash = $(this).closest('.tab').attr('data-page');
+                const newHash = getStringHash(value);
+                activePages[newHash] = activePages[oldHash];
+                activePages[newHash].hash = newHash;
+                activePages[newHash].name = value;
+
+                delete allPages[oldHash];
+                delete activePages[oldHash];
+                config.delete('pages.' + oldHash);
+
+                if (currentTab === oldHash) {
+                    currentTab = newHash;
+                    config.set('currentTab', currentTab);
+                }
+
+                $('.page[data-page="' + oldHash + '"] > .text').text(value);
+                $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
+
+                saveAllData(true);
+            }
+        }
+    });
+}
+
+// Update numbers in tabs
+function reorderTabs() {
+    $('#tabs .tab').each(function (index) {
+        if (index < 10 || index > 19) {
+            $(this).find('strong').text(index + 1);
+        } else {
+            $(this).find('strong').text(keyboardArray[index - 10].toUpperCase());
+        }
+    });
+}
+
+// Clear added blocks from main area
+function flushAddedBlocks() {
+    activePages[currentTab].added.forEach(function (hash) {
+        removeBlockFromPage(hash);
+    });
+
+    lastPlayedHash = '';
+    activePages[currentTab].added = [];
+}
+
+// Remove all deck items
+function flushDeckItems() {
+    _.keys(activePages[currentTab].blocks).forEach(function (hash) {
+        if (!activePages[currentTab].added.includes(hash)) {
+            howlDb[hash].unload();
+            delete activePages[currentTab].blocks[hash];
+            $('.deck-items[data-page="' + currentTab + '"] .simplebar-content').empty();
+        }
+    });
+
+    lastPlayedHash = '';
+}
+
+// Prevent dragging/resizing of the main blocks
+function freezePageEditing(blocks) {
+    const $blocks = blocks || $('.sound-block');
+
+    $blocks.draggable('disable').resizable('disable');
+    $('.deck-items .panel-block').draggable('disable');
+    $('.ui-selected').removeClass('ui-selected');
+    $('.main').selectable('disable');
+    $('.page-remove').prop('disabled', true);
 }
 
 // ==================== //
@@ -866,40 +997,6 @@ function getPageName(text) {
     return 'grinch-page_' + filenamify(slugify(text)) + '.json';
 }
 
-// Clear added blocks from main area
-function flushAddedBlocks() {
-    activePages[currentTab].added.forEach(function (hash) {
-        removeBlockFromPage(hash);
-    });
-
-    lastPlayedHash = '';
-    activePages[currentTab].added = [];
-}
-
-// Remove all deck items
-function flushDeckItems() {
-    _.keys(activePages[currentTab].blocks).forEach(function (hash) {
-        if (!activePages[currentTab].added.includes(hash)) {
-            howlDb[hash].unload();
-            delete activePages[currentTab].blocks[hash];
-            $('.deck-items[data-page="' + currentTab + '"] .simplebar-content').empty();
-        }
-    });
-
-    lastPlayedHash = '';
-}
-
-// Prevent dragging/resizing of the main blocks
-function freezePageEditing(blocks) {
-    const $blocks = blocks || $('.sound-block');
-
-    $blocks.draggable('disable').resizable('disable');
-    $('.deck-items .panel-block').draggable('disable');
-    $('.ui-selected').removeClass('ui-selected');
-    $('.main').selectable('disable');
-    $('.page-remove').prop('disabled', true);
-}
-
 // Remove blocks without path from json
 function filterBlocksWithoutPath(json) {
     _.keys(json.blocks).forEach(function (hash) {
@@ -939,17 +1036,6 @@ function toggleSidebarClasses(name) {
     $('body').toggleClass(name);
 }
 
-// Update numbers in tabs
-function reorderTabs() {
-    $('#tabs .tab').each(function (index) {
-        if (index < 10 || index > 19) {
-            $(this).find('strong').text(index + 1);
-        } else {
-            $(this).find('strong').text(keyboardArray[index - 10].toUpperCase());
-        }
-    });
-}
-
 // Return HTML code for a tab
 function getTabHtml(text, hash) {
     return '<li class="tab" data-page="' + hash + '">' +
@@ -959,53 +1045,6 @@ function getTabHtml(text, hash) {
         '<span class="text">' + text + '</span>' +
         '<span class="icon tab-remove"><i class="fa fa-times"></i></span>' +
         '</a></li>';
-}
-
-// Make tab text editable
-function initEditableTab($tab) {
-    $tab.find('.text').editable(function (value) {
-        const val = value.replace(/\s+/g, ' ').trim();
-        const hash = getStringHash(val);
-
-        if (pageExists(hash)) {
-            showNotification('Такая страница уже есть!', true, 1500);
-            return activePages[$tab.attr('data-page')].name;
-        }
-
-        return val;
-    }, {
-        type: 'textarea',
-        tooltip: null,
-        rows: 1,
-        event: 'edit',
-        onblur: 'submit',
-        onedit: function (settings, element) {
-            settings.cols = element.textContent.length + 5;
-        },
-        callback: function (value) {
-            if (activePages[$tab.attr('data-page')].name !== value) {
-                const oldHash = $(this).closest('.tab').attr('data-page');
-                const newHash = getStringHash(value);
-                activePages[newHash] = activePages[oldHash];
-                activePages[newHash].hash = newHash;
-                activePages[newHash].name = value;
-
-                delete allPages[oldHash];
-                delete activePages[oldHash];
-                config.delete('pages.' + oldHash);
-
-                if (currentTab === oldHash) {
-                    currentTab = newHash;
-                    config.set('currentTab', currentTab);
-                }
-
-                $('.page[data-page="' + oldHash + '"] > .text').text(value);
-                $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
-
-                saveAllData(true);
-            }
-        }
-    });
 }
 
 // Get a random short string
@@ -1025,13 +1064,18 @@ function pageExists(hash) {
 }
 
 // Check if page has already been added to DB
-function savedExists(hash) {
+function savedPageExists(hash) {
     return _.keys(allPages).includes(hash);
 }
 
 // Check if page with Hash has been already added
-function activeExists(hash) {
+function activePageExists(hash) {
     return _.keys(activePages).includes(hash);
+}
+
+// Check if page with Hash already exists
+function projectExists(hash) {
+    return _.keys(allProjects).includes(hash);
 }
 
 // Reinit page search
@@ -1081,6 +1125,13 @@ function actionWithLoading(callback) {
         callback();
         $wrapper.removeClass('is-loading');
     });
+}
+
+// Get active tabs as an ordered array
+function getActiveTabs() {
+    return $('#tabs .tab').map(function () {
+        return this.dataset.page;
+    }).get();
 }
 
 // ================== //
@@ -1153,7 +1204,7 @@ $(function () {
             if (ui.item.hasClass('panel-block')) {
                 const hash = ui.item.attr('data-page');
 
-                if (activeExists(hash)) {
+                if (activePageExists(hash)) {
                     showNotification('Такой таб уже есть!', true, 1500);
                     ui.item.remove();
                 } else {
@@ -1232,8 +1283,15 @@ $(function () {
     _.keys(allPages).forEach(function (hash) {
         addPageToList(hash, allPages[hash].name);
     });
-
     updatePageSearch();
+
+    // Load project names to navigator
+    _.keys(allProjects).forEach(function (hash) {
+        addProjectToList(hash, allProjects[hash].name);
+    });
+    if (currentProject.length > 0) {
+        $('[data-proj="' + currentProject + '"]').addClass('is-active');
+    }
 
     updateProjectSearch();
 
@@ -1508,7 +1566,7 @@ $(function () {
     //  Body events  //
     // ------------- //
 
-    $body.on('keypress', '.sound-text textarea, .text textarea', function (e) {
+    $body.on('keydown', '.sound-text textarea, .text textarea', function (e) {
         // Prevent new line on Enter key
         if (e.which === 13) {
             e.target.blur();
@@ -1516,8 +1574,29 @@ $(function () {
     }).on('click', '.modal-background, .modal .delete', function () {
         $('.modal.is-active').removeClass('is-active');
     }).keydown(function (e) {
+        // Prevent tab key
         if (e.which === 9) {
             e.preventDefault();
+        }
+    }).on('keydown', '#deck .search', function (e) {
+        // Escape erases search
+        if (e.which === 27) {
+            resetDeckList();
+        }
+    }).on('keydown', '#page-search .search', function (e) {
+        if (e.which === 27) {
+            pageSearch.list.search();
+            e.currentTarget.value = '';
+        }
+    }).on('keydown', '#project-search .search', function (e) {
+        if (e.which === 27) {
+            projectSearch.list.search();
+            e.currentTarget.value = '';
+        }
+    }).on('keydown', '#proj-create .input', function (e) {
+        // Enter in project input
+        if (e.which === 13) {
+            projectSaveAction(e.target);
         }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
@@ -1540,6 +1619,13 @@ $(function () {
             addNewEmptyPage();
             tabClick(false);
         }
+    }).on('click', '.proj-saveas', function () {
+        if (isEditMode() && _.size(activePages) > 0) {
+            const $modal = $('#proj-create');
+            $modal.addClass('is-active').find('input').val('').focus();
+        }
+    }).on('click', '.btn-saveas', function () {
+        projectSaveAction(this);
     });
 
     // ----------- //

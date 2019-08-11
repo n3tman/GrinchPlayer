@@ -5202,7 +5202,7 @@ a.list-item {
 }
 
 .modal-background {
-  background-color: rgba(10, 10, 10, 0.86);
+  background-color: rgba(0, 0, 0, 0.7);
 }
 
 .modal-content,
@@ -13131,6 +13131,12 @@ textarea:focus {
 }
 .panel .panel-block:last-child {
   border-bottom: 0;
+}
+.panel .panel-block.is-active {
+  color: white;
+  background: #1a2531;
+  border-bottom: 1px solid #8694a4;
+  border-top: 1px solid #8694a4;
 }
 
 .panel.navigator {

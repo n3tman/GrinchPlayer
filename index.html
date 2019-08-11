@@ -50,33 +50,7 @@
                     </button>
                 </p>
             </div>
-            <div class="items">
-                <a class="panel-block page" data-proj="123">
-                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
-                    <span class="text">Проект один</span>
-                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
-                </a>
-                <a class="panel-block page" data-proj="123">
-                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
-                    <span class="text">Проект два</span>
-                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
-                </a>
-                <a class="panel-block page" data-proj="123">
-                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
-                    <span class="text">Проект три</span>
-                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
-                </a>
-                <a class="panel-block page" data-proj="123">
-                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
-                    <span class="text">Проект четыре</span>
-                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
-                </a>
-                <a class="panel-block page" data-proj="123">
-                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
-                    <span class="text">Проект пять</span>
-                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
-                </a>
-            </div>
+            <div class="items"></div>
         </div>
     </nav>
 
@@ -233,6 +207,28 @@
                     <li><b>Выделить</b> файлы/папки в проводнике</li>
                     <li><b>Перенести</b> их в окно плеера в область <b>колоды</b> (правой панели)</li>
                 </ol>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal no-drag" id="proj-create">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+            <p class="modal-card-title">Проект</p>
+            <button class="delete" aria-label="close"></button>
+        </header>
+        <section class="modal-card-body">
+            <div class="field has-addons">
+                <div class="control">
+                    <input class="input is-large" type="text" placeholder="Название">
+                </div>
+                <div class="control">
+                    <a class="button is-large btn-saveas">
+                        Сохранить
+                    </a>
+                </div>
             </div>
         </section>
     </div>
