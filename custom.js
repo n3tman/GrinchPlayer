@@ -740,6 +740,11 @@ function projectSaveAction(that) {
     const text = $modal.find('input').val().trim();
     if (text.length > 0) {
         const hash = getStringHash(text);
+
+        if (!projectExists(hash)) {
+            addProjectToList(hash, text, true);
+        }
+
         allProjects[hash] = {
             name: text,
             pages: getActiveTabs()
@@ -748,13 +753,11 @@ function projectSaveAction(that) {
         currentProject = hash;
         config.set('currentProject', currentProject);
 
-        if (!projectExists(hash)) {
-            addProjectToList(hash, text, true);
-        }
-
         $('#project-search .is-active').removeClass('is-active');
         $('[data-proj="' + hash + '"]').addClass('is-active');
         $modal.removeClass('is-active');
+
+        showNotification('Сохранено как проект: <b>' + text + '</b>', false, 3000);
     }
 }
 
@@ -1255,8 +1258,8 @@ $(function () {
         content: '<div class="block-controls">' +
             '<button class="button close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>' +
             '<button class="button add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>' +
-            '<button class="button proj-save" title="Сохранить текущий проект"><i class="fa fa-floppy-o"></i></button>' +
-            '<button class="button proj-saveas" title="Сохранить как"><i class="fa fa-file-text"></i></button>' +
+            '<button class="button proj-save" title="Сохранить как текущий проект"><i class="fa fa-floppy-o"></i></button>' +
+            '<button class="button proj-saveas" title="Сохранить как…"><i class="fa fa-file-text"></i></button>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -1626,6 +1629,13 @@ $(function () {
         }
     }).on('click', '.btn-saveas', function () {
         projectSaveAction(this);
+    }).on('click', '.proj-save', function () {
+        if (isEditMode() && _.size(activePages) > 0) {
+            const name = allProjects[currentProject].name;
+            allProjects[currentProject].pages = getActiveTabs();
+            config.set('projects', allProjects);
+            showNotification('Сохранено как проект: <b>' + name + '</b>', false, 3000);
+        }
     });
 
     // ----------- //
