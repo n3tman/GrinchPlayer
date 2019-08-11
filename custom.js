@@ -19,7 +19,7 @@ const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
-const keyboardArray = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
+const keyboardArray = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
 const editClass = 'has-bottom';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
@@ -942,7 +942,7 @@ function toggleSidebarClasses(name) {
 // Update numbers in tabs
 function reorderTabs() {
     $('#tabs .tab').each(function (index) {
-        if (index < 10 || index > 35) {
+        if (index < 10 || index > 19) {
             $(this).find('strong').text(index + 1);
         } else {
             $(this).find('strong').text(keyboardArray[index - 10].toUpperCase());
