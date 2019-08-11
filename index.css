@@ -12903,7 +12903,7 @@ textarea:focus {
   flex-direction: column;
 }
 .tippy-content .block-controls .button + .button {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 .tippy-content .button {
   padding: 0;
@@ -12999,7 +12999,7 @@ textarea:focus {
   font-size: 1.5rem;
   border: 0;
   border-left: 1px solid #4E5D6C;
-  padding: 0 0.8rem;
+  padding: 0 10px;
 }
 .tabs.is-toggle ul {
   flex: 1;
@@ -13139,10 +13139,12 @@ textarea:focus {
 .panel.navigator .pages {
   height: calc(60% - 60px);
 }
-.panel.navigator .pages > .items {
+.panel.navigator .pages > .items,
+.panel.navigator .projects > .items {
   height: calc(100% - 60px);
 }
-.panel.navigator .pages .page {
+.panel.navigator .pages .page,
+.panel.navigator .projects .page {
   position: relative;
   padding-left: 45px;
   padding-right: 45px;

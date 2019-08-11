@@ -51,7 +51,31 @@
                 </p>
             </div>
             <div class="items">
-                <a class="panel-block">...в разработке...</a>
+                <a class="panel-block page" data-proj="123">
+                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
+                    <span class="text">Проект один</span>
+                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
+                </a>
+                <a class="panel-block page" data-proj="123">
+                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
+                    <span class="text">Проект два</span>
+                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
+                </a>
+                <a class="panel-block page" data-proj="123">
+                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
+                    <span class="text">Проект три</span>
+                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
+                </a>
+                <a class="panel-block page" data-proj="123">
+                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
+                    <span class="text">Проект четыре</span>
+                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
+                </a>
+                <a class="panel-block page" data-proj="123">
+                    <button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>
+                    <span class="text">Проект пять</span>
+                    <button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>
+                </a>
             </div>
         </div>
     </nav>
@@ -62,8 +86,7 @@
         <div class="tabs is-toggle drag" id="tabs">
             <ul></ul>
             <div class="buttons no-drag">
-                <button class="button is-dark add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>
-                <button class="button is-dark close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>
+                <button class="button is-dark" id="tab-actions"><i class="fa fa-chevron-circle-down"></i></button>
             </div>
         </div>
     </div>

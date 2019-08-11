@@ -15,6 +15,7 @@ const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
 
+const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
@@ -24,6 +25,7 @@ const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf
 const howlDb = {};
 const activePages = {};
 const pageSearch = {};
+const projectSearch = {};
 const allPages = config.get('pages') || {};
 
 let currentTab = config.get('currentTab') || '';
@@ -89,7 +91,6 @@ function toggleEditMode() {
         $('.deck-items .panel-block').draggable('enable');
         $('.main').selectable('enable');
         $('.page-remove').prop('disabled', false);
-        $('.add-tab').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -693,7 +694,6 @@ function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
         '<button class="button is-dark page-remove"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
-        '<button class="button is-dark page-add"><i class="fa fa-chevron-right"></i></button>' +
         '</a>';
     $(html).appendTo('#page-search .simplebar-content').draggable({
         appendTo: 'body',
@@ -898,7 +898,6 @@ function freezePageEditing(blocks) {
     $('.ui-selected').removeClass('ui-selected');
     $('.main').selectable('disable');
     $('.page-remove').prop('disabled', true);
-    $('.add-tab').prop('disabled', true);
 }
 
 // Remove blocks without path from json
@@ -1039,6 +1038,12 @@ function activeExists(hash) {
 function updatePageSearch() {
     pageSearch.list.reIndex();
     pageSearch.bar.recalculate();
+}
+
+// Reinit project search
+function updateProjectSearch() {
+    projectSearch.list.reIndex();
+    projectSearch.bar.recalculate();
 }
 
 // Click on tab
@@ -1194,28 +1199,31 @@ $(function () {
         });
     });
 
-    // Tab buttons
-    $('.add-tab').click(function () {
-        if (isEditMode()) {
-            addNewEmptyPage();
-            tabClick(false);
-        }
-    });
-
-    $('.close-tabs').click(function () {
-        if (_.size(activePages) > 0) {
-            actionWithLoading(function () {
-                saveAllData(true);
-                _.keys(activePages).forEach(function (hash) {
-                    closeTab(hash);
-                });
-            });
-        }
+    // Show tooltip with buttons in Edit mode
+    tippy($('#tab-actions')[0], {
+        content: '<div class="block-controls">' +
+            '<button class="button close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>' +
+            '<button class="button add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>' +
+            '<button class="button proj-save" title="Сохранить текущий проект"><i class="fa fa-floppy-o"></i></button>' +
+            '<button class="button proj-saveas" title="Сохранить как"><i class="fa fa-file-text"></i></button>' +
+            '</div>',
+        arrow: true,
+        aria: null,
+        distance: 5,
+        interactive: true,
+        placement: 'bottom'
     });
 
     // Init page search
     pageSearch.bar = new SBar($('#page-search .items')[0]);
     pageSearch.list = new List('page-search', {
+        valueNames: ['text'],
+        listClass: 'simplebar-content'
+    });
+
+    // Init project search
+    projectSearch.bar = new SBar($('#project-search .items')[0]);
+    projectSearch.list = new List('project-search', {
         valueNames: ['text'],
         listClass: 'simplebar-content'
     });
@@ -1226,6 +1234,8 @@ $(function () {
     });
 
     updatePageSearch();
+
+    updateProjectSearch();
 
     // Load pages info from config
     const tabs = config.get('activeTabs');
@@ -1516,6 +1526,20 @@ $(function () {
         }
     }).on('mouseenter', '.main', function () {
         document.activeElement.blur();
+    }).on('click', '.close-tabs', function () {
+        if (_.size(activePages) > 0) {
+            actionWithLoading(function () {
+                saveAllData(true);
+                _.keys(activePages).forEach(function (hash) {
+                    closeTab(hash);
+                });
+            });
+        }
+    }).on('click', '.add-tab', function () {
+        if (isEditMode()) {
+            addNewEmptyPage();
+            tabClick(false);
+        }
     });
 
     // ----------- //
@@ -1538,16 +1562,6 @@ $(function () {
 
                 delete allPages[hash];
                 config.delete('pages.' + hash);
-            });
-        }
-    }).on('click', '.page-add', function () {
-        const $parent = $(this).parent();
-        const hash = $parent.attr('data-page');
-        if (activeExists(hash)) {
-            showNotification('Такой таб уже есть!', true, 1500);
-        } else {
-            actionWithLoading(function () {
-                loadPageFromList(hash);
             });
         }
     });
