@@ -446,6 +446,8 @@ function saveAllData(skipNotify) {
     config.set('activeTabs', activeTabs);
     config.set('currentTab', currentTab);
     config.set('pages', allPages);
+    config.set('projects', allProjects);
+    config.set('currentProject', currentProject);
 
     if (!skipNotify) {
         showNotification('Данные сохранены в базу!', false, 2000);
@@ -727,7 +729,31 @@ function addProjectToList(hash, text, reindex) {
         '<button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>' +
         '</a>';
 
-    $(html).appendTo('#project-search .simplebar-content');
+    $(html).appendTo('#project-search .simplebar-content').on('dblclick', function (e) {
+        const hash = e.currentTarget.dataset.proj;
+        const $this = $(e.currentTarget);
+
+        if (hash !== currentProject) {
+            actionWithLoading(function () {
+                closeAllTabs();
+
+                allProjects[hash].pages.forEach(function (page) {
+                    loadSavedPage(allPages[page]);
+                });
+
+                tabClick(true);
+
+                if (!isEditMode()) {
+                    freezePageEditing();
+                }
+            });
+
+            currentProject = hash;
+            config.set('currentProject', currentProject);
+            $('#project-search .is-active').removeClass('is-active');
+            $this.addClass('is-active');
+        }
+    });
 
     if (reindex) {
         updateProjectSearch();
@@ -888,6 +914,14 @@ function freezePageEditing(blocks) {
     $('.ui-selected').removeClass('ui-selected');
     $('.main').selectable('disable');
     $('.page-remove').prop('disabled', true);
+}
+
+// Close all tabs
+function closeAllTabs() {
+    saveAllData(true);
+    _.keys(activePages).forEach(function (hash) {
+        closeTab(hash);
+    });
 }
 
 // ==================== //
@@ -1137,6 +1171,13 @@ function getActiveTabs() {
     }).get();
 }
 
+// Unselect all projects
+function unselectProjects() {
+    currentProject = '';
+    config.set('currentProject', currentProject);
+    $('#project-search .is-active').removeClass('is-active');
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -1281,6 +1322,14 @@ $(function () {
         valueNames: ['text'],
         listClass: 'simplebar-content'
     });
+    projectSearch.list.on('searchComplete', _.debounce(function () {
+        $('#project-search .items .panel-block').each(function () {
+            const hash = this.dataset.proj;
+            if (currentProject !== hash) {
+                $(this).removeClass('is-active');
+            }
+        });
+    }, 200));
 
     // Load page names to navigator
     _.keys(allPages).forEach(function (hash) {
@@ -1611,10 +1660,8 @@ $(function () {
     }).on('click', '.close-tabs', function () {
         if (_.size(activePages) > 0) {
             actionWithLoading(function () {
-                saveAllData(true);
-                _.keys(activePages).forEach(function (hash) {
-                    closeTab(hash);
-                });
+                closeAllTabs();
+                unselectProjects();
             });
         }
     }).on('click', '.add-tab', function () {
@@ -1629,8 +1676,10 @@ $(function () {
         }
     }).on('click', '.btn-saveas', function () {
         projectSaveAction(this);
+    }).on('click', '.close-proj', function () {
+        unselectProjects();
     }).on('click', '.proj-save', function () {
-        if (isEditMode() && _.size(activePages) > 0) {
+        if (isEditMode() && _.size(activePages) > 0 && currentProject.length > 0) {
             const name = allProjects[currentProject].name;
             allProjects[currentProject].pages = getActiveTabs();
             config.set('projects', allProjects);

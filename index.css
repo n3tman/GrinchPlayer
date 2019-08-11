@@ -13054,6 +13054,17 @@ textarea:focus {
   vertical-align: middle;
 }
 
+.add-tab,
+.proj-save,
+.proj-saveas {
+  display: none;
+}
+.has-bottom .add-tab,
+.has-bottom .proj-save,
+.has-bottom .proj-saveas {
+  display: block;
+}
+
 .main {
   display: none;
   height: 100%;
@@ -13138,6 +13149,16 @@ textarea:focus {
   border-bottom: 1px solid #8694a4;
   border-top: 1px solid #8694a4;
 }
+.panel .bottom {
+  height: 40px;
+  border-bottom: 0;
+  border-top: 0;
+  padding: 5px;
+}
+.panel .bottom .button {
+  height: 30px;
+  padding: 0 0.75em;
+}
 
 .panel.navigator {
   border-right: 2px solid #4E5D6C;
@@ -13168,7 +13189,7 @@ textarea:focus {
   left: auto;
 }
 .panel.navigator .projects {
-  height: 40%;
+  height: calc(40% - 40px);
 }
 .panel.navigator .page > .button,
 .panel.navigator .panel-search .button {
@@ -13273,16 +13294,6 @@ textarea:focus {
 }
 .panel.deck .control + .control {
   border-left: 1px solid #4E5D6C;
-}
-.panel.deck .bottom {
-  height: 40px;
-  border-bottom: 0;
-  border-top: 0;
-  padding: 5px;
-}
-.panel.deck .bottom .button {
-  height: 30px;
-  padding: 0 0.75em;
 }
 .panel.deck .search.input {
   display: none;
