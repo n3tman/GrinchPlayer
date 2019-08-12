@@ -92,7 +92,7 @@ function toggleEditMode() {
         $blocks.draggable('enable').resizable('enable');
         $('.deck-items .panel-block').draggable('enable');
         $('.main').selectable('enable');
-        $('.page-remove').prop('disabled', false);
+        $('.page-remove, .proj-remove').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -694,7 +694,7 @@ function initNewPageBlocks(hash) {
 // Add new page to the list
 function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
-        '<button class="button is-dark page-remove"><i class="fa fa-times"></i></button>' +
+        '<button class="button is-dark page-remove" title="Удалить страницу"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
         '</a>';
     $(html).appendTo('#page-search .simplebar-content').draggable({
@@ -721,38 +721,39 @@ function addPageToList(hash, text, reindex) {
     }
 }
 
+// Load project tabs by hash
+function loadProjectTabs(hash) {
+    allProjects[hash].pages.forEach(function (page) {
+        loadSavedPage(allPages[page]);
+    });
+
+    if (!isEditMode()) {
+        freezePageEditing();
+    }
+}
+
 // Add new page to the list
 function addProjectToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-proj="' + hash + '">' +
-        '<button class="button is-dark proj-remove"><i class="fa fa-times"></i></button>' +
+        '<button class="button is-dark proj-remove" title="Удалить проект"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
-        '<button class="button is-dark proj-add"><i class="fa fa-chevron-right"></i></button>' +
+        '<button class="button is-dark proj-add" title="Добавить табы проекта"><i class="fa fa-chevron-right"></i></button>' +
         '</a>';
 
     $(html).appendTo('#project-search .simplebar-content').on('dblclick', function (e) {
         const hash = e.currentTarget.dataset.proj;
         const $this = $(e.currentTarget);
 
-        if (hash !== currentProject) {
-            actionWithLoading(function () {
-                closeAllTabs();
+        actionWithLoading(function () {
+            closeAllTabs();
+            loadProjectTabs(hash);
+            tabClick(true);
+        });
 
-                allProjects[hash].pages.forEach(function (page) {
-                    loadSavedPage(allPages[page]);
-                });
-
-                tabClick(true);
-
-                if (!isEditMode()) {
-                    freezePageEditing();
-                }
-            });
-
-            currentProject = hash;
-            config.set('currentProject', currentProject);
-            $('#project-search .is-active').removeClass('is-active');
-            $this.addClass('is-active');
-        }
+        currentProject = hash;
+        config.set('currentProject', currentProject);
+        $('#project-search .is-active').removeClass('is-active');
+        $this.addClass('is-active');
     });
 
     if (reindex) {
@@ -784,6 +785,24 @@ function projectSaveAction(that) {
         $modal.removeClass('is-active');
 
         showNotification('Сохранено как проект: <b>' + text + '</b>', false, 3000);
+    }
+}
+
+// Project save as action
+function projectSaveAs() {
+    if (isEditMode() && _.size(activePages) > 0) {
+        const $modal = $('#proj-create');
+        $modal.addClass('is-active').find('input').val('').focus();
+    }
+}
+
+// Project save button action
+function projectSaveButton() {
+    if (isEditMode() && _.size(activePages) > 0 && currentProject.length > 0) {
+        const name = allProjects[currentProject].name;
+        allProjects[currentProject].pages = getActiveTabs();
+        config.set('projects', allProjects);
+        showNotification('Сохранено как проект: <b>' + name + '</b>', false, 3000);
     }
 }
 
@@ -863,7 +882,16 @@ function initEditableTab($tab) {
                 }
 
                 $('.page[data-page="' + oldHash + '"] > .text').text(value);
+                updatePageSearch();
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
+
+                // Update hash in projects
+                _.keys(allProjects).forEach(function (hash) {
+                    const index = allProjects[hash].pages.indexOf(oldHash);
+                    if (index > -1) {
+                        allProjects[hash].pages[index] = newHash;
+                    }
+                });
 
                 saveAllData(true);
             }
@@ -913,7 +941,7 @@ function freezePageEditing(blocks) {
     $('.deck-items .panel-block').draggable('disable');
     $('.ui-selected').removeClass('ui-selected');
     $('.main').selectable('disable');
-    $('.page-remove').prop('disabled', true);
+    $('.page-remove, .proj-remove').prop('disabled', true);
 }
 
 // Close all tabs
@@ -1670,21 +1698,13 @@ $(function () {
             tabClick(false);
         }
     }).on('click', '.proj-saveas', function () {
-        if (isEditMode() && _.size(activePages) > 0) {
-            const $modal = $('#proj-create');
-            $modal.addClass('is-active').find('input').val('').focus();
-        }
+        projectSaveAs();
     }).on('click', '.btn-saveas', function () {
         projectSaveAction(this);
     }).on('click', '.close-proj', function () {
         unselectProjects();
     }).on('click', '.proj-save', function () {
-        if (isEditMode() && _.size(activePages) > 0 && currentProject.length > 0) {
-            const name = allProjects[currentProject].name;
-            allProjects[currentProject].pages = getActiveTabs();
-            config.set('projects', allProjects);
-            showNotification('Сохранено как проект: <b>' + name + '</b>', false, 3000);
-        }
+        projectSaveButton();
     });
 
     // ----------- //
@@ -1709,6 +1729,35 @@ $(function () {
                 config.delete('pages.' + hash);
             });
         }
+    });
+
+    $('#project-search').on('click', '.proj-remove', function () {
+        const $parent = $(this).parent();
+        const hash = $parent.attr('data-proj');
+
+        if (confirmAction('Удалить проект ' + allProjects[hash].name.toUpperCase() + ' из базы?') === 1) {
+            actionWithLoading(function () {
+                if (hash === currentProject) {
+                    currentProject = '';
+                    config.set('currentProject', currentProject);
+                }
+
+                $parent.remove();
+                updateProjectSearch();
+
+                delete allProjects[hash];
+                config.delete('projects.' + hash);
+            });
+        }
+    }).on('click', '.proj-add', function () {
+        const hash = $(this).parent().attr('data-proj');
+        actionWithLoading(function () {
+            loadProjectTabs(hash);
+
+            if (currentTab === '') {
+                tabClick(true);
+            }
+        });
     });
 
     // -------------- //
@@ -1871,6 +1920,16 @@ $(function () {
     // Save all data
     addHotkey('ctrl+s', function () {
         saveAllData();
+    });
+
+    // Save all data
+    addHotkey('alt+s', function () {
+        projectSaveButton();
+    });
+
+    // Save project as
+    addHotkey('shift+alt+s', function () {
+        projectSaveAs();
     });
 
     // Close current wab
