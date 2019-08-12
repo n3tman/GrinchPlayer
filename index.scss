@@ -147,6 +147,17 @@ textarea:focus {
     }
 }
 
+.text textarea {
+    display: block;
+    font-size: 1rem;
+    line-height: 1.5;
+    background: transparent;
+    color: $light;
+    resize: none;
+    border: 0;
+    overflow: hidden;
+}
+
 // ------------------ //
 //  Utilities
 // ------------------ //
@@ -384,17 +395,6 @@ textarea:focus {
 
     .fa-stack-1x {
         color: $background;
-    }
-
-    .text textarea {
-        font-size: 1rem;
-        line-height: 24px;
-        background: transparent;
-        color: $light;
-        resize: none;
-        border: 0;
-        overflow: hidden;
-        vertical-align: middle;
     }
 }
 

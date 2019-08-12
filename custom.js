@@ -724,7 +724,9 @@ function addPageToList(hash, text, reindex) {
 // Load project tabs by hash
 function loadProjectTabs(hash) {
     allProjects[hash].pages.forEach(function (page) {
-        loadSavedPage(allPages[page]);
+        if (!activePageExists(page)) {
+            loadSavedPage(allPages[page]);
+        }
     });
 
     if (!isEditMode()) {
@@ -754,7 +756,14 @@ function addProjectToList(hash, text, reindex) {
         config.set('currentProject', currentProject);
         $('#project-search .is-active').removeClass('is-active');
         $this.addClass('is-active');
+    }).on('contextmenu', function (e) {
+        e.preventDefault();
+        if (isEditMode()) {
+            $(e.currentTarget).find('.text').trigger('edit');
+        }
     });
+
+    initEditableProject($('[data-proj="' + hash + '"]'));
 
     if (reindex) {
         updateProjectSearch();
@@ -792,7 +801,11 @@ function projectSaveAction(that) {
 function projectSaveAs() {
     if (isEditMode() && _.size(activePages) > 0) {
         const $modal = $('#proj-create');
-        $modal.addClass('is-active').find('input').val('').focus();
+        $modal.addClass('is-active').find('input').val('').focus().keydown(function (e) {
+            if (e.which === 27) {
+                $modal.removeClass('is-active');
+            }
+        });
     }
 }
 
@@ -862,7 +875,7 @@ function initEditableTab($tab) {
         event: 'edit',
         onblur: 'submit',
         onedit: function (settings, element) {
-            settings.cols = element.textContent.length + 5;
+            settings.cols = element.textContent.length + 3;
         },
         callback: function (value) {
             if (activePages[$tab.attr('data-page')].name !== value) {
@@ -894,6 +907,53 @@ function initEditableTab($tab) {
                 });
 
                 saveAllData(true);
+            }
+        }
+    });
+}
+
+// Make project item text editable
+function initEditableProject($item) {
+    const $text = $item.find('.text');
+
+    $text.editable(function (value) {
+        const val = value.replace(/\s+/g, ' ').trim();
+        const hash = getStringHash(val);
+
+        if (projectExists(hash)) {
+            showNotification('Такой проект уже есть!', true, 1500);
+            return allProjects[$item.attr('data-proj')].name;
+        }
+
+        return val;
+    }, {
+        type: 'textarea',
+        tooltip: null,
+        event: 'edit',
+        onblur: 'submit',
+        onedit: function (settings) {
+            settings.rows = _.round($text.height() / 24);
+        },
+        callback: function (value) {
+            if (allProjects[$item.attr('data-proj')].name !== value) {
+                const oldHash = $item.attr('data-proj');
+                const newHash = getStringHash(value);
+
+                allProjects[newHash] = allProjects[oldHash];
+                allProjects[newHash].name = value;
+
+                delete allProjects[oldHash];
+                config.delete('projects.' + oldHash);
+
+                if (currentProject === oldHash) {
+                    currentProject = newHash;
+                    config.set('currentProject', currentProject);
+                }
+
+                $text.text(value);
+                $item.attr('data-proj', newHash);
+
+                updateProjectSearch();
             }
         }
     });
@@ -1930,6 +1990,11 @@ $(function () {
     // Save project as
     addHotkey('shift+alt+s', function () {
         projectSaveAs();
+    });
+
+    // Esc to close modals
+    addHotkey('esc', function () {
+        $('.modal.is-active').removeClass('is-active');
     });
 
     // Close current wab

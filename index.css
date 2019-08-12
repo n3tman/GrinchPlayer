@@ -12856,6 +12856,17 @@ textarea:focus {
   height: 100%;
 }
 
+.text textarea {
+  display: block;
+  font-size: 1rem;
+  line-height: 1.5;
+  background: transparent;
+  color: whitesmoke;
+  resize: none;
+  border: 0;
+  overflow: hidden;
+}
+
 .drag {
   -webkit-app-region: drag;
 }
@@ -13042,16 +13053,6 @@ textarea:focus {
 }
 .tabs.is-toggle .fa-stack-1x {
   color: #2B3E50;
-}
-.tabs.is-toggle .text textarea {
-  font-size: 1rem;
-  line-height: 24px;
-  background: transparent;
-  color: whitesmoke;
-  resize: none;
-  border: 0;
-  overflow: hidden;
-  vertical-align: middle;
 }
 
 .add-tab,
