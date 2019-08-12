@@ -443,6 +443,10 @@ textarea:focus {
     }
 }
 
+.events-none .sound-block {
+    pointer-events: none;
+}
+
 .has-bottom .main {
     & {
         background-image: linear-gradient($grey-dark 1px, transparent 1px),

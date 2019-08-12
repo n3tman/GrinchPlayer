@@ -1718,6 +1718,15 @@ $(function () {
         if (e.which === 9) {
             e.preventDefault();
         }
+
+        // Shift key
+        if (e.which === 16 && !e.originalEvent.repeat) {
+            $('.main').addClass('events-none');
+        }
+    }).keyup(function (e) {
+        if (e.which === 16) {
+            $('.main').removeClass('events-none');
+        }
     }).on('keydown', '#deck .search', function (e) {
         // Escape erases search
         if (e.which === 27) {
