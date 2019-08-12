@@ -899,10 +899,10 @@ function initEditableTab($tab) {
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
 
                 // Update hash in projects
-                _.keys(allProjects).forEach(function (hash) {
-                    const index = allProjects[hash].pages.indexOf(oldHash);
+                _.keys(allProjects).forEach(function (proj) {
+                    const index = allProjects[proj].pages.indexOf(oldHash);
                     if (index > -1) {
-                        allProjects[hash].pages[index] = newHash;
+                        allProjects[proj].pages[index] = newHash;
                     }
                 });
 
@@ -1426,8 +1426,8 @@ $(function () {
     updatePageSearch();
 
     // Load project names to navigator
-    _.keys(allProjects).forEach(function (hash) {
-        addProjectToList(hash, allProjects[hash].name);
+    _.keys(allProjects).forEach(function (proj) {
+        addProjectToList(proj, allProjects[proj].name);
     });
     if (currentProject.length > 0) {
         $('[data-proj="' + currentProject + '"]').addClass('is-active');
@@ -1796,6 +1796,14 @@ $(function () {
 
                 delete allPages[hash];
                 config.delete('pages.' + hash);
+
+                // Remove page from all projects
+                _.keys(allProjects).forEach(function (proj) {
+                    const index = allProjects[proj].pages.indexOf(hash);
+                    if (index > -1) {
+                        allProjects[proj].pages.splice(index, 1);
+                    }
+                });
             });
         }
     });
