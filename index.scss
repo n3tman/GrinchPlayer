@@ -59,11 +59,18 @@ html, body {
     padding-bottom: 2px;
 }
 
+.panel-block > .fa {
+    margin-right: 10px;
+    font-size: 1.3rem;
+}
+
 .button:focus:not(:active),
 .button.is-focused:not(:active) {
     box-shadow: none;
 }
 
+.panel-block:focus,
+input:focus,
 textarea:focus {
     outline: none;
 }
@@ -196,8 +203,14 @@ textarea:focus {
 // ------------------ //
 
 .tippy-tooltip {
-    background-color: $grey;
-    padding: 4px;
+    & {
+        background-color: $grey;
+        padding: 4px;
+    }
+
+    &.green-theme {
+        background-color: rgba($green, 0.8);
+    }
 }
 
 .tippy-popper[x-placement^=left] .tippy-arrow {
@@ -206,6 +219,10 @@ textarea:focus {
 
 .tippy-popper[x-placement^=right] .tippy-arrow {
     border-right-color: $grey;
+}
+
+.tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
+    border-right-color: rgba($green, 0.8);
 }
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
@@ -236,6 +253,14 @@ textarea:focus {
 
     .fa {
         font-size: 1.5rem;
+    }
+
+    .panel .fa {
+        font-size: 1.3rem;
+    }
+
+    .panel .panel-block {
+        padding: 3px 0.75em;
     }
 }
 
@@ -553,7 +578,7 @@ textarea:focus {
     }
 
     .pages {
-        height: calc(60% - 60px);
+        height: calc(60% - 120px);
     }
 
     .pages > .items,
@@ -591,6 +616,11 @@ textarea:focus {
     .panel-search .button {
         width: 35px;
     }
+
+    .info .panel-block {
+        justify-content: center;
+        height: 30px;
+    }
 }
 
 .navbar-brand {
@@ -615,10 +645,11 @@ textarea:focus {
     & {
         height: 30px;
         font-size: 1.1rem;
-        color: $success;
+        color: $green;
         display: flex;
         justify-content: center;
         align-items: center;
+        border-bottom: $panel-item-border;
     }
 
     i {
@@ -682,7 +713,7 @@ textarea:focus {
     .deck-items {
         & {
             display: none;
-            height: calc(100% - 340px);
+            height: calc(100% - 190px);
             transition: height 0.3s;
         }
 
@@ -709,7 +740,7 @@ textarea:focus {
             padding: 0 0.75em;
         }
 
-        .button:hover {
+        .button:not([disabled]):hover {
             background: $grey-dark;
             opacity: 0.8;
         }
@@ -765,14 +796,6 @@ textarea:focus {
             margin-right: 5px;
         }
     }
-
-    .info {
-        height: 150px;
-    }
-
-    .info .fa {
-        margin-right: 0.75em;
-    }
 }
 
 .edit-mode {
@@ -786,7 +809,7 @@ textarea:focus {
     }
 
     .panel.deck .deck-items {
-        height: calc(100% - 550px);
+        height: calc(100% - 400px);
     }
 }
 

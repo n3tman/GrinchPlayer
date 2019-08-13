@@ -92,7 +92,7 @@ function toggleEditMode() {
         $blocks.draggable('enable').resizable('enable');
         $('.deck-items .panel-block').draggable('enable');
         $('.main').selectable('enable');
-        $('.page-remove, .proj-remove').prop('disabled', false);
+        $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
     }
@@ -1001,7 +1001,7 @@ function freezePageEditing(blocks) {
     $('.deck-items .panel-block').draggable('disable');
     $('.ui-selected').removeClass('ui-selected');
     $('.main').selectable('disable');
-    $('.page-remove, .proj-remove').prop('disabled', true);
+    $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
 }
 
 // Close all tabs
@@ -1311,18 +1311,33 @@ $(function () {
         mainWindow.close();
     });
 
-    // Navbar links
-    $('#youtube').click(function () {
-        shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
+    // Settings and About tooltips
+    tippy($('#settings')[0], {
+        content: '<div class="panel">' +
+            '<p class="panel-heading">Настройки</p>' +
+            '<a class="panel-block set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>' +
+            '</div>',
+        arrow: true,
+        aria: null,
+        trigger: 'click',
+        theme: 'green',
+        interactive: true,
+        placement: 'right'
     });
 
-    $('#discord').click(function () {
-        shell.openExternal('https://discord.gg/EEkpKp2');
-    });
-
-    // Toggle Edit mode
-    $('#page-edit').click(function () {
-        toggleEditMode();
+    tippy($('#about')[0], {
+        content: '<div class="panel">' +
+            '<p class="panel-heading">О программе</p>' +
+            '<a class="panel-block show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>' +
+            '<a class="panel-block discord" title="Обсуждение в #grinch-player"><i class="fa fa-discord-alt"></i> Discord</a>' +
+            '<a class="panel-block youtube" title="Канал Гринча"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>' +
+            '</div>',
+        arrow: true,
+        aria: null,
+        trigger: 'click',
+        theme: 'green',
+        interactive: true,
+        placement: 'right'
     });
 
     // Tabs
@@ -1626,11 +1641,6 @@ $(function () {
         saveAllData();
     });
 
-    // Show help
-    $('#show-help').click(function () {
-        $('#help').addClass('is-active');
-    });
-
     // Import one PPv2 file
     $('#add-pp').click(function () {
         $wrapper.addClass('is-loading');
@@ -1774,6 +1784,38 @@ $(function () {
         unselectProjects();
     }).on('click', '.proj-save', function () {
         projectSaveButton();
+    }).on('click', '.set-device', function () {
+        const $devices = $('#devices');
+        const $list = $devices.find('.list');
+
+        $('#settings')[0]._tippy.hide();
+
+        $list.empty();
+
+        navigator.mediaDevices.enumerateDevices().then(function (devices) {
+            const audioDevices = devices.filter(function (device) {
+                return device.kind === 'audiooutput';
+            });
+
+            audioDevices.forEach(function (audioDevice) {
+                const id = audioDevice.deviceId;
+                const classes = id === deviceId ? 'list-item is-active' : 'list-item';
+                const html = '<a class="' + classes + '" data-id="' + id + '">' +
+                    audioDevice.label + '</a>';
+                $list.append(html);
+            });
+
+            $devices.addClass('is-active');
+        });
+    }).on('click', '.show-help', function () {
+        $('#about')[0]._tippy.hide();
+        $('#help').addClass('is-active');
+    }).on('click', '.youtube', function () {
+        $('#about')[0]._tippy.hide();
+        shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
+    }).on('click', '.discord', function () {
+        $('#about')[0]._tippy.hide();
+        shell.openExternal('https://discord.gg/EEkpKp2');
     });
 
     // ----------- //
@@ -1960,29 +2002,6 @@ $(function () {
             classList.add('is-active');
             showNotification('Устройство установлено!', 1500);
         }
-    });
-
-    $('#set-device').click(function () {
-        const $devices = $('#devices');
-        const $list = $devices.find('.list');
-
-        $list.empty();
-
-        navigator.mediaDevices.enumerateDevices().then(function (devices) {
-            const audioDevices = devices.filter(function (device) {
-                return device.kind === 'audiooutput';
-            });
-
-            audioDevices.forEach(function (audioDevice) {
-                const id = audioDevice.deviceId;
-                const classes = id === deviceId ? 'list-item is-active' : 'list-item';
-                const html = '<a class="' + classes + '" data-id="' + id + '">' +
-                    audioDevice.label + '</a>';
-                $list.append(html);
-            });
-
-            $devices.addClass('is-active');
-        });
     });
 
     // --------- //
