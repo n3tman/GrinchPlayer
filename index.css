@@ -12798,6 +12798,7 @@ textarea:focus {
 .ui-draggable-dragging {
   background: #2B3E50;
   width: 200px;
+  min-height: 30px;
   padding: 0;
   z-index: 3000;
 }
@@ -12816,6 +12817,7 @@ textarea:focus {
 .ui-selectable-helper {
   border: 2px dotted rgba(92, 184, 92, 0.7);
   background: rgba(92, 184, 92, 0.1) !important;
+  z-index: 5000;
 }
 
 .ui-selecting {
@@ -13111,7 +13113,8 @@ textarea:focus {
   box-shadow: inset 0 0 0 2px #4E5D6C !important;
 }
 
-.events-none .sound-block {
+.events-none .sound-block,
+.events-none .panel-block {
   pointer-events: none;
 }
 
@@ -13329,8 +13332,7 @@ textarea:focus {
   display: none;
 }
 .panel.deck .sound-text {
-  padding: 2px;
-  line-height: normal;
+  padding: 5px 0;
 }
 .panel.deck .panel-heading.edit {
   border-top: 1px solid #4E5D6C;

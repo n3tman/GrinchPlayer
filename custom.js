@@ -34,6 +34,7 @@ let currentProject = config.get('currentProject') || '';
 let deviceId = config.get('device') || 'default';
 let $wrapper;
 let $main;
+let $deckItems;
 let $tabList;
 
 let notifyHandle;
@@ -72,11 +73,11 @@ function showNotification(text, error, time) {
 }
 
 // Confirm action
-function confirmAction(text) {
+function confirmAction(text, buttons) {
     return dialog.showMessageBox({
-        buttons: ['Нет', 'Да'],
+        buttons: buttons ? buttons : ['Нет', 'Да'],
         message: text,
-        cancelId: 3
+        cancelId: 10
     });
 }
 
@@ -91,7 +92,7 @@ function toggleEditMode() {
     if (isEditMode()) {
         $blocks.draggable('enable').resizable('enable');
         $('.deck-items .panel-block').draggable('enable');
-        $('.main').selectable('enable');
+        $('.main, .deck-items').selectable('enable');
         $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
@@ -116,7 +117,7 @@ function initDraggableMain($element) {
                 const topOffset = ui.position.top - oldPos.top;
                 const leftOffset = ui.position.left - oldPos.left;
 
-                $('.ui-selected').not(this).each(function () {
+                $main.find('.ui-selected').not(this).each(function () {
                     $(this).css({
                         top: this.offsetTop + topOffset,
                         left: this.offsetLeft + leftOffset
@@ -131,7 +132,7 @@ function initDraggableMain($element) {
             activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
 
             if (e.target.classList.contains('ui-selected')) {
-                $('.ui-selected').not(this).each(function () {
+                $main.find('.ui-selected').not(this).each(function () {
                     activePages[currentTab].blocks[this.dataset.hash].rect = getRectWithOffset(this);
                 });
             }
@@ -417,7 +418,7 @@ function addFileBlocks(files) {
 function setDeckCounter() {
     const $deck = $('#deck');
     const $counter = $deck.find('.count');
-    const $items = $deck.find('.deck-items[data-page="' + currentTab + '"] .panel-block');
+    const $items = $deckItems.find('.panel-block');
     $counter.text($items.length);
 }
 
@@ -515,12 +516,8 @@ function loadSavedPage(page, skipTab) {
             addInitHowl(hash, block.path);
         });
 
-        if (pageHash === currentTab) {
-            updateDeckData();
-        }
+        activePages[pageHash].list.reIndex();
     }
-
-    saveAllData(true);
 }
 
 // Load PPv2 page
@@ -687,7 +684,17 @@ function initNewPageBlocks(hash) {
             updateDeckData();
         }
     }).selectable({
-        filter: '.sound-block'
+        filter: '.sound-block',
+        start: function () {
+            $('.ui-selected').removeClass('ui-selected');
+        }
+    });
+
+    $deckSelector.selectable({
+        filter: '.panel-block',
+        start: function () {
+            $('.ui-selected').removeClass('ui-selected');
+        }
     });
 }
 
@@ -981,14 +988,20 @@ function flushAddedBlocks() {
 }
 
 // Remove all deck items
-function flushDeckItems() {
+function flushDeckItems(withFiles) {
     _.keys(activePages[currentTab].blocks).forEach(function (hash) {
         if (!activePages[currentTab].added.includes(hash)) {
             howlDb[hash].unload();
+
+            if (withFiles) {
+                fs.unlinkSync(activePages[currentTab].blocks[hash].path);
+            }
+
             delete activePages[currentTab].blocks[hash];
-            $('.deck-items[data-page="' + currentTab + '"] .simplebar-content').empty();
         }
     });
+
+    $deckItems.find('.simplebar-content').empty();
 
     lastPlayedHash = '';
 }
@@ -1000,7 +1013,7 @@ function freezePageEditing(blocks) {
     $blocks.draggable('disable').resizable('disable');
     $('.deck-items .panel-block').draggable('disable');
     $('.ui-selected').removeClass('ui-selected');
-    $('.main').selectable('disable');
+    $('.main, .deck-items').selectable('disable');
     $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
 }
 
@@ -1374,9 +1387,11 @@ $(function () {
         $('.ui-selected').removeClass('ui-selected');
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
-        const selector = '[data-page="' + currentTab + '"]';
         $('[data-page]').not('.tab, .page').hide();
+
+        const selector = '[data-page="' + currentTab + '"]';
         $main = $('.main' + selector);
+        $deckItems = $('.deck-items' + selector);
         updateDeckData();
         $(selector).show();
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
@@ -1628,7 +1643,7 @@ $(function () {
                 actionWithLoading(function () {
                     flushAddedBlocks();
                     updateDeckData();
-                    showNotification('Удалено со страницы: <b>' + count + '</b>', 3000);
+                    showNotification('Удалено со страницы: <b>' + count + '</b>', false, 3000);
                 });
             }
         } else {
@@ -1731,11 +1746,11 @@ $(function () {
 
         // Shift key
         if (e.which === 16 && !e.originalEvent.repeat) {
-            $('.main').addClass('events-none');
+            $('body').addClass('events-none');
         }
     }).keyup(function (e) {
         if (e.which === 16) {
-            $('.main').removeClass('events-none');
+            $('body').removeClass('events-none');
         }
     }).on('keydown', '#deck .search', function (e) {
         // Escape erases search
@@ -1890,7 +1905,7 @@ $(function () {
             // Batch add several blocks from the top
             resetDeckList();
             const num = $('#batch-num').val();
-            const $items = $('.deck-items[data-page="' + currentTab + '"] .panel-block');
+            const $items = $deckItems.find('.panel-block');
             let count = 0;
 
             if (num > 0 && $items.length > 0) {
@@ -1907,7 +1922,7 @@ $(function () {
                         }
                     });
 
-                    showNotification('Добавлено блоков: <b>' + count + '</b>', 3000);
+                    showNotification('Добавлено блоков: <b>' + count + '</b>', false, 3000);
 
                     lastAddedHash = '';
                     updateDeckData();
@@ -1976,11 +1991,17 @@ $(function () {
         if (isEditMode() && _.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
             const before = _.size(activePages[currentTab].blocks);
             stopCurrentSound();
-            if (confirmAction('Удалить ВСЕ блоки из колоды?') === 1) {
+
+            const choice = confirmAction('Удалить ВСЕ звуки из колоды?', [
+                'Нет', 'Да, только из базы', 'Да, вместе с файлами'
+            ]);
+
+            if (choice === 1 || choice === 2) {
                 actionWithLoading(function () {
-                    flushDeckItems();
+                    const withFiles = (choice === 2);
+                    flushDeckItems(withFiles);
                     showNotification('Удалено из колоды: <b>' +
-                        (before - _.size(activePages[currentTab].blocks)) + '</b>', false, 3000);
+                        (before - _.size(activePages[currentTab].blocks)) + '</b>', false, 2000);
                     updateDeckData();
                 });
             }
@@ -2000,7 +2021,7 @@ $(function () {
             hp.Howler.setDevice(id);
             $(this).parent().find('.is-active').removeClass('is-active');
             classList.add('is-active');
-            showNotification('Устройство установлено!', 1500);
+            showNotification('Устройство установлено!', false, 1500);
         }
     });
 
@@ -2076,14 +2097,42 @@ $(function () {
 
     // Remove selected blocks
     addHotkey('delete', function () {
-        if (isEditMode()) {
+        const $selected = $('.ui-selected');
+
+        if (isEditMode() && $selected.length > 0) {
             actionWithLoading(function () {
-                $('.ui-selected').each(function () {
-                    const hash = this.dataset.hash;
-                    removeBlockFromPage(hash);
-                    _.pull(activePages[currentTab].added, hash);
+                if ($selected.first().parent().hasClass('main')) {
+                    $main.find('.ui-selected').each(function () {
+                        const hash = this.dataset.hash;
+                        removeBlockFromPage(hash);
+                        _.pull(activePages[currentTab].added, hash);
+                    });
                     updateDeckData();
-                });
+                } else {
+                    const choice = confirmAction('Удалить выделенные звуки из колоды?', [
+                        'Нет', 'Да, только из базы', 'Да, вместе с файлами'
+                    ]);
+
+                    if (choice === 1 || choice === 2) {
+                        const $selected = $deckItems.find('.ui-selected');
+
+                        $selected.each(function () {
+                            const hash = this.dataset.hash;
+                            howlDb[hash].unload();
+
+                            if (choice === 2) {
+                                fs.unlinkSync(activePages[currentTab].blocks[hash].path);
+                            }
+
+                            delete activePages[currentTab].blocks[hash];
+                            $(this).remove();
+                        });
+
+                        updateDeckData();
+
+                        showNotification('Удалено из колоды: <b>' + $selected.length + '</b>', false, 2000);
+                    }
+                }
             });
         }
     });

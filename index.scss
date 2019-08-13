@@ -82,6 +82,7 @@ textarea:focus {
 .ui-draggable-dragging {
     background: $background;
     width: 200px;
+    min-height: 30px;
     padding: 0;
     z-index: 3000;
 }
@@ -103,6 +104,7 @@ textarea:focus {
 .ui-selectable-helper {
     border: 2px dotted rgba($green, 0.7);
     background: rgba($green, 0.1) !important;
+    z-index: 5000;
 }
 
 .ui-selecting {
@@ -468,8 +470,11 @@ textarea:focus {
     }
 }
 
-.events-none .sound-block {
-    pointer-events: none;
+.events-none {
+    .sound-block,
+    .panel-block {
+        pointer-events: none;
+    }
 }
 
 .has-bottom .main {
@@ -768,8 +773,7 @@ textarea:focus {
     }
 
     .sound-text {
-        padding: 2px;
-        line-height: normal;
+        padding: 5px 0;
     }
 
     .panel-heading.edit {
