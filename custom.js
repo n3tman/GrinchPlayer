@@ -28,6 +28,7 @@ const pageSearch = {};
 const projectSearch = {};
 const allPages = config.get('pages') || {};
 const allProjects = config.get('projects') || {};
+const blockBuffer = {type: '', blocks: {}};
 
 let currentTab = config.get('currentTab') || '';
 let currentProject = config.get('currentProject') || '';
@@ -296,14 +297,16 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
 }
 
 // Add a previously saved sound block to main div
-function addSavedSoundBlock(hash, pageHash) {
+function addSavedSoundBlock(hash, pageHash, blockSource) {
     const selector = '[data-hash="' + hash + '"]';
-    const text = activePages[pageHash].blocks[hash].text;
-    const rect = activePages[pageHash].blocks[hash].rect;
+    const source = blockSource ? blockSource : activePages[pageHash];
+    const text = source.blocks[hash].text;
+    const rect = source.blocks[hash].rect;
     const $mainSelector = $('.main[data-page="' + pageHash + '"]');
 
-    const html = '<a class="button is-dark sound-block"' +
-        ' data-hash="' + hash + '"><div class="sound-overlay"></div>' +
+    const html = '<a class="button is-dark sound-block' +
+        (blockSource ? ' ui-selected' : '') +
+        '" data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
     $(html).appendTo($mainSelector).css({
@@ -363,7 +366,7 @@ function addDeckItemFromFile(soundPath) {
     const hash = getFileHash(soundPath);
     const text = path.parse(soundPath).name;
 
-    if (_.keys(activePages[currentTab].blocks).includes(hash)) {
+    if (activeBlockExists(hash)) {
         console.log(text + ' === ' + activePages[currentTab].blocks[hash].text + '\n----------\n');
     } else {
         activePages[currentTab].blocks[hash] = {
@@ -686,14 +689,14 @@ function initNewPageBlocks(hash) {
     }).selectable({
         filter: '.sound-block',
         start: function () {
-            $('.ui-selected').removeClass('ui-selected');
+            unselectBlocks();
         }
     });
 
     $deckSelector.selectable({
         filter: '.panel-block',
         start: function () {
-            $('.ui-selected').removeClass('ui-selected');
+            unselectBlocks();
         }
     });
 }
@@ -1012,7 +1015,7 @@ function freezePageEditing(blocks) {
 
     $blocks.draggable('disable').resizable('disable');
     $('.deck-items .panel-block').draggable('disable');
-    $('.ui-selected').removeClass('ui-selected');
+    unselectBlocks();
     $('.main, .deck-items').selectable('disable');
     $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
 }
@@ -1023,6 +1026,34 @@ function closeAllTabs() {
     _.keys(activePages).forEach(function (hash) {
         closeTab(hash);
     });
+}
+
+// Process selected blocks
+function selectedBlocksAction(message, callback) {
+    const $selected = $('.ui-selected');
+
+    if (isEditMode() && $selected.length > 0) {
+        blockBuffer.blocks = {};
+
+        if ($selected.first().parent().hasClass('main')) {
+            blockBuffer.type = 'main';
+
+            $main.find('.ui-selected').each(function () {
+                const hash = this.dataset.hash;
+                blockBuffer.blocks[hash] = _.cloneDeep(activePages[currentTab].blocks[hash]);
+
+                if (callback !== undefined) {
+                    callback(hash);
+                }
+            });
+
+            unselectBlocks();
+
+            showNotification(message + ': <b>' + $selected.length + '</b>', false, 2000);
+        } else {
+            blockBuffer.type = 'deck';
+        }
+    }
 }
 
 // ==================== //
@@ -1216,6 +1247,11 @@ function projectExists(hash) {
     return _.keys(allProjects).includes(hash);
 }
 
+// Check if block exists in active page
+function activeBlockExists(hash) {
+    return _.keys(activePages[currentTab].blocks).includes(hash);
+}
+
 // Reinit page search
 function updatePageSearch() {
     pageSearch.list.reIndex();
@@ -1277,6 +1313,11 @@ function unselectProjects() {
     currentProject = '';
     config.set('currentProject', currentProject);
     $('#project-search .is-active').removeClass('is-active');
+}
+
+// Unselect all selected blocks
+function unselectBlocks() {
+    $('.ui-selected').removeClass('ui-selected');
 }
 
 // ================== //
@@ -1384,7 +1425,7 @@ $(function () {
             resetDeckList();
         }
 
-        $('.ui-selected').removeClass('ui-selected');
+        unselectBlocks();
         currentTab = e.currentTarget.dataset.page;
         config.set('currentTab', currentTab);
         $('[data-page]').not('.tab, .page').hide();
@@ -2134,6 +2175,39 @@ $(function () {
                     }
                 }
             });
+        }
+    });
+
+    // Copy blocks or deck items
+    addHotkey('ctrl+c', function () {
+        selectedBlocksAction('Скопировано со страницы');
+    });
+
+    // Cut blocks or deck items
+    addHotkey('ctrl+x', function () {
+        selectedBlocksAction('Вырезано со страницы', function (hash) {
+            console.log(hash);
+        });
+    });
+
+    // Paste blocks or deck items
+    addHotkey('ctrl+v', function () {
+        if (isEditMode() && _.size(blockBuffer.blocks) > 0) {
+            let counter = 0;
+
+            if (blockBuffer.type === 'main') {
+                _.keys(blockBuffer.blocks).forEach(function (hash) {
+                    if (!activeBlockExists(hash)) {
+                        activePages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
+                        activePages[currentTab].added.push(hash);
+                        addSavedSoundBlock(hash, currentTab, blockBuffer);
+                        counter++;
+                    }
+                });
+
+                showNotification('Вставлено блоков: <b>' + counter + '</b>. Пропущено: <b>' +
+                    (_.size(blockBuffer.blocks) - counter) + '</b>', false, 2000);
+            }
         }
     });
 });
