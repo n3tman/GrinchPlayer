@@ -23,13 +23,14 @@ const keyboardArray = ['0', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
 const editClass = 'has-bottom';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
-const activePages = {};
 const pageSearch = {};
 const projectSearch = {};
 const allPages = config.get('pages') || {};
 const allProjects = config.get('projects') || {};
 const blockBuffer = {type: '', blocks: {}};
 
+let isEditMode = config.get('editMode') || false;
+let activePages = {};
 let currentTab = config.get('currentTab') || '';
 let currentProject = config.get('currentProject') || '';
 let deviceId = config.get('device') || 'default';
@@ -86,11 +87,11 @@ function confirmAction(text, buttons) {
 function toggleEditMode() {
     const $blocks = $('.sound-block');
     const $tabs = $('#tabs .tab');
+    isEditMode = !isEditMode;
+    toggleBodyClass(editClass);
+    config.set('editMode', isEditMode);
 
-    toggleSidebarClasses(editClass);
-    config.set('editMode', isEditMode());
-
-    if (isEditMode()) {
+    if (isEditMode) {
         $blocks.draggable('enable').resizable('enable');
         $('.deck-items .panel-block').draggable('enable');
         $('.main, .deck-items').selectable('enable');
@@ -150,7 +151,7 @@ function initDraggableMain($element) {
             autoSizeText($element);
         }, 200)
     }).mousedown(function (e) {
-        if (e.which === 3 && isEditMode()) {
+        if (e.which === 3 && isEditMode) {
             const $target = $(e.currentTarget).find('.ui-resizable-se');
             const posX = $target.offset().left + 8;
             const posY = $target.offset().top + 8;
@@ -164,7 +165,7 @@ function initDraggableMain($element) {
             });
         }
     }).on('wheel', function (e) {
-        if (isEditMode()) {
+        if (isEditMode) {
             playSound(e.currentTarget);
         }
     });
@@ -337,7 +338,7 @@ function appendDeckItemHtml(hash, text, pageHash) {
         distance: 10
     }).on('dblclick', function (e) {
         const $target = $(e.currentTarget);
-        if (isEditMode()) {
+        if (isEditMode) {
             addSoundBlockFromDeck($target, false);
             updateDeckData();
             $target.off('dblclick');
@@ -650,12 +651,12 @@ function initNewPageBlocks(hash) {
     reorderTabs();
 
     $mainSelector.on('click', '.sound-block', function () {
-        if (!isEditMode()) {
+        if (!isEditMode) {
             playSound(this);
         }
     }).on('contextmenu', '.sound-block', function (e) {
         e.preventDefault();
-        if (isEditMode() && e.ctrlKey) {
+        if (isEditMode && e.ctrlKey) {
             $(e.currentTarget).find('.sound-text').trigger('edit');
         }
     }).on('contextmenu', function (e) {
@@ -738,7 +739,7 @@ function loadProjectTabs(hash) {
         }
     });
 
-    if (!isEditMode()) {
+    if (!isEditMode) {
         freezePageEditing();
     }
 }
@@ -766,7 +767,7 @@ function addProjectToList(hash, text, reindex) {
         $this.addClass('is-active');
     }).on('contextmenu', function (e) {
         e.preventDefault();
-        if (isEditMode()) {
+        if (isEditMode) {
             $(e.currentTarget).find('.text').trigger('edit');
         }
     });
@@ -807,7 +808,7 @@ function projectSaveAction(that) {
 
 // Project save as action
 function projectSaveAs() {
-    if (isEditMode() && _.size(activePages) > 0) {
+    if (isEditMode && _.size(activePages) > 0) {
         const $modal = $('#proj-create');
         $modal.addClass('is-active').find('input').val('').focus().keydown(function (e) {
             if (e.which === 27) {
@@ -819,7 +820,7 @@ function projectSaveAs() {
 
 // Project save button action
 function projectSaveButton() {
-    if (isEditMode() && _.size(activePages) > 0 && currentProject.length > 0) {
+    if (isEditMode && _.size(activePages) > 0 && currentProject.length > 0) {
         const name = allProjects[currentProject].name;
         allProjects[currentProject].pages = getActiveTabs();
         config.set('projects', allProjects);
@@ -830,10 +831,13 @@ function projectSaveButton() {
 // Close the tab
 function closeTab(hash) {
     const selector = '[data-page="' + hash + '"]';
-    const $tab = $('.tab' + selector);
-    const $prevTab = $tab.prev();
-    $(selector).not('.page').remove();
-    reorderTabs();
+    const $prevTab = $('.tab' + selector).prev();
+
+    document.querySelectorAll(selector).forEach(function (el, i) {
+        if (i > 0) {
+            el.remove();
+        }
+    });
 
     _.keys(activePages[hash].blocks).forEach(function (blockHash) {
         howlDb[blockHash].unload();
@@ -842,11 +846,24 @@ function closeTab(hash) {
     delete activePages[hash];
     currentTab = '';
 
+    reorderTabs();
+
     if ($prevTab.length > 0) {
         $prevTab.click();
     } else {
         tabClick(true);
     }
+}
+
+// Close all tabs
+function closeAllTabs() {
+    const selector = '.tab, .main, .panel-tabs, .deck-items, .deck .search';
+    document.querySelectorAll(selector).forEach(function (el) {
+        el.remove();
+    });
+    hp.Howler.unload();
+    activePages = {};
+    currentTab = '';
 }
 
 // Update zoom of the page
@@ -1015,18 +1032,11 @@ function freezePageEditing(blocks) {
     $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
 }
 
-// Close all tabs
-function closeAllTabs() {
-    _.keys(activePages).forEach(function (hash) {
-        closeTab(hash);
-    });
-}
-
 // Process selected blocks
 function selectedBlocksAction(message, callback) {
     const $selected = $('.ui-selected');
 
-    if (isEditMode() && $selected.length > 0) {
+    if (isEditMode && $selected.length > 0) {
         let $parent;
         let counter = 0;
 
@@ -1068,11 +1078,6 @@ function selectedBlocksAction(message, callback) {
 //   Helper Functions   //
 //                      //
 // ==================== //
-
-// Check current mode
-function isEditMode() {
-    return $('body').hasClass(editClass);
-}
 
 // Autosize text inside block
 function autoSizeText($block) {
@@ -1208,7 +1213,7 @@ function updateMainHeight() {
 }
 
 // Toggle sidebar classes
-function toggleSidebarClasses(name) {
+function toggleBodyClass(name) {
     $('body').toggleClass(name);
 }
 
@@ -1306,7 +1311,7 @@ function loadPageFromList(hash, skipTab) {
     loadSavedPage(allPages[hash], skipTab);
     tabClick(hash);
 
-    if (!isEditMode()) {
+    if (!isEditMode) {
         freezePageEditing();
     }
 }
@@ -1361,9 +1366,8 @@ $(function () {
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
 
-    const editMode = config.get('editMode') || false;
-    if (editMode === true) {
-        toggleSidebarClasses(editClass);
+    if (isEditMode) {
+        toggleBodyClass(editClass);
     }
 
     // Window controls
@@ -1456,7 +1460,7 @@ $(function () {
         $(e.currentTarget).addClass('is-active');
     }).on('contextmenu', '.tab', function (e) {
         e.preventDefault();
-        if (isEditMode()) {
+        if (isEditMode) {
             $(e.currentTarget).find('.text').trigger('edit');
         }
     }).on('click', '.tab-close', function (e) {
@@ -1547,7 +1551,7 @@ $(function () {
     }, 200);
 
     // Freeze editing if not in Edit mode
-    if (!isEditMode()) {
+    if (!isEditMode) {
         freezePageEditing();
     }
 
@@ -1839,7 +1843,7 @@ $(function () {
             });
         }
     }).on('click', '.add-tab', function () {
-        if (isEditMode()) {
+        if (isEditMode) {
             addNewEmptyPage();
             tabClick(false);
         }
@@ -1951,7 +1955,7 @@ $(function () {
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
     }).on('click', '#batch-btn', function () {
-        if (isEditMode() && _.size(activePages) > 0) {
+        if (isEditMode && _.size(activePages) > 0) {
             // Batch add several blocks from the top
             resetDeckList();
             const num = $('#batch-num').val();
@@ -2014,7 +2018,7 @@ $(function () {
         }
     }).on('dragover', false).on('drop', function (e) {
         // Drag and drop files/folders
-        if (isEditMode() && e.originalEvent.dataTransfer !== undefined) {
+        if (isEditMode && e.originalEvent.dataTransfer !== undefined) {
             const files = e.originalEvent.dataTransfer.files;
             let fileArray = [];
 
@@ -2038,7 +2042,7 @@ $(function () {
 
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
-        if (isEditMode() && _.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
+        if (isEditMode && _.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
             const before = _.size(activePages[currentTab].blocks);
             stopCurrentSound();
 
@@ -2109,6 +2113,7 @@ $(function () {
         if (_.size(activePages) > 0) {
             actionWithLoading(function () {
                 closeTab(currentTab);
+                updateMainHeight();
             });
         }
     });
@@ -2148,7 +2153,7 @@ $(function () {
     addHotkey('delete', function () {
         const $selected = $('.ui-selected');
 
-        if (isEditMode() && $selected.length > 0) {
+        if (isEditMode && $selected.length > 0) {
             actionWithLoading(function () {
                 if ($selected.first().parent().hasClass('main')) {
                     $main.find('.ui-selected').each(function () {
@@ -2203,7 +2208,7 @@ $(function () {
 
     // Paste blocks or deck items
     addHotkey('ctrl+v', function () {
-        if (isEditMode() && _.size(blockBuffer.blocks) > 0) {
+        if (isEditMode && _.size(blockBuffer.blocks) > 0) {
             let counter = 0;
 
             _.keys(blockBuffer.blocks).forEach(function (hash) {
