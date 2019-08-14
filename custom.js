@@ -904,6 +904,7 @@ function initEditableTab($tab) {
                     config.set('currentTab', currentTab);
                 }
 
+                resetPageSearch();
                 $('.page[data-page="' + oldHash + '"] > .text').text(value);
                 updatePageSearch();
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
@@ -960,9 +961,9 @@ function initEditableProject($item) {
                     config.set('currentProject', currentProject);
                 }
 
+                resetProjectSearch();
                 $text.text(value);
                 $item.attr('data-proj', newHash);
-
                 updateProjectSearch();
             }
         }
@@ -1225,6 +1226,18 @@ function getRandomString(length) {
 function resetDeckList() {
     activePages[currentTab].list.search();
     $('.search-' + currentTab).val('');
+}
+
+// Reset page search
+function resetPageSearch() {
+    pageSearch.list.search();
+    $('#page-search .search').val('');
+}
+
+// Reset project search
+function resetProjectSearch() {
+    projectSearch.list.search();
+    $('#project-search .search').val('');
 }
 
 // Check if page with Hash already exists
@@ -1800,13 +1813,11 @@ $(function () {
         }
     }).on('keydown', '#page-search .search', function (e) {
         if (e.which === 27) {
-            pageSearch.list.search();
-            e.currentTarget.value = '';
+            resetPageSearch();
         }
     }).on('keydown', '#project-search .search', function (e) {
         if (e.which === 27) {
-            projectSearch.list.search();
-            e.currentTarget.value = '';
+            resetProjectSearch();
         }
     }).on('keydown', '#proj-create .input', function (e) {
         // Enter in project input
