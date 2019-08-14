@@ -97,6 +97,7 @@ function toggleEditMode() {
         $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
     } else {
         freezePageEditing($blocks, $tabs);
+        saveAllData(true);
     }
 }
 
@@ -618,8 +619,6 @@ function addNewEmptyPage($element) {
     initNewPageBlocks(hash);
 
     updateMainHeight();
-
-    saveAllData(true);
 }
 
 // Init everything for a new page
@@ -763,7 +762,6 @@ function addProjectToList(hash, text, reindex) {
         });
 
         currentProject = hash;
-        config.set('currentProject', currentProject);
         $('#project-search .is-active').removeClass('is-active');
         $this.addClass('is-active');
     }).on('contextmenu', function (e) {
@@ -901,7 +899,6 @@ function initEditableTab($tab) {
 
                 if (currentTab === oldHash) {
                     currentTab = newHash;
-                    config.set('currentTab', currentTab);
                 }
 
                 resetPageSearch();
@@ -916,8 +913,6 @@ function initEditableTab($tab) {
                         allProjects[proj].pages[index] = newHash;
                     }
                 });
-
-                saveAllData(true);
             }
         }
     });
@@ -958,7 +953,6 @@ function initEditableProject($item) {
 
                 if (currentProject === oldHash) {
                     currentProject = newHash;
-                    config.set('currentProject', currentProject);
                 }
 
                 resetProjectSearch();
@@ -1023,7 +1017,6 @@ function freezePageEditing(blocks) {
 
 // Close all tabs
 function closeAllTabs() {
-    saveAllData(true);
     _.keys(activePages).forEach(function (hash) {
         closeTab(hash);
     });
@@ -1226,7 +1219,7 @@ function getTabHtml(text, hash) {
         '<i class="fa fa-circle fa-stack-2x"></i>' +
         '<strong class="fa-stack-1x">1</strong></span>' +
         '<span class="text">' + text + '</span>' +
-        '<span class="icon tab-remove"><i class="fa fa-times"></i></span>' +
+        '<span class="icon tab-close"><i class="fa fa-times"></i></span>' +
         '</a></li>';
 }
 
@@ -1337,7 +1330,6 @@ function getActiveTabs() {
 // Unselect all projects
 function unselectProjects() {
     currentProject = '';
-    config.set('currentProject', currentProject);
     $('#project-search .is-active').removeClass('is-active');
 }
 
@@ -1453,7 +1445,6 @@ $(function () {
 
         unselectBlocks();
         currentTab = e.currentTarget.dataset.page;
-        config.set('currentTab', currentTab);
         $('[data-page]').not('.tab, .page').hide();
 
         const selector = '[data-page="' + currentTab + '"]';
@@ -1468,14 +1459,13 @@ $(function () {
         if (isEditMode()) {
             $(e.currentTarget).find('.text').trigger('edit');
         }
-    }).on('click', '.tab-remove', function (e) {
+    }).on('click', '.tab-close', function (e) {
         e.stopPropagation();
         const $this = $(this);
         const hash = $this.closest('.tab').attr('data-page');
         actionWithLoading(function () {
-            updateMainHeight();
-            saveAllData(true);
             closeTab(hash);
+            updateMainHeight();
         });
     });
 
@@ -1740,7 +1730,6 @@ $(function () {
             } else {
                 const result = loadPpv2(files[0]);
                 if (result) {
-                    saveAllData(true);
                     $wrapper.removeClass('is-loading');
                     showNotification('Добавлена страница <b>' + result.name + '</b>. &nbsp;Звуков: <b>' + result.added + '</b>, пропущено: <b>' + result.skipped + '</b>');
                 } else {
@@ -1785,8 +1774,6 @@ $(function () {
 
                     showNotification('Добавлено страниц: <b>' + pageCount + '</b>. &nbsp;Звуков: <b>' +
                         addedCount + '</b>, пропущено: <b>' + skippedCount + '</b>', false, 5000);
-
-                    saveAllData(true);
                 }
 
                 $wrapper.removeClass('is-loading');
@@ -1909,7 +1896,6 @@ $(function () {
         if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
             actionWithLoading(function () {
                 if (_.keys(activePages).includes(hash)) {
-                    saveAllData(true);
                     closeTab(hash);
                 }
 
@@ -1938,7 +1924,6 @@ $(function () {
             actionWithLoading(function () {
                 if (hash === currentProject) {
                     currentProject = '';
-                    config.set('currentProject', currentProject);
                 }
 
                 $parent.remove();
@@ -2123,7 +2108,6 @@ $(function () {
     addHotkey('ctrl+w', function () {
         if (_.size(activePages) > 0) {
             actionWithLoading(function () {
-                saveAllData(true);
                 closeTab(currentTab);
             });
         }
