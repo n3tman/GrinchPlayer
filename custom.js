@@ -551,7 +551,7 @@ function loadPpv2(filePath) {
             const filePath = parsed.dir + '\\' + parts[0];
             lineNum++;
 
-            if (fs.existsSync(filePath)) {
+            if (fs.existsSync(filePath) && parts.length === 6) {
                 const hash = getFileHash(filePath);
 
                 if (!_.keys(page.blocks).includes(hash)) {
