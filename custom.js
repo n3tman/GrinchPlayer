@@ -1034,27 +1034,39 @@ function selectedBlocksAction(message, callback) {
     const $selected = $('.ui-selected');
 
     if (isEditMode() && $selected.length > 0) {
+        let $parent;
+        let counter = 0;
+
         blockBuffer.blocks = {};
 
         if ($selected.first().parent().hasClass('main')) {
             blockBuffer.type = 'main';
-
-            $main.find('.ui-selected').each(function () {
-                const hash = this.dataset.hash;
-                const $this = $(this);
-                blockBuffer.blocks[hash] = _.cloneDeep(activePages[currentTab].blocks[hash]);
-
-                if (callback !== undefined) {
-                    callback($this, hash);
-                }
-            });
-
-            unselectBlocks();
-
-            showNotification(message + ': <b>' + $selected.length + '</b>', false, 2000);
+            $parent = $main;
         } else {
             blockBuffer.type = 'deck';
+            $parent = $deckItems;
+            resetDeckList();
         }
+
+        $parent.find('.ui-selected').each(function () {
+            const hash = this.dataset.hash;
+            const $this = $(this);
+            blockBuffer.blocks[hash] = _.cloneDeep(activePages[currentTab].blocks[hash]);
+
+            if (callback !== undefined) {
+                callback($this, hash);
+            }
+
+            counter++;
+        });
+
+        unselectBlocks();
+
+        if (blockBuffer.type === 'deck' && callback !== undefined) {
+            updateDeckData();
+        }
+
+        showNotification(message + ': <b>' + counter + '</b>', false, 2000);
     }
 }
 
@@ -2192,12 +2204,12 @@ $(function () {
 
     // Copy blocks or deck items
     addHotkey('ctrl+c', function () {
-        selectedBlocksAction('Скопировано со страницы');
+        selectedBlocksAction('Скопировано');
     });
 
     // Cut blocks or deck items
     addHotkey('ctrl+x', function () {
-        selectedBlocksAction('Вырезано со страницы', function ($this, hash) {
+        selectedBlocksAction('Вырезано', function ($this, hash) {
             $this.remove();
             _.pull(activePages[currentTab].added, hash);
             delete activePages[currentTab].blocks[hash];
@@ -2210,19 +2222,27 @@ $(function () {
         if (isEditMode() && _.size(blockBuffer.blocks) > 0) {
             let counter = 0;
 
-            if (blockBuffer.type === 'main') {
-                _.keys(blockBuffer.blocks).forEach(function (hash) {
-                    if (!activeBlockExists(hash)) {
-                        activePages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
+            _.keys(blockBuffer.blocks).forEach(function (hash) {
+                if (!activeBlockExists(hash)) {
+                    activePages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
+
+                    if (blockBuffer.type === 'main') {
                         activePages[currentTab].added.push(hash);
                         addSavedSoundBlock(hash, currentTab, blockBuffer);
-                        counter++;
+                    } else {
+                        appendDeckItemHtml(hash, blockBuffer.blocks[hash].text);
                     }
-                });
 
-                showNotification('Вставлено блоков: <b>' + counter + '</b>. Пропущено: <b>' +
-                    (_.size(blockBuffer.blocks) - counter) + '</b>', false, 2000);
+                    counter++;
+                }
+            });
+
+            if (blockBuffer.type === 'deck') {
+                updateDeckData();
             }
+
+            showNotification('Вставлено: <b>' + counter + '</b>. Пропущено: <b>' +
+                (_.size(blockBuffer.blocks) - counter) + '</b>', false, 2000);
         }
     });
 });
