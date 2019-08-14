@@ -1041,10 +1041,11 @@ function selectedBlocksAction(message, callback) {
 
             $main.find('.ui-selected').each(function () {
                 const hash = this.dataset.hash;
+                const $this = $(this);
                 blockBuffer.blocks[hash] = _.cloneDeep(activePages[currentTab].blocks[hash]);
 
                 if (callback !== undefined) {
-                    callback(hash);
+                    callback($this, hash);
                 }
             });
 
@@ -2196,8 +2197,11 @@ $(function () {
 
     // Cut blocks or deck items
     addHotkey('ctrl+x', function () {
-        selectedBlocksAction('Вырезано со страницы', function (hash) {
-            console.log(hash);
+        selectedBlocksAction('Вырезано со страницы', function ($this, hash) {
+            $this.remove();
+            _.pull(activePages[currentTab].added, hash);
+            delete activePages[currentTab].blocks[hash];
+            howlDb[hash].unload();
         });
     });
 
