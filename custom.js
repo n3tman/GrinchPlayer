@@ -665,7 +665,11 @@ function addNewEmptyPage() {
         name: text,
         added: [],
         blocks: {},
-        init: true
+        init: true,
+        store: new Store({
+            cwd: 'pages',
+            name: hash
+        })
     };
 
     initNewPageBlocks(hash);
