@@ -685,13 +685,20 @@ function initNewPageBlocks(hash, isSaved) {
         mainHtml = activePages[hash].store.get('main');
     }
 
-    $('.wrapper').append(mainHtml);
+    document.querySelector('.wrapper').insertAdjacentHTML('beforeend', mainHtml);
 
-    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
+    document.querySelector('#deck-bottom').insertAdjacentHTML('beforebegin',
+        '<div class="deck-items" data-page="' + hash + '"></div>'
+    );
 
-    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" type="text" data-page="' + hash + '" placeholder="фильтр">');
+    document.querySelector('#search-wrapper').insertAdjacentHTML('beforeend',
+        '<input class="input search search-' + hash + '" type="text" data-page="' + hash + '" placeholder="фильтр">'
+    );
 
-    $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '"><a class="sort sort-' + hash + '" data-sort="sound-text">по алфавиту</a><a class="sort by-length desc sort-' + hash + '">по длине</a></p>');
+    document.querySelector('#deck > .panel-search').insertAdjacentHTML('afterend',
+        '<p class="panel-tabs" data-page="' + hash + '"><a class="sort sort-' + hash +
+        '" data-sort="sound-text">по алфавиту</a><a class="sort by-length desc sort-' + hash + '">по длине</a></p>'
+    );
 
     const $mainSelector = $('.main' + selector);
     const $deckSelector = $('.deck-items' + selector);
