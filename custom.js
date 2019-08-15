@@ -485,7 +485,7 @@ function saveAllData(skipNotify) {
             .replace(/ui[-\w]+\s*/g, '')
             .replace(/<div class="".+?<\/div>/g, '');
 
-        allPages[hash] = _.omit(_.cloneDeep(activePages[hash]), ['bar', 'list', 'store', 'init']);
+        allPages[hash] = _.omit(activePages[hash], ['bar', 'list', 'store', 'init']);
 
         activePages[hash].store.set({
             name: activePages[hash].name,
@@ -534,14 +534,14 @@ function showFolderSelectionDialog(callback, finish, title) {
 function addPageToDatabase(page) {
     if (!savedPageExists(page.hash)) {
         addPageToList(page.hash, page.name, true);
-        allPages[page.hash] = _.cloneDeep(page);
+        allPages[page.hash] = page;
     }
 }
 
 // Load saved page
 function loadSavedPage(page, skipTab) {
     const pageHash = page.hash;
-    activePages[pageHash] = page;
+    activePages[pageHash] = _.cloneDeep(page);
     activePages[pageHash].init = false;
 
     activePages[pageHash].store = new Store({
@@ -894,6 +894,8 @@ function projectSaveAs() {
                 $modal.removeClass('is-active');
             }
         });
+    } else {
+        showNotification('Нет активных страниц', true, 3000);
     }
 }
 
@@ -904,6 +906,8 @@ function projectSaveButton() {
         allProjects[currentProject].pages = getActiveTabs();
         config.set('projects', allProjects);
         showNotification('Сохранено как проект: <b>' + name + '</b>', false, 3000);
+    } else {
+        showNotification('Нет активных страниц или проектов', true, 3000);
     }
 }
 
@@ -1841,8 +1845,11 @@ $(function () {
                         }
                     });
 
-                    showNotification('Добавлено страниц: <b>' + pageCount + '</b>. &nbsp;Звуков: <b>' +
-                        addedCount + '</b>, пропущено: <b>' + skippedCount + '</b>', false, 5000);
+                    if (pageCount > 0) {
+                        showNotification('Добавлено страниц: <b>' + pageCount + '</b>. &nbsp;Звуков: <b>' + addedCount + '</b>, пропущено: <b>' + skippedCount + '</b>', false, 5000);
+                    } else {
+                        showNotification('Новых страниц <b>не найдено</b>', true, 3000);
+                    }
                 }
 
                 $wrapper.removeClass('is-loading');
