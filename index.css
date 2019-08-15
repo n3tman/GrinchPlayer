@@ -13143,7 +13143,7 @@ textarea:focus {
 .panel .panel-search {
   margin-bottom: 0;
 }
-.panel .panel-search .icon:first-child {
+.panel .panel-search .icon:only-child {
   display: none;
 }
 .panel .panel-search .input,

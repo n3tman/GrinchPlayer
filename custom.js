@@ -1513,6 +1513,7 @@ $(function () {
         const selector = '[data-page="' + currentTab + '"]';
         $main = $('.main' + selector);
         $deckItems = $('.deck-items' + selector);
+        updateDeckData();
 
         const query = '.main, .panel-tabs, .deck-items, .deck .search';
         document.querySelectorAll(query).forEach(function (el) {
@@ -2176,12 +2177,22 @@ $(function () {
         $('.modal.is-active').removeClass('is-active');
     });
 
-    // Close current wab
+    // Close current tab
     addHotkey('ctrl+w', function () {
         if (_.size(activePages) > 0) {
             actionWithLoading(function () {
                 closeTab(currentTab);
                 updateMainHeight();
+            });
+        }
+    });
+
+    // Close all tabs
+    addHotkey('ctrl+alt+w', function () {
+        if (_.size(activePages) > 0) {
+            actionWithLoading(function () {
+                closeAllTabs();
+                unselectProjects();
             });
         }
     });
