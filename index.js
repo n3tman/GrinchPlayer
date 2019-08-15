@@ -1,6 +1,8 @@
 'use strict';
 const path = require('path');
 const {app, BrowserWindow} = require('electron');
+// eslint-disable-next-line no-unused-vars
+const cache = require('v8-compile-cache');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');

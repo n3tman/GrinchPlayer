@@ -90,8 +90,8 @@ function toggleEditMode() {
     isEditMode = !isEditMode;
     toggleBodyClass(editClass);
 
-    if (isEditMode) {
-        actionWithLoading(function () {
+    actionWithLoading(function () {
+        if (isEditMode) {
             _.keys(activePages).forEach(function (hash) {
                 if (!activePages[hash].init) {
                     initEditablePage(hash);
@@ -105,16 +105,16 @@ function toggleEditMode() {
             $('.deck-items .panel-block').draggable('enable');
             $('.main, .deck-items').selectable('enable');
             $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
-        });
-    } else {
-        $blocks.draggable('disable').resizable('disable');
-        $('.deck-items .panel-block').draggable('disable');
-        $('.main, .deck-items').selectable('disable');
-        $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
+        } else {
+            $blocks.draggable('disable').resizable('disable');
+            $('.deck-items .panel-block').draggable('disable');
+            $('.main, .deck-items').selectable('disable');
+            $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
 
-        unselectBlocks();
-        saveAllData(true);
-    }
+            unselectBlocks();
+            saveAllData(true);
+        }
+    });
 }
 
 // Initialize draggable/resizable block
@@ -485,7 +485,7 @@ function saveAllData(skipNotify) {
             .replace(/ui[-\w]+\s*/g, '')
             .replace(/<div class="".+?<\/div>/g, '');
 
-        allPages[hash] = _.omit(activePages[hash], ['bar', 'list', 'store', 'init']);
+        allPages[hash] = _.omit(_.cloneDeep(activePages[hash]), ['bar', 'list', 'store', 'init']);
 
         activePages[hash].store.set({
             name: activePages[hash].name,
@@ -534,7 +534,7 @@ function showFolderSelectionDialog(callback, finish, title) {
 function addPageToDatabase(page) {
     if (!savedPageExists(page.hash)) {
         addPageToList(page.hash, page.name, true);
-        allPages[page.hash] = page;
+        allPages[page.hash] = _.cloneDeep(page);
     }
 }
 
