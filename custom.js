@@ -14,7 +14,7 @@ const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
-// 1const Store = require('electron-store');
+const Store = require('electron-store');
 
 const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
@@ -480,14 +480,17 @@ function saveAllData(skipNotify) {
     const activeTabs = getActiveTabs();
 
     activeTabs.forEach(function (hash) {
-        // 1const selector = '[data-page="' + hash + '"]';
-        // const mainHtml = document.querySelector('.main' + selector).outerHTML
-        //     .replace(/ui[-\w]+\s*/g, '')
-        //     .replace(/<div class="".+?<\/div>/g, '');
+        const selector = '[data-page="' + hash + '"]';
+        const mainHtml = document.querySelector('.main' + selector).outerHTML
+            .replace(/ui[-\w]+\s*/g, '')
+            .replace(/<div class="".+?<\/div>/g, '');
 
         allPages[hash] = _.omit(activePages[hash], ['bar', 'list', 'store', 'init']);
 
-        // 1activePages[hash].store.set('main', mainHtml);
+        activePages[hash].store.set({
+            name: activePages[hash].name,
+            main: mainHtml
+        });
     });
 
     config.set('activeTabs', activeTabs);
@@ -541,24 +544,26 @@ function loadSavedPage(page, skipTab) {
     activePages[pageHash] = page;
     activePages[pageHash].init = false;
 
-    // 1activePages[pageHash].store = new Store({
-    //     cwd: 'pages',
-    //     name: pageHash
-    // });
+    activePages[pageHash].store = new Store({
+        cwd: 'pages',
+        name: pageHash
+    });
+
+    const isSaved = activePages[pageHash].store.has('main');
 
     if (!skipTab) {
         const tabHtml = $(getTabHtml(page.name, pageHash));
         $tabList.append(tabHtml);
     }
 
-    initNewPageBlocks(pageHash, activePages[pageHash].store);
+    initNewPageBlocks(pageHash, isSaved);
 
     if (_.size(page.blocks) > 0) {
         _.each(page.blocks, function (block, hash) {
-            if (page.added.includes(hash)) {
-                addSavedSoundBlock(hash, pageHash);
-            } else {
+            if (!page.added.includes(hash)) {
                 appendDeckItemHtml(hash, block.text, pageHash);
+            } else if (!isSaved) {
+                addSavedSoundBlock(hash, pageHash);
             }
 
             addInitHowl(hash, block.path);
@@ -615,7 +620,7 @@ function loadPpv2(filePath) {
                     counter++;
 
                     page.blocks[hash] = {};
-                    page.blocks[hash].path = filePath;
+                    page.blocks[hash].path = path.win32.normalize(filePath);
                     page.blocks[hash].text = parts[5];
 
                     if (left >= 10) {
@@ -668,12 +673,12 @@ function addNewEmptyPage() {
 }
 
 // Init everything for a new page
-function initNewPageBlocks(hash, stored) {
+function initNewPageBlocks(hash, isSaved) {
     const selector = '[data-page="' + hash + '"]';
 
     let mainHtml = '<div class="main" data-page="' + hash + '">';
-    if (stored !== undefined && stored.has('main')) {
-        mainHtml = stored.get('main');
+    if (isSaved === true) {
+        mainHtml = activePages[hash].store.get('main');
     }
 
     $('.wrapper').append(mainHtml);
