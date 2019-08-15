@@ -14,6 +14,7 @@ const slugify = require('@sindresorhus/slugify');
 const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
+// 1const Store = require('electron-store');
 
 const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
@@ -29,7 +30,7 @@ const allPages = config.get('pages') || {};
 const allProjects = config.get('projects') || {};
 const blockBuffer = {type: '', blocks: {}};
 
-let isEditMode = config.get('editMode') || false;
+let isEditMode = false;
 let activePages = {};
 let currentTab = config.get('currentTab') || '';
 let currentProject = config.get('currentProject') || '';
@@ -86,28 +87,48 @@ function confirmAction(text, buttons) {
 // Toggle edit mode
 function toggleEditMode() {
     const $blocks = $('.sound-block');
-    const $tabs = $('#tabs .tab');
     isEditMode = !isEditMode;
     toggleBodyClass(editClass);
-    config.set('editMode', isEditMode);
 
     if (isEditMode) {
-        $blocks.draggable('enable').resizable('enable');
-        $('.deck-items .panel-block').draggable('enable');
-        $('.main, .deck-items').selectable('enable');
-        $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
+        actionWithLoading(function () {
+            _.keys(activePages).forEach(function (hash) {
+                if (!activePages[hash].init) {
+                    initEditablePage(hash);
+                    initDraggableMain(hash);
+                    initDeckEditable(hash);
+                    activePages[hash].init = true;
+                }
+            });
+
+            $blocks.draggable('enable').resizable('enable');
+            $('.deck-items .panel-block').draggable('enable');
+            $('.main, .deck-items').selectable('enable');
+            $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
+        });
     } else {
-        freezePageEditing($blocks, $tabs);
+        $blocks.draggable('disable').resizable('disable');
+        $('.deck-items .panel-block').draggable('disable');
+        $('.main, .deck-items').selectable('disable');
+        $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
+
+        unselectBlocks();
         saveAllData(true);
     }
 }
 
 // Initialize draggable/resizable block
-function initDraggableMain($element) {
-    const hash = $element.data('hash');
+function initDraggableMain(main, single) {
+    let $elements;
+    if (single === true) {
+        $elements = main;
+    } else {
+        $elements = $('.main[data-page="' + main + '"] .sound-block');
+    }
+
     let oldPos;
 
-    $element.draggable({
+    $elements.draggable({
         grid: [10, 10],
         containment: 'parent',
         stack: '.sound-block',
@@ -147,9 +168,9 @@ function initDraggableMain($element) {
             const hash = e.target.dataset.hash;
             activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
         },
-        resize: _.debounce(function () {
-            autoSizeText($element);
-        }, 200)
+        resize: _.debounce(function (e, ui) {
+            autoSizeText(ui.element);
+        }, 100)
     }).mousedown(function (e) {
         if (e.which === 3 && isEditMode) {
             const $target = $(e.currentTarget).find('.ui-resizable-se');
@@ -172,9 +193,7 @@ function initDraggableMain($element) {
 
     // Make text editable in place on button click
     setTimeout(function () {
-        const $text = $element.find('.sound-text');
-
-        $text.editable(function (value) {
+        $elements.find('.sound-text').editable(function (value) {
             return value.replace(/\s+/g, ' ').trim();
         }, {
             type: 'textarea',
@@ -182,20 +201,20 @@ function initDraggableMain($element) {
             event: 'edit',
             onblur: 'submit',
             width: '100%',
-            onedit: function (settings) {
-                const fontSize = parseInt($text.css('font-size'), 10);
-                settings.rows = _.round($text.height() / fontSize);
+            onedit: function (settings, element) {
+                const fontSize = parseInt(element.style.fontSize, 10);
+                settings.rows = _.round(element.offsetHeight / fontSize);
             },
             callback: function (value) {
-                activePages[currentTab].blocks[hash].text = value;
-                autoSizeText($element);
+                activePages[currentTab].blocks[this.parentElement.dataset.hash].text = value;
+                autoSizeText($(this.parentElement));
             }
         });
-    }, 200);
+    }, 200); // 200 - because timeout is 100 on droppable
 
-    setTimeout(function () {
-        autoSizeText($element);
-    }, 500);
+    // 1setTimeout(function () {
+    //     autoSizeText($elements);
+    // }, 500);
 }
 
 // Check block for collision with others
@@ -288,8 +307,9 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
         activePages[currentTab].blocks[hash].rect = getRectWithOffset($dropped[0]);
         activePages[currentTab].added.push(hash);
 
+        // Timeout is needed because of jQuery UI
         setTimeout(function () {
-            initDraggableMain($dropped);
+            initDraggableMain($dropped, true);
         }, 100);
 
         return true;
@@ -300,7 +320,6 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
 
 // Add a previously saved sound block to main div
 function addSavedSoundBlock(hash, pageHash, blockSource) {
-    const selector = '[data-hash="' + hash + '"]';
     const source = blockSource ? blockSource : activePages[pageHash];
     const text = source.blocks[hash].text;
     const rect = source.blocks[hash].rect;
@@ -317,8 +336,6 @@ function addSavedSoundBlock(hash, pageHash, blockSource) {
         height: rect.height,
         width: rect.width
     });
-
-    initDraggableMain($mainSelector.find(selector));
 }
 
 // Append HTML of the item to the deck
@@ -329,7 +346,19 @@ function appendDeckItemHtml(hash, text, pageHash) {
     const deckHash = pageHash ? pageHash : currentTab;
     const selector = $('.deck-items[data-page="' + deckHash + '"] .simplebar-content');
 
-    $(html).prependTo(selector).draggable({
+    $(html).prependTo(selector);
+}
+
+// Init editable elements in deck
+function initDeckEditable(deck, single) {
+    let $elements;
+    if (single === true) {
+        $elements = deck;
+    } else {
+        $elements = $('.deck-items[data-page="' + deck + '"] .panel-block');
+    }
+
+    $elements.draggable({
         appendTo: 'body',
         revert: 'invalid',
         scroll: false,
@@ -371,6 +400,8 @@ function addDeckItemFromFile(soundPath) {
     if (activeBlockExists(hash)) {
         console.log(text + ' === ' + activePages[currentTab].blocks[hash].text + '\n----------\n');
     } else {
+        const selector = '[data-hash="' + hash + '"]';
+
         activePages[currentTab].blocks[hash] = {
             hash: hash,
             text: text,
@@ -379,6 +410,7 @@ function addDeckItemFromFile(soundPath) {
 
         addInitHowl(hash, soundPath);
         appendDeckItemHtml(hash, text);
+        initDeckEditable($deckItems.find(selector), true);
     }
 }
 
@@ -436,9 +468,11 @@ function updateDeckData() {
 
 // Delete one block from the page
 function removeBlockFromPage(hash) {
+    const selector = '[data-hash="' + hash + '"]';
     delete activePages[currentTab].blocks[hash].rect;
-    $main.find('[data-hash="' + hash + '"]').remove();
+    $main.find(selector).remove();
     appendDeckItemHtml(hash, activePages[currentTab].blocks[hash].text);
+    initDeckEditable($deckItems.find(selector), true);
 }
 
 // Save all pages/projects/settings to config
@@ -446,7 +480,14 @@ function saveAllData(skipNotify) {
     const activeTabs = getActiveTabs();
 
     activeTabs.forEach(function (hash) {
-        allPages[hash] = _.omit(activePages[hash], ['bar', 'list']);
+        // 1const selector = '[data-page="' + hash + '"]';
+        // const mainHtml = document.querySelector('.main' + selector).outerHTML
+        //     .replace(/ui[-\w]+\s*/g, '')
+        //     .replace(/<div class="".+?<\/div>/g, '');
+
+        allPages[hash] = _.omit(activePages[hash], ['bar', 'list', 'store', 'init']);
+
+        // 1activePages[hash].store.set('main', mainHtml);
     });
 
     config.set('activeTabs', activeTabs);
@@ -498,17 +539,19 @@ function addPageToDatabase(page) {
 function loadSavedPage(page, skipTab) {
     const pageHash = page.hash;
     activePages[pageHash] = page;
+    activePages[pageHash].init = false;
+
+    // 1activePages[pageHash].store = new Store({
+    //     cwd: 'pages',
+    //     name: pageHash
+    // });
 
     if (!skipTab) {
         const tabHtml = $(getTabHtml(page.name, pageHash));
         $tabList.append(tabHtml);
     }
 
-    addPageToDatabase(page);
-
-    initNewPageBlocks(pageHash);
-
-    updateMainHeight();
+    initNewPageBlocks(pageHash, activePages[pageHash].store);
 
     if (_.size(page.blocks) > 0) {
         _.each(page.blocks, function (block, hash) {
@@ -522,6 +565,13 @@ function loadSavedPage(page, skipTab) {
         });
 
         activePages[pageHash].list.reIndex();
+    }
+
+    if (isEditMode) {
+        initEditablePage(pageHash);
+        initDraggableMain(pageHash);
+        initDeckEditable(pageHash);
+        activePages[pageHash].init = true;
     }
 }
 
@@ -597,43 +647,42 @@ function loadPpv2(filePath) {
 }
 
 // Add new empty page
-function addNewEmptyPage($element) {
+function addNewEmptyPage() {
     const text = 'Таб#' + getRandomString(5);
     const hash = getStringHash(text);
     const tabHtml = $(getTabHtml(text, hash));
 
-    if ($element === undefined) {
-        $tabList.append(tabHtml);
-    } else {
-        $element.after(tabHtml);
-    }
-
+    $tabList.append(tabHtml);
     addPageToList(hash, text, true);
 
     activePages[hash] = {
         hash: hash,
         name: text,
         added: [],
-        blocks: {}
+        blocks: {},
+        init: true
     };
 
     initNewPageBlocks(hash);
-
-    updateMainHeight();
 }
 
 // Init everything for a new page
-function initNewPageBlocks(hash) {
+function initNewPageBlocks(hash, stored) {
     const selector = '[data-page="' + hash + '"]';
-    $('.wrapper').append('<div class="main" data-page="' + hash + '">');
-    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
-    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" ' +
-        'type="text" data-page="' + hash + '" placeholder="фильтр">');
-    $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '">' +
-        '<a class="sort sort-' + hash + '" data-sort="sound-text">по алфавиту</a>' +
-        '<a class="sort by-length desc sort-' + hash + '">по длине</a></p>');
 
-    const $tabSelector = $('.tab' + selector);
+    let mainHtml = '<div class="main" data-page="' + hash + '">';
+    if (stored !== undefined && stored.has('main')) {
+        mainHtml = stored.get('main');
+    }
+
+    $('.wrapper').append(mainHtml);
+
+    $('#deck-bottom').before('<div class="deck-items" data-page="' + hash + '"></div>');
+
+    $('#search-wrapper').prepend('<input class="input search search-' + hash + '" type="text" data-page="' + hash + '" placeholder="фильтр">');
+
+    $('#deck > .panel-search').after('<p class="panel-tabs" data-page="' + hash + '"><a class="sort sort-' + hash + '" data-sort="sound-text">по алфавиту</a><a class="sort by-length desc sort-' + hash + '">по длине</a></p>');
+
     const $mainSelector = $('.main' + selector);
     const $deckSelector = $('.deck-items' + selector);
 
@@ -646,18 +695,13 @@ function initNewPageBlocks(hash) {
         sortClass: 'sort-' + hash
     });
 
-    initEditableTab($tabSelector);
     $tabList.sortable('refresh');
     reorderTabs();
+    updateMainHeight();
 
     $mainSelector.on('click', '.sound-block', function () {
         if (!isEditMode) {
             playSound(this);
-        }
-    }).on('contextmenu', '.sound-block', function (e) {
-        e.preventDefault();
-        if (isEditMode && e.ctrlKey) {
-            $(e.currentTarget).find('.sound-text').trigger('edit');
         }
     }).on('contextmenu', function (e) {
         // Pause/play already playing sound
@@ -671,6 +715,24 @@ function initNewPageBlocks(hash) {
                     sound.play();
                 }
             }
+        }
+    });
+}
+
+// Init editable elements of the page
+function initEditablePage(hash) {
+    const selector = '[data-page="' + hash + '"]';
+
+    const $tabSelector = $('.tab' + selector);
+    const $mainSelector = $('.main' + selector);
+    const $deckSelector = $('.deck-items' + selector);
+
+    initEditableTab($tabSelector);
+
+    $mainSelector.on('contextmenu', '.sound-block', function (e) {
+        e.preventDefault();
+        if (isEditMode && e.ctrlKey) {
+            $(e.currentTarget).find('.sound-text').trigger('edit');
         }
     }).droppable({
         accept: '.deck .panel-block',
@@ -704,7 +766,9 @@ function initNewPageBlocks(hash) {
 // Add new page to the list
 function addPageToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-page="' + hash + '">' +
-        '<button class="button is-dark page-remove" title="Удалить страницу"><i class="fa fa-times"></i></button>' +
+        '<button class="button is-dark page-remove"' +
+        (isEditMode ? '' : ' disabled') +
+        ' title="Удалить страницу"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
         '</a>';
     $(html).appendTo('#page-search .simplebar-content').draggable({
@@ -738,16 +802,14 @@ function loadProjectTabs(hash) {
             loadSavedPage(allPages[page]);
         }
     });
-
-    if (!isEditMode) {
-        freezePageEditing();
-    }
 }
 
 // Add new page to the list
 function addProjectToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-proj="' + hash + '">' +
-        '<button class="button is-dark proj-remove" title="Удалить проект"><i class="fa fa-times"></i></button>' +
+        '<button class="button is-dark proj-remove"' +
+        (isEditMode ? '' : ' disabled') +
+        ' title="Удалить проект"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
         '<button class="button is-dark proj-add" title="Добавить табы проекта"><i class="fa fa-chevron-right"></i></button>' +
         '</a>';
@@ -1021,17 +1083,6 @@ function flushDeckItems(withFiles) {
     lastPlayedHash = '';
 }
 
-// Prevent dragging/resizing of the main blocks
-function freezePageEditing(blocks) {
-    const $blocks = blocks || $('.sound-block');
-
-    $blocks.draggable('disable').resizable('disable');
-    $('.deck-items .panel-block').draggable('disable');
-    unselectBlocks();
-    $('.main, .deck-items').selectable('disable');
-    $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
-}
-
 // Process selected blocks
 function selectedBlocksAction(message, callback) {
     const $selected = $('.ui-selected');
@@ -1080,13 +1131,13 @@ function selectedBlocksAction(message, callback) {
 // ==================== //
 
 // Autosize text inside block
-function autoSizeText($block) {
-    const $text = $block.find('.sound-text');
-
-    fancy.fillParentContainer($text[0], {
-        maxFontSize: 400,
-        maxWidth: $block.width() - 2,
-        maxHeight: $block.height() - 2
+function autoSizeText($elements) {
+    $elements.find('.sound-text').each(function () {
+        fancy.fillParentContainer(this, {
+            maxFontSize: 400,
+            maxWidth: this.parentElement.offsetWidth - 2,
+            maxHeight: this.parentElement.offsetHeight - 2
+        });
     });
 }
 
@@ -1310,10 +1361,6 @@ function tabClick(hash) {
 function loadPageFromList(hash, skipTab) {
     loadSavedPage(allPages[hash], skipTab);
     tabClick(hash);
-
-    if (!isEditMode) {
-        freezePageEditing();
-    }
 }
 
 // Perform an action, show loading before it
@@ -1365,10 +1412,6 @@ $(function () {
     const $body = $('body');
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
-
-    if (isEditMode) {
-        toggleBodyClass(editClass);
-    }
 
     // Window controls
     $('#win-minimize').click(function () {
@@ -1549,11 +1592,6 @@ $(function () {
             webFrame.setZoomFactor(zoom);
         }
     }, 200);
-
-    // Freeze editing if not in Edit mode
-    if (!isEditMode) {
-        freezePageEditing();
-    }
 
     // Add block from single or multiple files
     $('#add-sound').click(function () {
@@ -1894,51 +1932,55 @@ $(function () {
     // ----------- //
 
     $('#page-search').on('click', '.page-remove', function () {
-        const $parent = $(this).parent();
-        const hash = $parent.attr('data-page');
+        if (isEditMode) {
+            const $parent = $(this).parent();
+            const hash = $parent.attr('data-page');
 
-        if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
-            actionWithLoading(function () {
-                if (_.keys(activePages).includes(hash)) {
-                    closeTab(hash);
-                }
-
-                $parent.remove();
-                updatePageSearch();
-
-                delete allPages[hash];
-                config.delete('pages.' + hash);
-
-                // Remove page from all projects
-                _.keys(allProjects).forEach(function (proj) {
-                    const index = allProjects[proj].pages.indexOf(hash);
-                    if (index > -1) {
-                        allProjects[proj].pages.splice(index, 1);
+            if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
+                actionWithLoading(function () {
+                    if (_.keys(activePages).includes(hash)) {
+                        closeTab(hash);
                     }
+
+                    $parent.remove();
+                    updatePageSearch();
+
+                    delete allPages[hash];
+                    config.delete('pages.' + hash);
+
+                    // Remove page from all projects
+                    _.keys(allProjects).forEach(function (proj) {
+                        const index = allProjects[proj].pages.indexOf(hash);
+                        if (index > -1) {
+                            allProjects[proj].pages.splice(index, 1);
+                        }
+                    });
                 });
-            });
+            }
         }
     });
 
     $('#project-search').on('click', '.proj-remove', function () {
-        const $parent = $(this).parent();
-        const hash = $parent.attr('data-proj');
+        if (isEditMode) {
+            const $parent = $(this).parent();
+            const hash = $parent.attr('data-proj');
 
-        if (confirmAction('Удалить проект ' + allProjects[hash].name.toUpperCase() + ' из базы?') === 1) {
-            actionWithLoading(function () {
-                if (hash === currentProject) {
-                    currentProject = '';
-                }
+            if (confirmAction('Удалить проект ' + allProjects[hash].name.toUpperCase() + ' из базы?') === 1) {
+                actionWithLoading(function () {
+                    if (hash === currentProject) {
+                        currentProject = '';
+                    }
 
-                $parent.remove();
-                updateProjectSearch();
+                    $parent.remove();
+                    updateProjectSearch();
 
-                delete allProjects[hash];
-                config.delete('projects.' + hash);
-            });
+                    delete allProjects[hash];
+                    config.delete('projects.' + hash);
+                });
+            }
         }
     }).on('click', '.proj-add', function () {
-        const hash = $(this).parent().attr('data-proj');
+        const hash = this.parentElement.dataset.proj;
         actionWithLoading(function () {
             loadProjectTabs(hash);
 
@@ -2213,13 +2255,17 @@ $(function () {
 
             _.keys(blockBuffer.blocks).forEach(function (hash) {
                 if (!activeBlockExists(hash)) {
+                    const selector = '[data-hash="' + hash + '"]';
+
                     activePages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
 
                     if (blockBuffer.type === 'main') {
                         activePages[currentTab].added.push(hash);
                         addSavedSoundBlock(hash, currentTab, blockBuffer);
+                        initDraggableMain($main.find(selector), true);
                     } else {
                         appendDeckItemHtml(hash, blockBuffer.blocks[hash].text);
+                        initDeckEditable($deckItems.find(selector), true);
                     }
 
                     counter++;

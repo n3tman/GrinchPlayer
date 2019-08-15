@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data:">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: 'unsafe-inline'">
     <script src="custom.js"></script>
     <link rel="stylesheet" href="index.css">
 </head>
@@ -95,7 +95,7 @@
                     <button class="button is-dark is-static">фраз</button>
                 </p>
                 <p class="control">
-                    <button class="button is-dark" id="batch-btn" title="Добавить на страницу">
+                    <button disabled class="button is-dark" id="batch-btn" title="Добавить на страницу">
                         <i class="fa fa-plus"></i>
                     </button>
                 </p>
