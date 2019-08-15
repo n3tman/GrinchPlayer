@@ -212,9 +212,9 @@ function initDraggableMain(main, single) {
         });
     }, 200); // 200 - because timeout is 100 on droppable
 
-    // 1setTimeout(function () {
-    //     autoSizeText($elements);
-    // }, 500);
+    setTimeout(function () {
+        autoSizeText($elements);
+    }, 300);
 }
 
 // Check block for collision with others
@@ -664,6 +664,7 @@ function addNewEmptyPage() {
     };
 
     initNewPageBlocks(hash);
+    initEditablePage(hash);
 }
 
 // Init everything for a new page
@@ -1135,8 +1136,8 @@ function autoSizeText($elements) {
     $elements.find('.sound-text').each(function () {
         fancy.fillParentContainer(this, {
             maxFontSize: 400,
-            maxWidth: this.parentElement.offsetWidth - 2,
-            maxHeight: this.parentElement.offsetHeight - 2
+            maxWidth: $(this).parent().width() - 2,
+            maxHeight: $(this).parent().height() - 2
         });
     });
 }
@@ -1431,7 +1432,7 @@ $(function () {
     });
 
     // Settings and About tooltips
-    tippy($('#settings')[0], {
+    tippy(document.querySelector('#settings'), {
         content: '<div class="panel">' +
             '<p class="panel-heading">Настройки</p>' +
             '<a class="panel-block set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>' +
@@ -1444,7 +1445,7 @@ $(function () {
         placement: 'right'
     });
 
-    tippy($('#about')[0], {
+    tippy(document.querySelector('#about'), {
         content: '<div class="panel">' +
             '<p class="panel-heading">О программе</p>' +
             '<a class="panel-block show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>' +
@@ -1492,13 +1493,22 @@ $(function () {
 
         unselectBlocks();
         currentTab = e.currentTarget.dataset.page;
-        $('[data-page]').not('.tab, .page').hide();
 
         const selector = '[data-page="' + currentTab + '"]';
         $main = $('.main' + selector);
         $deckItems = $('.deck-items' + selector);
-        updateDeckData();
-        $(selector).show();
+
+        const query = '.main, .panel-tabs, .deck-items, .deck .search';
+        document.querySelectorAll(query).forEach(function (el) {
+            el.style.display = 'none';
+        });
+
+        document.querySelectorAll(selector).forEach(function (el) {
+            if (!el.classList.contains('page') && !el.classList.contains('tab')) {
+                el.style.display = 'block';
+            }
+        });
+
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
     }).on('contextmenu', '.tab', function (e) {
@@ -1517,7 +1527,7 @@ $(function () {
     });
 
     // Show tooltip with buttons in Edit mode
-    tippy($('#tab-actions')[0], {
+    tippy(document.querySelector('#tab-actions'), {
         content: '<div class="block-controls">' +
             '<button class="button close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>' +
             '<button class="button add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>' +
@@ -1532,14 +1542,14 @@ $(function () {
     });
 
     // Init page search
-    pageSearch.bar = new SBar($('#page-search .items')[0]);
+    pageSearch.bar = new SBar(document.querySelector('#page-search .items'));
     pageSearch.list = new List('page-search', {
         valueNames: ['text'],
         listClass: 'simplebar-content'
     });
 
     // Init project search
-    projectSearch.bar = new SBar($('#project-search .items')[0]);
+    projectSearch.bar = new SBar(document.querySelector('#project-search .items'));
     projectSearch.list = new List('project-search', {
         valueNames: ['text'],
         listClass: 'simplebar-content'
@@ -1897,7 +1907,7 @@ $(function () {
         const $devices = $('#devices');
         const $list = $devices.find('.list');
 
-        $('#settings')[0]._tippy.hide();
+        document.querySelector('#settings')._tippy.hide();
 
         $list.empty();
 
@@ -1917,13 +1927,13 @@ $(function () {
             $devices.addClass('is-active');
         });
     }).on('click', '.show-help', function () {
-        $('#about')[0]._tippy.hide();
+        document.querySelector('#about')._tippy.hide();
         $('#help').addClass('is-active');
     }).on('click', '.youtube', function () {
-        $('#about')[0]._tippy.hide();
+        document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
     }).on('click', '.discord', function () {
-        $('#about')[0]._tippy.hide();
+        document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://discord.gg/EEkpKp2');
     });
 
