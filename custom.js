@@ -480,6 +480,9 @@ function removeBlockFromPage(hash) {
 function saveAllData(skipNotify) {
     const activeTabs = getActiveTabs();
 
+    // Prevent saving pages with audio progress
+    stopCurrentSound();
+
     activeTabs.forEach(function (hash) {
         const selector = '[data-page="' + hash + '"]';
         const mainHtml = document.querySelector('.main' + selector).outerHTML
@@ -830,7 +833,7 @@ function addProjectToList(hash, text, reindex) {
         (isEditMode ? '' : ' disabled') +
         ' title="Удалить проект"><i class="fa fa-times"></i></button>' +
         '<span class="text">' + text + '</span>' +
-        '<button class="button is-dark proj-add" title="Добавить табы проекта"><i class="fa fa-chevron-right"></i></button>' +
+        '<button class="button is-dark proj-add" title="Добавить страницы проекта к текущим"><i class="fa fa-chevron-right"></i></button>' +
         '</a>';
 
     $(html).appendTo('#project-search .simplebar-content').on('dblclick', function (e) {
