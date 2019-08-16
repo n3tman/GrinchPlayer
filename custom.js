@@ -35,6 +35,7 @@ let activePages = {};
 let currentTab = config.get('currentTab') || '';
 let currentProject = config.get('currentProject') || '';
 let deviceId = config.get('device') || 'default';
+let volume = config.get('volume') || 1;
 let $wrapper;
 let $main;
 let $deckItems;
@@ -493,6 +494,7 @@ function saveAllData(skipNotify) {
         });
     });
 
+    config.set('volume', volume);
     config.set('activeTabs', activeTabs);
     config.set('currentTab', currentTab);
     config.set('pages', allPages);
@@ -960,7 +962,7 @@ function updateZoom(delta) {
 
     zoom = _.round(zoom, 2);
     webFrame.setZoomFactor(zoom);
-    showNotification('Текущий зум: ' + _.round(zoom * 100) + '%', false, 1500);
+    showNotification('Масштаб: ' + _.round(zoom * 100) + '%', false, 1500);
     config.set('zoom', zoom);
 }
 
@@ -1451,11 +1453,17 @@ $(function () {
         mainWindow.close();
     });
 
+    // Set default global volume
+    hp.Howler.volume(volume);
+
     // Settings and About tooltips
     tippy(document.querySelector('#settings'), {
         content: '<div class="panel">' +
             '<p class="panel-heading">Настройки</p>' +
             '<a class="panel-block set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>' +
+            '<div class="panel-block"><i class="fa fa-volume-up"></i> Громкость' +
+            '<input id="volume-slider" class="slider has-output is-fullwidth" min="0" max="100"' +
+            ' value="' + (volume * 100) + '" step="1" type="range"></div>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -1959,6 +1967,10 @@ $(function () {
     }).on('click', '.discord', function () {
         document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://discord.gg/EEkpKp2');
+    }).on('input', '#volume-slider', function () {
+        volume = this.value / 100;
+        hp.Howler.volume(volume);
+        showNotification('Громкость: ' + this.value + '%', false, 1500);
     });
 
     // ----------- //

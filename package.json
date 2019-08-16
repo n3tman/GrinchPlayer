@@ -20,6 +20,7 @@
 	"dependencies": {
 		"@sindresorhus/slugify": "^0.9.1",
 		"bulma": "^0.7.5",
+		"bulma-extensions": "^6.2.7",
 		"bulmaswatch": "^0.7.2",
 		"electron-context-menu": "^0.12.1",
 		"electron-debug": "^3.0.0",

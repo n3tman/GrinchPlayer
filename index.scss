@@ -19,6 +19,8 @@ $modal-background-background-color: rgba(black, 0.7);
 
 @import "node_modules/bulmaswatch/superhero/overrides";
 
+@import "node_modules/bulma-extensions/dist/css/bulma-extensions.min.css";
+
 // fixing font paths
 $fa-font-path: "node_modules/fork-awesome/fonts";
 
@@ -263,6 +265,13 @@ textarea:focus {
 
     .panel .panel-block {
         padding: 3px 0.75em;
+        flex-wrap: wrap;
+    }
+
+    .slider {
+        display: block !important;
+        width: 100% !important;
+        margin: 5px 0 !important;
     }
 }
 

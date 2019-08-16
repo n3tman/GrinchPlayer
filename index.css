@@ -1,5 +1,6 @@
 @charset "UTF-8";
 /*! bulma.io v0.7.5 | MIT License | github.com/jgthms/bulma */
+@import "node_modules/bulma-extensions/dist/css/bulma-extensions.min.css";
 @import "node_modules/jquery-ui-dist/jquery-ui.css";
 @import "node_modules/simplebar/src/simplebar.css";
 @import "node_modules/tippy.js/index.css";
@@ -12950,6 +12951,12 @@ textarea:focus {
 }
 .tippy-content .panel .panel-block {
   padding: 3px 0.75em;
+  flex-wrap: wrap;
+}
+.tippy-content .slider {
+  display: block !important;
+  width: 100% !important;
+  margin: 5px 0 !important;
 }
 
 .layout {
