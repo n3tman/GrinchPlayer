@@ -15,6 +15,7 @@ contextMenu();
 
 // Note: Must match `build.appId` in package.json
 app.setAppUserModelId('com.Nik.GrinchPlayer');
+app.disableHardwareAcceleration();
 
 // Set userData to current folder (portable app)
 // app.setPath('userData', process.env.PORTABLE_EXECUTABLE_DIR + '/' + app.getName());

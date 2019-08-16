@@ -154,11 +154,11 @@ function initDraggableMain(main, single) {
         },
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
+            allPages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
 
             if (e.target.classList.contains('ui-selected')) {
                 $main.find('.ui-selected').not(this).each(function () {
-                    activePages[currentTab].blocks[this.dataset.hash].rect = getRectWithOffset(this);
+                    allPages[currentTab].blocks[this.dataset.hash].rect = getRectWithOffset(this);
                 });
             }
         }
@@ -167,7 +167,7 @@ function initDraggableMain(main, single) {
         containment: 'parent',
         stop: function (e) {
             const hash = e.target.dataset.hash;
-            activePages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
+            allPages[currentTab].blocks[hash].rect = getRectWithOffset(e.target);
         },
         resize: _.debounce(function (e, ui) {
             autoSizeText(ui.element);
@@ -207,7 +207,7 @@ function initDraggableMain(main, single) {
                 settings.rows = _.round(element.offsetHeight / fontSize);
             },
             callback: function (value) {
-                activePages[currentTab].blocks[this.parentElement.dataset.hash].text = value;
+                allPages[currentTab].blocks[this.parentElement.dataset.hash].text = value;
                 autoSizeText($(this.parentElement));
             }
         });
@@ -220,13 +220,13 @@ function initDraggableMain(main, single) {
 
 // Check block for collision with others
 function isCollision(target, offsetTop, offsetLeft) {
-    if (activePages[currentTab].added.length > 0) {
+    if (allPages[currentTab].added.length > 0) {
         const targetRect = target.getBoundingClientRect();
         const targetHash = target.dataset.hash;
 
         let collision = false;
-        for (const hash of activePages[currentTab].added) {
-            const block = activePages[currentTab].blocks[hash];
+        for (const hash of allPages[currentTab].added) {
+            const block = allPages[currentTab].blocks[hash];
 
             if (targetHash !== hash) {
                 collision = targetRect.right - offsetLeft > block.rect.left &&
@@ -255,7 +255,7 @@ function autoPosition(block) {
     let success = true;
 
     if (lastAddedHash.length > 0) {
-        const lastRect = activePages[currentTab].blocks[lastAddedHash].rect;
+        const lastRect = allPages[currentTab].blocks[lastAddedHash].rect;
         block.style.left = lastRect.left + 'px';
         block.style.top = lastRect.bottom - 10 + 'px';
     }
@@ -305,8 +305,8 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
     }
 
     if (positioned) {
-        activePages[currentTab].blocks[hash].rect = getRectWithOffset($dropped[0]);
-        activePages[currentTab].added.push(hash);
+        allPages[currentTab].blocks[hash].rect = getRectWithOffset($dropped[0]);
+        allPages[currentTab].added.push(hash);
 
         // Timeout is needed because of jQuery UI
         setTimeout(function () {
@@ -321,7 +321,7 @@ function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
 
 // Add a previously saved sound block to main div
 function addSavedSoundBlock(hash, pageHash, blockSource) {
-    const source = blockSource ? blockSource : activePages[pageHash];
+    const source = blockSource ? blockSource : allPages[pageHash];
     const text = source.blocks[hash].text;
     const rect = source.blocks[hash].rect;
     const $mainSelector = $('.main[data-page="' + pageHash + '"]');
@@ -399,11 +399,11 @@ function addDeckItemFromFile(soundPath) {
     const text = path.parse(soundPath).name;
 
     if (activeBlockExists(hash)) {
-        console.log(text + ' === ' + activePages[currentTab].blocks[hash].text + '\n----------\n');
+        console.log(text + ' === ' + allPages[currentTab].blocks[hash].text + '\n----------\n');
     } else {
         const selector = '[data-hash="' + hash + '"]';
 
-        activePages[currentTab].blocks[hash] = {
+        allPages[currentTab].blocks[hash] = {
             hash: hash,
             text: text,
             path: path.win32.normalize(soundPath)
@@ -437,13 +437,13 @@ function playSound(element) {
 
 // Add multiple files as blocks
 function addFileBlocks(files) {
-    const before = _.size(activePages[currentTab].blocks);
+    const before = _.size(allPages[currentTab].blocks);
 
     files.forEach(function (file) {
         addDeckItemFromFile(file);
     });
 
-    const added = _.size(activePages[currentTab].blocks) - before;
+    const added = _.size(allPages[currentTab].blocks) - before;
     const skipped = files.length - added;
 
     showNotification('Добавлено звуков: <b>' + added + '</b>. ' +
@@ -470,9 +470,9 @@ function updateDeckData() {
 // Delete one block from the page
 function removeBlockFromPage(hash) {
     const selector = '[data-hash="' + hash + '"]';
-    delete activePages[currentTab].blocks[hash].rect;
+    delete allPages[currentTab].blocks[hash].rect;
     $main.find(selector).remove();
-    appendDeckItemHtml(hash, activePages[currentTab].blocks[hash].text);
+    appendDeckItemHtml(hash, allPages[currentTab].blocks[hash].text);
     initDeckEditable($deckItems.find(selector), true);
 }
 
@@ -489,10 +489,8 @@ function saveAllData(skipNotify) {
             .replace(/ui[-\w]+\s*/g, '')
             .replace(/<div class="".+?<\/div>/g, '');
 
-        allPages[hash] = _.omit(activePages[hash], ['bar', 'list', 'store', 'init']);
-
         activePages[hash].store.set({
-            name: activePages[hash].name,
+            name: allPages[hash].name,
             main: mainHtml
         });
     });
@@ -546,13 +544,14 @@ function addPageToDatabase(page) {
 // Load saved page
 function loadSavedPage(page, skipTab) {
     const pageHash = page.hash;
-    activePages[pageHash] = _.cloneDeep(page);
-    activePages[pageHash].init = false;
 
-    activePages[pageHash].store = new Store({
-        cwd: 'pages',
-        name: pageHash
-    });
+    activePages[pageHash] = {
+        init: false,
+        store: new Store({
+            cwd: 'pages',
+            name: pageHash
+        })
+    };
 
     const isSaved = activePages[pageHash].store.has('main');
 
@@ -665,11 +664,14 @@ function addNewEmptyPage() {
     $tabList.append(tabHtml);
     addPageToList(hash, text, true);
 
-    activePages[hash] = {
+    allPages[hash] = {
         hash: hash,
         name: text,
         added: [],
-        blocks: {},
+        blocks: {}
+    };
+
+    activePages[hash] = {
         init: true,
         store: new Store({
             cwd: 'pages',
@@ -878,9 +880,7 @@ function projectSaveAction(that) {
             name: text,
             pages: getActiveTabs()
         };
-        config.set('projects', allProjects);
         currentProject = hash;
-        config.set('currentProject', currentProject);
 
         $('#project-search .is-active').removeClass('is-active');
         $('[data-proj="' + hash + '"]').addClass('is-active');
@@ -909,7 +909,6 @@ function projectSaveButton() {
     if (isEditMode && _.size(activePages) > 0 && currentProject.length > 0) {
         const name = allProjects[currentProject].name;
         allProjects[currentProject].pages = getActiveTabs();
-        config.set('projects', allProjects);
         showNotification('Сохранено как проект: <b>' + name + '</b>', false, 3000);
     } else {
         showNotification('Нет активных страниц или проектов', true, 3000);
@@ -927,7 +926,7 @@ function closeTab(hash) {
         }
     });
 
-    _.keys(activePages[hash].blocks).forEach(function (blockHash) {
+    _.keys(allPages[hash].blocks).forEach(function (blockHash) {
         howlDb[blockHash].unload();
     });
 
@@ -977,7 +976,7 @@ function initEditableTab($tab) {
 
         if (pageExists(hash)) {
             showNotification('Такая страница уже есть!', true, 1500);
-            return activePages[$tab.attr('data-page')].name;
+            return allPages[$tab.attr('data-page')].name;
         }
 
         return val;
@@ -991,16 +990,16 @@ function initEditableTab($tab) {
             settings.cols = element.textContent.length + 3;
         },
         callback: function (value) {
-            if (activePages[$tab.attr('data-page')].name !== value) {
+            if (allPages[$tab.attr('data-page')].name !== value) {
                 const oldHash = $(this).closest('.tab').attr('data-page');
                 const newHash = getStringHash(value);
+                allPages[newHash] = allPages[oldHash];
+                allPages[newHash].hash = newHash;
+                allPages[newHash].name = value;
                 activePages[newHash] = activePages[oldHash];
-                activePages[newHash].hash = newHash;
-                activePages[newHash].name = value;
 
                 delete allPages[oldHash];
                 delete activePages[oldHash];
-                config.delete('pages.' + oldHash);
 
                 if (currentTab === oldHash) {
                     currentTab = newHash;
@@ -1054,7 +1053,6 @@ function initEditableProject($item) {
                 allProjects[newHash].name = value;
 
                 delete allProjects[oldHash];
-                config.delete('projects.' + oldHash);
 
                 if (currentProject === oldHash) {
                     currentProject = newHash;
@@ -1082,25 +1080,25 @@ function reorderTabs() {
 
 // Clear added blocks from main area
 function flushAddedBlocks() {
-    activePages[currentTab].added.forEach(function (hash) {
+    allPages[currentTab].added.forEach(function (hash) {
         removeBlockFromPage(hash);
     });
 
     lastPlayedHash = '';
-    activePages[currentTab].added = [];
+    allPages[currentTab].added = [];
 }
 
 // Remove all deck items
 function flushDeckItems(withFiles) {
-    _.keys(activePages[currentTab].blocks).forEach(function (hash) {
-        if (!activePages[currentTab].added.includes(hash)) {
+    _.keys(allPages[currentTab].blocks).forEach(function (hash) {
+        if (!allPages[currentTab].added.includes(hash)) {
             howlDb[hash].unload();
 
             if (withFiles) {
-                fs.unlinkSync(activePages[currentTab].blocks[hash].path);
+                fs.unlinkSync(allPages[currentTab].blocks[hash].path);
             }
 
-            delete activePages[currentTab].blocks[hash];
+            delete allPages[currentTab].blocks[hash];
         }
     });
 
@@ -1131,7 +1129,7 @@ function selectedBlocksAction(message, callback) {
         $parent.find('.ui-selected').each(function () {
             const hash = this.dataset.hash;
             const $this = $(this);
-            blockBuffer.blocks[hash] = _.cloneDeep(activePages[currentTab].blocks[hash]);
+            blockBuffer.blocks[hash] = _.cloneDeep(allPages[currentTab].blocks[hash]);
 
             if (callback !== undefined) {
                 callback($this, hash);
@@ -1350,7 +1348,7 @@ function projectExists(hash) {
 
 // Check if block exists in active page
 function activeBlockExists(hash) {
-    return _.keys(activePages[currentTab].blocks).includes(hash);
+    return _.keys(allPages[currentTab].blocks).includes(hash);
 }
 
 // Reinit page search
@@ -1678,7 +1676,7 @@ $(function () {
     // Export current page to a file
     $('#page-export').click(function () {
         if (_.size(activePages) > 0) {
-            const pageName = activePages[currentTab].name;
+            const pageName = allPages[currentTab].name;
             const fileName = getPageName(pageName);
 
             $wrapper.addClass('is-loading');
@@ -1701,12 +1699,12 @@ $(function () {
                     };
                     const blocks = {};
 
-                    if (activePages[currentTab].added.length > 0) {
-                        json.added = activePages[currentTab].added;
+                    if (allPages[currentTab].added.length > 0) {
+                        json.added = allPages[currentTab].added;
                     }
 
-                    if (_.size(activePages[currentTab].blocks) > 0) {
-                        _.each(activePages[currentTab].blocks, function (block, hash) {
+                    if (_.size(allPages[currentTab].blocks) > 0) {
+                        _.each(allPages[currentTab].blocks, function (block, hash) {
                             blocks[hash] = _.omit(block, 'path');
                         });
                         json.blocks = blocks;
@@ -1777,8 +1775,8 @@ $(function () {
 
     // Remove all added blocks
     $('#remove-main').click(function () {
-        if (_.size(activePages) > 0 && activePages[currentTab].added.length > 0) {
-            const count = activePages[currentTab].added.length;
+        if (_.size(activePages) > 0 && allPages[currentTab].added.length > 0) {
+            const count = allPages[currentTab].added.length;
             stopCurrentSound();
             if (confirmAction('Удалить ВСЕ блоки со страницы в колоду?') === 1) {
                 actionWithLoading(function () {
@@ -1995,7 +1993,6 @@ $(function () {
                     updatePageSearch();
 
                     delete allPages[hash];
-                    config.delete('pages.' + hash);
 
                     // Remove page from all projects
                     _.keys(allProjects).forEach(function (proj) {
@@ -2024,7 +2021,6 @@ $(function () {
                     updateProjectSearch();
 
                     delete allProjects[hash];
-                    config.delete('projects.' + hash);
                 });
             }
         }
@@ -2133,8 +2129,8 @@ $(function () {
 
     // Unload and remove sounds from the deck
     $('#remove-deck').click(function () {
-        if (isEditMode && _.size(activePages) > 0 && _.size(activePages[currentTab].blocks) > 0) {
-            const before = _.size(activePages[currentTab].blocks);
+        if (isEditMode && _.size(activePages) > 0 && _.size(allPages[currentTab].blocks) > 0) {
+            const before = _.size(allPages[currentTab].blocks);
             stopCurrentSound();
 
             const choice = confirmAction('Удалить ВСЕ звуки из колоды?', [
@@ -2146,7 +2142,7 @@ $(function () {
                     const withFiles = (choice === 2);
                     flushDeckItems(withFiles);
                     showNotification('Удалено из колоды: <b>' +
-                        (before - _.size(activePages[currentTab].blocks)) + '</b>', false, 2000);
+                        (before - _.size(allPages[currentTab].blocks)) + '</b>', false, 2000);
                     updateDeckData();
                 });
             }
@@ -2260,7 +2256,7 @@ $(function () {
                     $main.find('.ui-selected').each(function () {
                         const hash = this.dataset.hash;
                         removeBlockFromPage(hash);
-                        _.pull(activePages[currentTab].added, hash);
+                        _.pull(allPages[currentTab].added, hash);
                     });
                     updateDeckData();
                 } else {
@@ -2276,10 +2272,10 @@ $(function () {
                             howlDb[hash].unload();
 
                             if (choice === 2) {
-                                fs.unlinkSync(activePages[currentTab].blocks[hash].path);
+                                fs.unlinkSync(allPages[currentTab].blocks[hash].path);
                             }
 
-                            delete activePages[currentTab].blocks[hash];
+                            delete allPages[currentTab].blocks[hash];
                             $(this).remove();
                         });
 
@@ -2301,8 +2297,8 @@ $(function () {
     addHotkey('ctrl+x', function () {
         selectedBlocksAction('Вырезано', function ($this, hash) {
             $this.remove();
-            _.pull(activePages[currentTab].added, hash);
-            delete activePages[currentTab].blocks[hash];
+            _.pull(allPages[currentTab].added, hash);
+            delete allPages[currentTab].blocks[hash];
             howlDb[hash].unload();
         });
     });
@@ -2316,10 +2312,10 @@ $(function () {
                 if (!activeBlockExists(hash)) {
                     const selector = '[data-hash="' + hash + '"]';
 
-                    activePages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
+                    allPages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
 
                     if (blockBuffer.type === 'main') {
-                        activePages[currentTab].added.push(hash);
+                        allPages[currentTab].added.push(hash);
                         addSavedSoundBlock(hash, currentTab, blockBuffer);
                         initDraggableMain($main.find(selector), true);
                     } else {
