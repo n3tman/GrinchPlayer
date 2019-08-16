@@ -264,7 +264,7 @@ textarea:focus {
     }
 
     .panel .panel-block {
-        padding: 3px 0.75em;
+        padding: 5px 0.75em;
         flex-wrap: wrap;
     }
 
@@ -359,6 +359,10 @@ textarea:focus {
 
     .tab {
         -webkit-app-region: no-drag;
+    }
+
+    .tab:nth-child(n+11):nth-child(-n+20) {
+        background: rgba($grey-dark, 0.8);
     }
 
     .buttons,
@@ -813,12 +817,14 @@ textarea:focus {
 
 .edit-mode {
     opacity: 0;
+    pointer-events: none;
     transition: opacity 0.3s;
 }
 
 .has-bottom {
     .edit-mode {
         opacity: 1;
+        pointer-events: auto;
     }
 
     .panel.deck .deck-items {

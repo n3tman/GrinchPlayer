@@ -409,6 +409,7 @@ function addDeckItemFromFile(soundPath) {
             path: path.win32.normalize(soundPath)
         };
 
+        initBlockStats(currentTab, hash);
         addInitHowl(hash, soundPath);
         appendDeckItemHtml(hash, text);
         initDeckEditable($deckItems.find(selector), true);
@@ -533,11 +534,34 @@ function showFolderSelectionDialog(callback, finish, title) {
     });
 }
 
+// Init parameters for collecting page stats
+function initPageStats(hash) {
+    if (allPages[hash].addedDate === undefined) {
+        allPages[hash].addedDate = new Date().toISOString();
+    }
+
+    if (allPages[hash].counter === undefined) {
+        allPages[hash].counter = 0;
+    }
+}
+
+// Init parameters for collecting block stats
+function initBlockStats(page, hash) {
+    if (allPages[page].blocks[hash].addedDate === undefined) {
+        allPages[page].blocks[hash].addedDate = new Date().toISOString();
+    }
+
+    if (allPages[page].blocks[hash].counter === undefined) {
+        allPages[page].blocks[hash].counter = 0;
+    }
+}
+
 // Add page to database
 function addPageToDatabase(page) {
     if (!savedPageExists(page.hash)) {
         addPageToList(page.hash, page.name, true);
         allPages[page.hash] = page;
+        initPageStats(page.hash);
     }
 }
 
@@ -552,6 +576,9 @@ function loadSavedPage(page, skipTab) {
             name: pageHash
         })
     };
+
+    initPageStats(pageHash);
+    allPages[pageHash].lastDate = new Date().toISOString();
 
     const isSaved = activePages[pageHash].store.has('main');
 
@@ -570,6 +597,7 @@ function loadSavedPage(page, skipTab) {
                 addSavedSoundBlock(hash, pageHash);
             }
 
+            initBlockStats(pageHash, hash);
             addInitHowl(hash, block.path);
         });
 
@@ -623,9 +651,12 @@ function loadPpv2(filePath) {
 
                     counter++;
 
-                    page.blocks[hash] = {};
-                    page.blocks[hash].path = path.win32.normalize(filePath);
-                    page.blocks[hash].text = parts[5];
+                    page.blocks[hash] = {
+                        path: path.win32.normalize(filePath),
+                        text: parts[5],
+                        addedDate: new Date().toISOString(),
+                        counter: 0
+                    };
 
                     if (left >= 10) {
                         page.blocks[hash].rect = {
@@ -679,6 +710,7 @@ function addNewEmptyPage() {
         })
     };
 
+    initPageStats(hash);
     initNewPageBlocks(hash);
     initEditablePage(hash);
 }
@@ -725,7 +757,10 @@ function initNewPageBlocks(hash, isSaved) {
 
     $mainSelector.on('click', '.sound-block', function () {
         if (!isEditMode) {
+            const hash = this.dataset.hash;
             playSound(this);
+            allPages[currentTab].blocks[hash].lastDate = new Date().toISOString();
+            allPages[currentTab].blocks[hash].counter += 1;
         }
     }).on('contextmenu', function (e) {
         // Pause/play already playing sound
@@ -1541,6 +1576,8 @@ $(function () {
 
         $(e.delegateTarget).find('.is-active').removeClass('is-active');
         $(e.currentTarget).addClass('is-active');
+
+        allPages[currentTab].counter += 1;
     }).on('contextmenu', '.tab', function (e) {
         e.preventDefault();
         if (isEditMode) {
@@ -1705,7 +1742,7 @@ $(function () {
 
                     if (_.size(allPages[currentTab].blocks) > 0) {
                         _.each(allPages[currentTab].blocks, function (block, hash) {
-                            blocks[hash] = _.omit(block, 'path');
+                            blocks[hash] = _.omit(block, ['path', 'counter', 'addedDate', 'lastDate']);
                         });
                         json.blocks = blocks;
                     }
@@ -1750,6 +1787,8 @@ $(function () {
                                 const hash = getFileHash(file);
                                 if (_.keys(json.blocks).includes(hash)) {
                                     json.blocks[hash].path = path.win32.normalize(file);
+                                    json.blocks[hash].addedDate = new Date().toISOString();
+                                    json.blocks[hash].counter = 0;
                                     counter++;
                                 }
                             }
@@ -2313,6 +2352,8 @@ $(function () {
                     const selector = '[data-hash="' + hash + '"]';
 
                     allPages[currentTab].blocks[hash] = blockBuffer.blocks[hash];
+                    allPages[currentTab].blocks[hash].counter = 0;
+                    allPages[currentTab].blocks[hash].addedDate = new Date().toISOString();
 
                     if (blockBuffer.type === 'main') {
                         allPages[currentTab].added.push(hash);

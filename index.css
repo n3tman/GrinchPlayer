@@ -12950,7 +12950,7 @@ textarea:focus {
   font-size: 1.3rem;
 }
 .tippy-content .panel .panel-block {
-  padding: 3px 0.75em;
+  padding: 5px 0.75em;
   flex-wrap: wrap;
 }
 .tippy-content .slider {
@@ -13029,6 +13029,9 @@ textarea:focus {
 }
 .tabs.is-toggle .tab {
   -webkit-app-region: no-drag;
+}
+.tabs.is-toggle .tab:nth-child(n+11):nth-child(-n+20) {
+  background: rgba(43, 62, 80, 0.8);
 }
 .tabs.is-toggle .buttons,
 .tabs.is-toggle .button {
@@ -13363,11 +13366,13 @@ textarea:focus {
 
 .edit-mode {
   opacity: 0;
+  pointer-events: none;
   transition: opacity 0.3s;
 }
 
 .has-bottom .edit-mode {
   opacity: 1;
+  pointer-events: auto;
 }
 .has-bottom .panel.deck .deck-items {
   height: calc(100% - 400px);
