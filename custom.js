@@ -890,7 +890,6 @@ function addProjectToList(hash, text, reindex) {
         });
 
         currentProject = hash;
-        $('.close-proj').prop('disabled', false);
         $('#project-search .is-active').removeClass('is-active');
         $this.addClass('is-active');
     }).on('contextmenu', function (e) {
@@ -923,7 +922,6 @@ function projectSaveAction(that) {
             pages: getActiveTabs()
         };
         currentProject = hash;
-        $('.close-proj').prop('disabled', false);
 
         $('#project-search .is-active').removeClass('is-active');
         $('[data-proj="' + hash + '"]').addClass('is-active');
@@ -1478,7 +1476,6 @@ function getActiveTabs() {
 // Unselect all projects
 function unselectProjects() {
     currentProject = '';
-    $('.close-proj').prop('disabled', true);
     $('#project-search .is-active').removeClass('is-active');
 }
 
@@ -2162,7 +2159,6 @@ $(function () {
                 actionWithLoading(function () {
                     if (hash === currentProject) {
                         currentProject = '';
-                        $('.close-proj').prop('disabled', true);
                     }
 
                     $parent.remove();
