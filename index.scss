@@ -567,6 +567,12 @@ textarea:focus {
     .sound-block:focus {
         box-shadow: inset 0 0 0 2px rgba($white, 0.4) !important;
     }
+
+
+    .brush &,
+    .brush & .sound-block {
+        cursor: crosshair;
+    }
 }
 
 .events-none {
@@ -908,6 +914,11 @@ textarea:focus {
 
         .button.apply .fa {
             margin-right: 0;
+        }
+
+        .button.selected {
+            color: $white;
+            outline: 2px solid $blue;
         }
     }
 }

@@ -13196,6 +13196,9 @@ textarea:focus {
 .main .sound-block:focus {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
 }
+.brush .main, .brush .main .sound-block {
+  cursor: crosshair;
+}
 
 .events-none .sound-block,
 .events-none .panel-block {
@@ -13443,6 +13446,10 @@ textarea:focus {
 }
 .panel.deck .buttons.color .button.apply .fa, .panel.deck .buttons.color .button.apply .panel-tabs a::before, .panel.deck .panel-tabs .buttons.color .button.apply a::before {
   margin-right: 0;
+}
+.panel.deck .buttons.color .button.selected {
+  color: white;
+  outline: 2px solid #5bc0de;
 }
 
 .edit-mode {

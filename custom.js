@@ -112,6 +112,8 @@ function toggleEditMode() {
             $('.main, .deck-items').selectable('disable');
             $('.page-remove, .proj-remove, #batch-btn, #remove-deck').prop('disabled', true);
             document.querySelector('#color-choose')._tippy.hide();
+            $('#color-brush').removeClass('selected');
+            $('body').removeClass('brush');
 
             unselectBlocks();
             saveAllData(true);
@@ -1189,8 +1191,19 @@ function selectedBlocksAction(message, callback) {
     }
 }
 
+// Add color to single block
+function applySingleBlockColor(hash, $this) {
+    const color = allPages[currentTab].blocks[hash].color;
+    if (color !== undefined) {
+        $this.removeClass('bg-' + color);
+    }
+
+    allPages[currentTab].blocks[hash].color = selectedColor;
+    $this.addClass('bg-' + selectedColor);
+}
+
 // Apply color to selected blocks
-function applyBlockColor() {
+function applySelectedBlockColor() {
     const $selected = $main.find('.ui-selected');
 
     if (selectedColor !== undefined && $selected.length > 0) {
@@ -1198,13 +1211,7 @@ function applyBlockColor() {
             const $this = $(this);
             const hash = this.dataset.hash;
 
-            const color = allPages[currentTab].blocks[hash].color;
-            if (color !== undefined) {
-                $this.removeClass('bg-' + color);
-            }
-
-            allPages[currentTab].blocks[hash].color = selectedColor;
-            $this.addClass('bg-' + selectedColor);
+            applySingleBlockColor(hash, $this);
         });
 
         unselectBlocks();
@@ -1478,6 +1485,14 @@ function unselectProjects() {
 // Unselect all selected blocks
 function unselectBlocks() {
     $('.ui-selected').removeClass('ui-selected');
+}
+
+// Remove brush state
+function removeBrushState() {
+    $('#color-brush').removeClass('selected');
+    $('body').removeClass('brush');
+    $('.main').selectable('enable');
+    $('.sound-block').draggable('enable').resizable('enable');
 }
 
 // ================== //
@@ -1963,7 +1978,21 @@ $(function () {
 
     // Apply color to selected blocks
     $('#color-apply').click(function () {
-        applyBlockColor();
+        applySelectedBlockColor();
+    });
+
+    // Apply color to selected blocks
+    $('#color-brush').click(function () {
+        const $this = $(this);
+
+        if ($this.hasClass('selected')) {
+            removeBrushState();
+        } else {
+            $this.addClass('selected');
+            $('body').addClass('brush');
+            $('.main').selectable('disable');
+            $('.sound-block').draggable('disable').resizable('disable');
+        }
     });
 
     // ------------- //
@@ -2084,6 +2113,12 @@ $(function () {
 
         $button.addClass('bg-' + color);
         $button[0]._tippy.hide();
+    }).on('mousedown mouseenter', '.sound-block', function (e) {
+        if (isEditMode && selectedColor !== undefined && $('body').hasClass('brush') && e.buttons === 1) {
+            const hash = e.currentTarget.dataset.hash;
+            const $block = $(e.currentTarget);
+            applySingleBlockColor(hash, $block);
+        }
     });
 
     // ----------- //
@@ -2306,6 +2341,9 @@ $(function () {
     // Esc to close modals
     addHotkey('esc', function () {
         $('.modal.is-active').removeClass('is-active');
+        if (isEditMode) {
+            removeBrushState();
+        }
     });
 
     // Close current tab
@@ -2452,7 +2490,7 @@ $(function () {
     });
 
     // Apply color to blocks hotkey
-    addHotkey('ctrl+d', function() {
-        applyBlockColor();
+    addHotkey('ctrl+d', function () {
+        applySelectedBlockColor();
     });
 });
