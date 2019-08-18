@@ -81,42 +81,6 @@ textarea:focus {
     cursor: inherit;
 }
 
-.ui-draggable-dragging {
-    background: $background;
-    width: 200px;
-    min-height: 30px;
-    padding: 0;
-    z-index: 3000;
-}
-
-.ui-draggable-dragging.panel-block.page {
-    & {
-        height: 30px;
-        padding: 2.5px 0.75em;
-        border-top: 1px solid $border;
-        border-bottom: 1px solid $border;
-        width: auto;
-    }
-
-    .button {
-        display: none;
-    }
-}
-
-.ui-selectable-helper {
-    border: 2px dotted rgba($green, 0.7);
-    background: rgba($green, 0.1) !important;
-    z-index: 5000;
-}
-
-.ui-selecting {
-    background: rgba($green, 0.2) !important;
-}
-
-.ui-selected {
-    background: rgba($green, 0.3) !important;
-}
-
 .notification {
     position: absolute;
     right: 50px;
@@ -187,7 +151,100 @@ textarea:focus {
     left: 0;
     height: 100%;
     width: 0;
-    background-color: rgba($blue, 0.3);
+    background-color: rgba($white, 0.4);
+}
+
+// ------------------ //
+//  Background colors
+// ------------------ //
+
+.bg-yellow {
+    background-color: rgba(#b75d01, 0.5) !important;
+}
+
+.bg-orange {
+    background-color: rgba(#bf360c, 0.5) !important;
+}
+
+.bg-red {
+    background-color: rgba(#b71c1c, 0.5) !important;
+}
+
+.bg-pink {
+    background-color: rgba(#880e4f, 0.5) !important;
+}
+
+.bg-purple {
+    background-color: rgba(#4a148c, 0.5) !important;
+}
+
+.bg-indigo {
+    background-color: rgba(#1a237e, 0.5) !important;
+}
+
+.bg-blue {
+    background-color: rgba(#0d47a1, 0.5) !important;
+}
+
+.bg-light-blue {
+    background-color: rgba(#0072cb, 0.5) !important;
+}
+
+.bg-cyan {
+    background-color: rgba(#006064, 0.5) !important;
+}
+
+.bg-green {
+    background-color: rgba(#236d28, 0.5) !important;
+}
+
+.bg-grey {
+    background-color: rgba($grey, 0.5) !important;
+}
+
+.bg-default {
+    background-color: inherit !important;
+}
+
+// ------------------ //
+//  jQuery UI
+// ------------------ //
+
+.ui-draggable-dragging {
+    background: $background;
+    width: 200px;
+    min-height: 30px;
+    padding: 0;
+    z-index: 3000;
+}
+
+.ui-draggable-dragging.panel-block.page {
+    & {
+        height: 30px;
+        padding: 2.5px 0.75em;
+        border-top: 1px solid $border;
+        border-bottom: 1px solid $border;
+        width: auto;
+    }
+
+    .button {
+        display: none;
+    }
+}
+
+.ui-selectable-helper {
+    border: 2px dotted rgba($green, 0.7);
+    background: rgba($green, 0.1) !important;
+    z-index: 5000;
+}
+
+.ui-selecting {
+    background: rgba($green, 0.2) !important;
+}
+
+.ui-selected {
+    background: rgba($green, 0.3) !important;
+    outline: 1px solid rgba($white, 0.6);
 }
 
 // ------------------ //
@@ -219,6 +276,10 @@ textarea:focus {
 
 .tippy-popper[x-placement^=left] .tippy-arrow {
     border-left-color: $grey;
+}
+
+.tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
+    border-left-color: rgba($green, 0.8);
 }
 
 .tippy-popper[x-placement^=right] .tippy-arrow {
@@ -272,6 +333,30 @@ textarea:focus {
         display: block !important;
         width: 100% !important;
         margin: 5px 0 !important;
+    }
+
+    .panel {
+        width: auto;
+    }
+
+    .colors {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 4px !important;
+    }
+
+    .colors > .color {
+        width: 103px;
+        height: 35px;
+        padding: 6px;
+        margin: 4px;
+        color: whitesmoke;
+        box-shadow: inset 0 0 0 1px rgba($white, 0.15) !important;
+    }
+
+    .colors > .color:hover {
+        cursor: pointer;
+        box-shadow: inset 0 0 0 2px rgba($white, 0.4) !important;
     }
 }
 
@@ -474,12 +559,13 @@ textarea:focus {
         z-index: 1;
         user-select: none;
         overflow: hidden;
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.4) !important;
+        background-color: rgba($grey-darker, 0.5);
+        box-shadow: inset 0 0 0 1px rgba($white, 0.15) !important;
     }
 
     .sound-block:hover,
     .sound-block:focus {
-        box-shadow: inset 0 0 0 2px $grey !important;
+        box-shadow: inset 0 0 0 2px rgba($white, 0.4) !important;
     }
 }
 
@@ -498,7 +584,7 @@ textarea:focus {
     }
 
     .sound-block {
-        box-shadow: inset 0 0 0 1px rgba($grey, 0.8) !important;
+        box-shadow: inset 0 0 0 1px rgba($white, 0.3) !important;
     }
 }
 
@@ -813,6 +899,17 @@ textarea:focus {
             margin-right: 5px;
         }
     }
+
+    .buttons.color {
+        .button:first-child {
+            padding: 0 25px;
+            background: $grey-darker;
+        }
+
+        .button.apply .fa {
+            margin-right: 0;
+        }
+    }
 }
 
 .edit-mode {
@@ -828,7 +925,7 @@ textarea:focus {
     }
 
     .panel.deck .deck-items {
-        height: calc(100% - 400px);
+        height: calc(100% - 470px);
     }
 }
 

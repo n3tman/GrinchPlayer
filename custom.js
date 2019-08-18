@@ -40,11 +40,11 @@ let $wrapper;
 let $main;
 let $deckItems;
 let $tabList;
-
 let notifyHandle;
 let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
+let selectedColor;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -105,12 +105,13 @@ function toggleEditMode() {
             $blocks.draggable('enable').resizable('enable');
             $('.deck-items .panel-block').draggable('enable');
             $('.main, .deck-items').selectable('enable');
-            $('.page-remove, .proj-remove, #batch-btn').prop('disabled', false);
+            $('.page-remove, .proj-remove, #batch-btn, #remove-deck').prop('disabled', false);
         } else {
             $blocks.draggable('disable').resizable('disable');
             $('.deck-items .panel-block').draggable('disable');
             $('.main, .deck-items').selectable('disable');
-            $('.page-remove, .proj-remove, #batch-btn').prop('disabled', true);
+            $('.page-remove, .proj-remove, #batch-btn, #remove-deck').prop('disabled', true);
+            document.querySelector('#color-choose')._tippy.hide();
 
             unselectBlocks();
             saveAllData(true);
@@ -324,10 +325,12 @@ function addSavedSoundBlock(hash, pageHash, blockSource) {
     const source = blockSource ? blockSource : allPages[pageHash];
     const text = source.blocks[hash].text;
     const rect = source.blocks[hash].rect;
+    const color = source.blocks[hash].color;
     const $mainSelector = $('.main[data-page="' + pageHash + '"]');
 
     const html = '<a class="button is-dark sound-block' +
         (blockSource ? ' ui-selected' : '') +
+        (color ? ' bg-' + color : '') +
         '" data-hash="' + hash + '"><div class="sound-overlay"></div>' +
         '<div class="sound-text">' + text + '</div></a>';
 
@@ -472,6 +475,7 @@ function updateDeckData() {
 function removeBlockFromPage(hash) {
     const selector = '[data-hash="' + hash + '"]';
     delete allPages[currentTab].blocks[hash].rect;
+    delete allPages[currentTab].blocks[hash].color;
     $main.find(selector).remove();
     appendDeckItemHtml(hash, allPages[currentTab].blocks[hash].text);
     initDeckEditable($deckItems.find(selector), true);
@@ -863,7 +867,7 @@ function loadProjectTabs(hash) {
     });
 }
 
-// Add new page to the list
+// Add new project to the list
 function addProjectToList(hash, text, reindex) {
     const html = '<a class="panel-block page" data-proj="' + hash + '">' +
         '<button class="button is-dark proj-remove"' +
@@ -884,6 +888,7 @@ function addProjectToList(hash, text, reindex) {
         });
 
         currentProject = hash;
+        $('.close-proj').prop('disabled', false);
         $('#project-search .is-active').removeClass('is-active');
         $this.addClass('is-active');
     }).on('contextmenu', function (e) {
@@ -916,6 +921,7 @@ function projectSaveAction(that) {
             pages: getActiveTabs()
         };
         currentProject = hash;
+        $('.close-proj').prop('disabled', false);
 
         $('#project-search .is-active').removeClass('is-active');
         $('[data-proj="' + hash + '"]').addClass('is-active');
@@ -1183,6 +1189,30 @@ function selectedBlocksAction(message, callback) {
     }
 }
 
+// Apply color to selected blocks
+function applyBlockColor() {
+    const $selected = $main.find('.ui-selected');
+
+    if (selectedColor !== undefined && $selected.length > 0) {
+        $selected.each(function () {
+            const $this = $(this);
+            const hash = this.dataset.hash;
+
+            const color = allPages[currentTab].blocks[hash].color;
+            if (color !== undefined) {
+                $this.removeClass('bg-' + color);
+            }
+
+            allPages[currentTab].blocks[hash].color = selectedColor;
+            $this.addClass('bg-' + selectedColor);
+        });
+
+        unselectBlocks();
+    } else {
+        showNotification('Не выбраны блоки или цвет', true, 2000);
+    }
+}
+
 // ==================== //
 //                      //
 //   Helper Functions   //
@@ -1441,6 +1471,7 @@ function getActiveTabs() {
 // Unselect all projects
 function unselectProjects() {
     currentProject = '';
+    $('.close-proj').prop('disabled', true);
     $('#project-search .is-active').removeClass('is-active');
 }
 
@@ -1522,6 +1553,31 @@ $(function () {
         theme: 'green',
         interactive: true,
         placement: 'right'
+    });
+
+    tippy(document.querySelector('#color-choose'), {
+        content: '<div class="panel">' +
+            '<p class="panel-heading">Выбрать цвет</p>' +
+            '<div class="panel-block colors">' +
+            '<div class="color bg-yellow" data-color="yellow">Текст</div>' +
+            '<div class="color bg-orange" data-color="orange">Текст</div>' +
+            '<div class="color bg-red" data-color="red">Текст</div>' +
+            '<div class="color bg-pink" data-color="pink">Текст</div>' +
+            '<div class="color bg-purple" data-color="purple">Текст</div>' +
+            '<div class="color bg-indigo" data-color="indigo">Текст</div>' +
+            '<div class="color bg-blue" data-color="blue">Текст</div>' +
+            '<div class="color bg-light-blue" data-color="light-blue">Текст</div>' +
+            '<div class="color bg-cyan" data-color="cyan">Текст</div>' +
+            '<div class="color bg-green" data-color="green">Текст</div>' +
+            '<div class="color bg-grey" data-color="grey">Текст</div>' +
+            '<div class="color bg-default" data-color="default">Стандарт</div>' +
+            '</div></div>',
+        arrow: true,
+        aria: null,
+        trigger: 'click',
+        theme: 'green',
+        interactive: true,
+        placement: 'left'
     });
 
     // Tabs
@@ -1905,6 +1961,11 @@ $(function () {
         });
     });
 
+    // Apply color to selected blocks
+    $('#color-apply').click(function () {
+        applyBlockColor();
+    });
+
     // ------------- //
     //  Body events  //
     // ------------- //
@@ -2011,6 +2072,18 @@ $(function () {
         volume = this.value / 100;
         hp.Howler.volume(volume);
         showNotification('Громкость: ' + this.value + '%', false, 1500);
+    }).on('click', '.colors > .color', function (e) {
+        const color = e.target.dataset.color;
+        const $button = $('#color-choose');
+
+        if (selectedColor !== undefined) {
+            $button.removeClass('bg-' + selectedColor);
+        }
+
+        selectedColor = color;
+
+        $button.addClass('bg-' + color);
+        $button[0]._tippy.hide();
     });
 
     // ----------- //
@@ -2054,6 +2127,7 @@ $(function () {
                 actionWithLoading(function () {
                     if (hash === currentProject) {
                         currentProject = '';
+                        $('.close-proj').prop('disabled', true);
                     }
 
                     $parent.remove();
@@ -2375,5 +2449,10 @@ $(function () {
             showNotification('Вставлено: <b>' + counter + '</b>. Пропущено: <b>' +
                 (_.size(blockBuffer.blocks) - counter) + '</b>', false, 2000);
         }
+    });
+
+    // Apply color to blocks hotkey
+    addHotkey('ctrl+d', function() {
+        applyBlockColor();
     });
 });

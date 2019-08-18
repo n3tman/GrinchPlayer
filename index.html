@@ -56,7 +56,7 @@
             </div>
             <div class="items"></div>
             <div class="panel-block bottom">
-                <button class="button is-link is-outlined is-fullwidth close-proj">
+                <button class="button is-link is-outlined is-fullwidth close-proj" disabled>
                     Снять выделение
                 </button>
             </div>
@@ -109,11 +109,19 @@
             </p>
         </div>
         <div class="panel-block bottom" id="deck-bottom">
-            <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду">
+            <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду" disabled>
                 Очистить
             </button>
         </div>
         <div class="edit-mode">
+            <div class="panel-heading edit">
+                Редактировать
+            </div>
+            <div class="buttons edit color">
+                <button class="button" id="color-choose" title="Выбрать цвет"><i class="fa fa-delicious"></i> Цвет</button>
+                <button class="button apply" id="color-apply" title="Применить цвет к выделенным"><i class="fa fa-check"></i></button>
+                <button class="button" id="color-brush" title="Режим рисования"><i class="fa fa-paint-brush"></i> Кисть</button>
+            </div>
             <div class="panel-heading edit">
                 Добавить
             </div>
@@ -185,6 +193,7 @@
                     <li><b>Левая</b> кнопка в навигаторе страниц (зажать и перенести на вкладки) — открыть страницу
                     <li><b>Левая</b> кнопка в навигаторе (<b>двойной клик</b>) — открыть страницу или проект</li>
                     <li><b>Правая</b> кнопка на звуке в колоде — воспроизвести звук</li>
+                    <li><b>Escape</b> — закрыть всплывающее окно, сбросить фильтр в поиске, выйти из режима рисования
                 </ul>
 
                 <h3>В режиме воспроизведения</h3>
@@ -206,6 +215,7 @@
                     <li><b>Ctrl+C</b> — скопировать звуки со страницы или из колоды
                     <li><b>Ctrl+X</b> — вырезать звуки со страницы или из колоды
                     <li><b>Ctrl+V</b> — вставить звуки на страницу или в колоду
+                    <li><b>Ctrl+D</b> — покрасить выделенные блоки в выбранный цвет
                 </ul>
 
                 <h3>Добавление файлов/папок из проводника (drag'n'drop)</h3>
