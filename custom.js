@@ -1292,12 +1292,12 @@ function roundToTen(value) {
 // Get hex hash of a file
 function getFileHash(path) {
     const file = fs.readFileSync(path);
-    return Number(farmhash.hash64(file)).toString(16);
+    return Number(farmhash.hash32(file)).toString(16);
 }
 
 // Get hex hash of a string
 function getStringHash(text) {
-    return Number(farmhash.hash64(text)).toString(16);
+    return Number(farmhash.hash32(text)).toString(16);
 }
 
 // Get files in folder by mask
