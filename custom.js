@@ -26,8 +26,8 @@ const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf
 const howlDb = {};
 const pageSearch = {};
 const projectSearch = {};
-const allPages = config.get('pages') || {};
-const allProjects = config.get('projects') || {};
+let allPages = config.get('pages') || {};
+let allProjects = config.get('projects') || {};
 const blockBuffer = {type: '', blocks: {}};
 
 let isEditMode = false;
@@ -496,10 +496,12 @@ function saveAllData(skipNotify) {
             .replace(/ui[-\w]+\s*/g, '')
             .replace(/<div class="".+?<\/div>/g, '');
 
-        activePages[hash].store.set({
-            name: allPages[hash].name,
-            main: mainHtml
-        });
+        if (_.size(activePages) > 0) {
+            activePages[hash].store.set({
+                name: allPages[hash].name,
+                main: mainHtml
+            });
+        }
     });
 
     config.set('volume', volume);
@@ -2307,6 +2309,81 @@ $(function () {
             $(this).parent().find('.is-active').removeClass('is-active');
             classList.add('is-active');
             showNotification('Устройство установлено!', false, 1500);
+        }
+    });
+
+    // -------------------- //
+    //  Update DB <= 1.5.0  //
+    // -------------------- //
+
+    $('#update-base').click(function () {
+        if (_.keys(allPages)[0].length < 12) {
+            showNotification('Обновление не требуется!');
+        } else {
+            actionWithLoading(function () {
+                const newAllPages = {};
+                const newAllProjects = {};
+
+                _.keys(allPages).forEach(function (pageHash) {
+                    const page = allPages[pageHash];
+                    const newHash = getStringHash(page.name);
+                    newAllPages[newHash] = _.cloneDeep(page);
+                    newAllPages[newHash].hash = newHash;
+                    newAllPages[newHash].added = [];
+                    newAllPages[newHash].blocks = {};
+
+                    if (currentTab === pageHash) {
+                        currentTab = newHash;
+                    }
+
+                    if (activePageExists(pageHash)) {
+                        $('[data-page="' + pageHash + '"]').attr('data-page', newHash);
+                    }
+
+                    _.keys(page.blocks).forEach(function (hash) {
+                        const block = page.blocks[hash];
+                        const blockHash = getFileHash(block.path);
+                        newAllPages[newHash].blocks[blockHash] = _.cloneDeep(page.blocks[hash]);
+                        if (page.added.includes(hash)) {
+                            newAllPages[newHash].added.push(blockHash);
+                        }
+                    });
+                });
+
+                _.keys(allProjects).forEach(function (projHash) {
+                    const proj = allProjects[projHash];
+                    const newHash = getStringHash(proj.name);
+                    newAllProjects[newHash] = _.cloneDeep(proj);
+                    newAllProjects[newHash].pages = [];
+
+                    if (currentProject === projHash) {
+                        currentProject = newHash;
+                    }
+
+                    proj.pages.forEach(function (pageHash) {
+                        newAllProjects[newHash].pages.push(
+                            getStringHash(allPages[pageHash].name)
+                        );
+                    });
+                });
+
+                allPages = newAllPages;
+                allProjects = newAllProjects;
+
+                activePages = {};
+
+                const savedFiles = fg.sync('*.json', {
+                    cwd: path.join(remote.app.getPath('userData'), 'pages'),
+                    onlyFiles: true,
+                    absolute: true
+                });
+
+                savedFiles.forEach(function (file) {
+                    fs.unlinkSync(file);
+                });
+            });
+
+            showNotification('Готово! Перезапустите плеер');
         }
     });
 
