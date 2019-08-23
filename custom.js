@@ -1222,7 +1222,7 @@ function applySelectedBlockColor() {
 
 // Import a saved page
 function importSavedPage(file, json) {
-    let counter;
+    let counter = 0;
     const filesNum = _.size(json.blocks);
     const dir = path.dirname(file);
     const checkPath = path.join(dir, json.name);
@@ -1231,18 +1231,19 @@ function importSavedPage(file, json) {
         const files = getAudioFilesInFolder(checkPath);
         if (files.length > 0) {
             counter = processJsonFiles(files, json);
-            finishJsonImport(json, counter, filesNum);
-        } else {
-            $wrapper.removeClass('is-loading');
-            showNotification('Не найдено звуков в папке <b>' + json.name + '</b>', true, 3000);
         }
     } else {
         showFolderSelectionDialog(function (files) {
             counter = processJsonFiles(files, json);
         }, function () {
-            finishJsonImport(json, counter, filesNum);
+            showNotification('Добавлена страница <b>' + json.name + '</b>. Звуков: <b>' + counter + '</b>, пропущено: <b>' + (filesNum - counter) + '</b>');
         }, 'Выберите папку со звуками для страницы "' + json.name + '"');
     }
+
+    return {
+        added: counter,
+        skipped: filesNum - counter
+    };
 }
 
 // ==================== //
@@ -1553,16 +1554,6 @@ function processJsonFiles(files, json) {
     }
 
     return counter;
-}
-
-// Finish importing a json page
-function finishJsonImport(json, counter, filesNum) {
-    counter = counter ? counter : 0;
-    filesNum = filesNum ? filesNum : 0;
-
-    $wrapper.removeClass('is-loading');
-
-    showNotification('Добавлена страница <b>' + json.name + '</b>. Звуков: <b>' + counter + '</b>, пропущено: <b>' + (filesNum - counter) + '</b>');
 }
 
 // ================== //
@@ -1904,7 +1895,7 @@ $(function () {
 
         dialog.showOpenDialog({
             title: 'Выберите сохраненную страницу',
-            properties: ['openFile'],
+            properties: ['openFile', 'multiSelections'],
             filters: [{
                 name: 'JSON',
                 extensions: ['json']
@@ -1913,19 +1904,30 @@ $(function () {
             if (files === undefined) {
                 $wrapper.removeClass('is-loading');
             } else {
-                let json = JSON.parse(fs.readFileSync(files[0]));
+                let addedCount = 0;
+                let skippedCount = 0;
+                let pageCount = 0;
 
-                if (json.type && json.type === 'page' && files.length > 0) {
-                    if (pageExists(json.hash)) {
-                        $wrapper.removeClass('is-loading');
-                        showNotification('Такая страница уже есть!', true, 1500);
-                    } else {
-                        importSavedPage(files[0], json);
+                files.forEach(function (file) {
+                    let json = JSON.parse(fs.readFileSync(file));
+
+                    if (json.type && json.type === 'page' && !pageExists(json.hash)) {
+                        const result = importSavedPage(file, json);
+                        addedCount += result.added;
+                        skippedCount += result.skipped;
+                        pageCount++;
                     }
-                } else {
-                    $wrapper.removeClass('is-loading');
-                    showNotification('Ошибка импортирования', true, 1500);
+                });
+
+                if (pageCount > 0 && addedCount > 0) {
+                    showNotification('Добавлено страниц: <b>' + pageCount + '</b>. Звуков: <b>' + addedCount + '</b>, пропущено: <b>' + skippedCount + '</b>', false, 5000);
                 }
+
+                if (pageCount === 0) {
+                    showNotification('Новых страниц <b>не найдено</b>', true, 3000);
+                }
+
+                $wrapper.removeClass('is-loading');
             }
         });
     });
