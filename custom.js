@@ -411,7 +411,7 @@ function addDeckItemFromFile(soundPath) {
         allPages[currentTab].blocks[hash] = {
             hash: hash,
             text: text,
-            path: path.win32.normalize(soundPath)
+            path: path.normalize(soundPath)
         };
 
         initBlockStats(currentTab, hash);
@@ -645,7 +645,7 @@ function loadPpv2(filePath) {
     lines.forEach(function (line, i) {
         if (i !== 0 && line.trim().length > 0) {
             const parts = line.split('*');
-            const filePath = parsed.dir + '\\' + parts[0];
+            const filePath = path.join(parsed.dir, parts[0]);
             lineNum++;
 
             if (fs.existsSync(filePath) && parts[0].length > 0 && parts[5].length > 0) {
@@ -660,7 +660,7 @@ function loadPpv2(filePath) {
                     counter++;
 
                     page.blocks[hash] = {
-                        path: path.win32.normalize(filePath),
+                        path: path.normalize(filePath),
                         text: parts[5],
                         addedDate: new Date().toISOString(),
                         counter: 0
@@ -1494,6 +1494,19 @@ function removeBrushState() {
     $('.sound-block').draggable('enable').resizable('enable');
 }
 
+// Erase 'pages' folder with cached pages
+function flushSavedPages() {
+    const savedFiles = fg.sync('*.json', {
+        cwd: path.join(remote.app.getPath('userData'), 'pages'),
+        onlyFiles: true,
+        absolute: true
+    });
+
+    savedFiles.forEach(function (file) {
+        fs.unlinkSync(file);
+    });
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -1856,7 +1869,7 @@ $(function () {
                             for (const file of files) {
                                 const hash = getFileHash(file);
                                 if (_.keys(json.blocks).includes(hash)) {
-                                    json.blocks[hash].path = path.win32.normalize(file);
+                                    json.blocks[hash].path = path.normalize(file);
                                     json.blocks[hash].addedDate = new Date().toISOString();
                                     json.blocks[hash].counter = 0;
                                     counter++;
@@ -2318,7 +2331,7 @@ $(function () {
 
     $('#update-base').click(function () {
         if (_.keys(allPages)[0].length < 12) {
-            showNotification('Обновление не требуется!');
+            showNotification('Исправление не требуется!', false, 3000);
         } else {
             actionWithLoading(function () {
                 const newAllPages = {};
@@ -2372,19 +2385,17 @@ $(function () {
 
                 activePages = {};
 
-                const savedFiles = fg.sync('*.json', {
-                    cwd: path.join(remote.app.getPath('userData'), 'pages'),
-                    onlyFiles: true,
-                    absolute: true
-                });
-
-                savedFiles.forEach(function (file) {
-                    fs.unlinkSync(file);
-                });
+                flushSavedPages();
             });
 
             showNotification('Готово! Перезапустите плеер');
         }
+    });
+
+    // Flush cached pages button
+    $('#flush-cache').click(function () {
+        flushSavedPages();
+        showNotification('Кеш страниц очищен!', false, 3000);
     });
 
     // --------- //
