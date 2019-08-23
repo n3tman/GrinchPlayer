@@ -393,6 +393,12 @@ function addInitHowl(hash, soundPath) {
             preload: false,
             onplay: function () {
                 requestAnimationFrame(updateAudioStep);
+            },
+            onloaderror: function () {
+                $('[data-hash="' + hash + '"]').addClass('is-error');
+            },
+            onplayerror: function () {
+                $('[data-hash="' + hash + '"]').addClass('is-error');
             }
         });
     }
@@ -476,11 +482,19 @@ function updateDeckData() {
 // Delete one block from the page
 function removeBlockFromPage(hash) {
     const selector = '[data-hash="' + hash + '"]';
+    const $element = $main.find(selector);
+    const isError = $element.hasClass('is-error');
     delete allPages[currentTab].blocks[hash].rect;
     delete allPages[currentTab].blocks[hash].color;
-    $main.find(selector).remove();
+    $element.remove();
     appendDeckItemHtml(hash, allPages[currentTab].blocks[hash].text);
-    initDeckEditable($deckItems.find(selector), true);
+
+    const $item = $deckItems.find(selector);
+    initDeckEditable($item, true);
+
+    if (isError) {
+        $item.addClass('is-error');
+    }
 }
 
 // Save all pages/projects/settings to config
@@ -1135,10 +1149,11 @@ function flushAddedBlocks() {
 function flushDeckItems(withFiles) {
     _.keys(allPages[currentTab].blocks).forEach(function (hash) {
         if (!allPages[currentTab].added.includes(hash)) {
+            const filePath = allPages[currentTab].blocks[hash].path;
             howlDb[hash].unload();
 
-            if (withFiles) {
-                fs.unlinkSync(allPages[currentTab].blocks[hash].path);
+            if (withFiles && fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
             }
 
             delete allPages[currentTab].blocks[hash];
@@ -2581,10 +2596,11 @@ $(function () {
 
                         $selected.each(function () {
                             const hash = this.dataset.hash;
+                            const filePath = allPages[currentTab].blocks[hash].path;
                             howlDb[hash].unload();
 
-                            if (choice === 2) {
-                                fs.unlinkSync(allPages[currentTab].blocks[hash].path);
+                            if (choice === 2 && fs.existsSync(filePath)) {
+                                fs.unlinkSync(filePath);
                             }
 
                             delete allPages[currentTab].blocks[hash];

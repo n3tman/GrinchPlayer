@@ -154,6 +154,22 @@ textarea:focus {
     background-color: rgba($white, 0.4);
 }
 
+.is-error {
+    & {
+        background-color: $red !important;
+    }
+
+    &::before {
+        content: '';
+        width: 100%;
+        position: absolute;
+        right: 0;
+        top: 50%;
+        border-bottom: 3px solid $white;
+        transform: skewY(-15deg);
+    }
+}
+
 // ------------------ //
 //  Background colors
 // ------------------ //
@@ -216,6 +232,7 @@ textarea:focus {
     min-height: 30px;
     padding: 0;
     z-index: 3000;
+    overflow: hidden;
 }
 
 .ui-draggable-dragging.panel-block.page {
@@ -833,6 +850,7 @@ textarea:focus {
             margin-left: 25px;
             width: 200px;
             user-select: none;
+            overflow: hidden;
         }
     }
 

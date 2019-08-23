@@ -12861,6 +12861,19 @@ textarea:focus {
   background-color: rgba(255, 255, 255, 0.4);
 }
 
+.is-error {
+  background-color: #d9534f !important;
+}
+.is-error::before {
+  content: "";
+  width: 100%;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  border-bottom: 3px solid white;
+  transform: skewY(-15deg);
+}
+
 .bg-yellow {
   background-color: rgba(183, 93, 1, 0.5) !important;
 }
@@ -12915,6 +12928,7 @@ textarea:focus {
   min-height: 30px;
   padding: 0;
   z-index: 3000;
+  overflow: hidden;
 }
 
 .ui-draggable-dragging.panel-block.page {
@@ -13388,6 +13402,7 @@ textarea:focus {
   margin-left: 25px;
   width: 200px;
   user-select: none;
+  overflow: hidden;
 }
 .panel.deck .batch {
   padding: 0;
