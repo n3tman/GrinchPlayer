@@ -1657,9 +1657,11 @@ $(function () {
     tippy(document.querySelector('#about'), {
         content: '<div class="panel">' +
             '<p class="panel-heading">О программе</p>' +
+            '<a class="panel-block show-info" title="Описание плеера"><i class="fa fa-info-circle"></i> Описание</a>' +
             '<a class="panel-block show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>' +
             '<a class="panel-block discord" title="Обсуждение в #grinch-player"><i class="fa fa-discord-alt"></i> Discord</a>' +
             '<a class="panel-block youtube" title="Канал Гринча"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>' +
+            '<a class="panel-block check-updates" title="Открыть страницу на GitHub"><i class="fa fa-external-link-square"></i> Обновления</a>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -2195,12 +2197,24 @@ $(function () {
     }).on('click', '.show-help', function () {
         document.querySelector('#about')._tippy.hide();
         $('#help').addClass('is-active');
+    }).on('click', '.show-info', function () {
+        document.querySelector('#about')._tippy.hide();
+        $('#info').addClass('is-active');
     }).on('click', '.youtube', function () {
         document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
     }).on('click', '.discord', function () {
         document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://discord.gg/EEkpKp2');
+    }).on('click', '.check-updates', function () {
+        document.querySelector('#about')._tippy.hide();
+        shell.openExternal('https://github.com/n3tman/GrinchPlayer/releases');
+    }).on('click', '.releases', function () {
+        shell.openExternal('https://github.com/n3tman/GrinchPlayer/releases');
+    }).on('click', '.repository', function () {
+        shell.openExternal('https://github.com/n3tman/GrinchPlayer');
+    }).on('click', '.license', function () {
+        shell.openExternal('https://creativecommons.org/licenses/by-nc-sa/4.0/deed.ru');
     }).on('input', '#volume-slider', function () {
         volume = this.value / 100;
         hp.Howler.volume(volume);

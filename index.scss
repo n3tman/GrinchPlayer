@@ -1007,6 +1007,41 @@ textarea:focus {
     }
 }
 
+.modal .content {
+    .img {
+        border-radius: 10px;
+    }
+
+    img {
+        vertical-align: middle;
+    }
+
+    h3 {
+        margin-bottom: 0.5rem;
+    }
+
+    h3:first-of-type {
+        margin-top: 0.5rem;
+    }
+
+    h2.title {
+        margin: 1rem 0;
+        font-weight: bold;
+    }
+
+    h4.title {
+        margin: 1rem 0 0.5rem;
+    }
+
+    p {
+        margin: 0.5rem 0;
+    }
+
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
 .modal-card-head,
 .modal-card-body {
     padding: 0.8rem;
