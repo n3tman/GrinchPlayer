@@ -1246,6 +1246,29 @@ function importSavedPage(file, json) {
     };
 }
 
+// Export single page from database
+function exportSavedPage(page, filePath) {
+    const json = {
+        type: 'page',
+        hash: getStringHash(page.name),
+        name: page.name
+    };
+    const blocks = {};
+
+    if (page.added.length > 0) {
+        json.added = page.added;
+    }
+
+    if (_.size(page.blocks) > 0) {
+        _.each(page.blocks, function (block, hash) {
+            blocks[hash] = _.omit(block, ['path', 'counter', 'addedDate', 'lastDate']);
+        });
+        json.blocks = blocks;
+    }
+
+    fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
+}
+
 // ==================== //
 //                      //
 //   Helper Functions   //
@@ -1397,7 +1420,7 @@ function getTabHtml(text, hash) {
         '<i class="fa fa-circle fa-stack-2x"></i>' +
         '<strong class="fa-stack-1x">1</strong></span>' +
         '<span class="text">' + text + '</span>' +
-        '<span class="icon tab-close"><i class="fa fa-times"></i></span>' +
+        '<span class="icon tab-close" title="Закрыть (Ctrl+W)"><i class="fa fa-times"></i></span>' +
         '</a></li>';
 }
 
@@ -1728,7 +1751,7 @@ $(function () {
     // Show tooltip with buttons in Edit mode
     tippy(document.querySelector('#tab-actions'), {
         content: '<div class="block-controls">' +
-            '<button class="button close-tabs" title="Закрыть все табы"><i class="fa fa-times-circle"></i></button>' +
+            '<button class="button close-tabs" title="Закрыть все табы (Ctrl+Alt+W)"><i class="fa fa-times-circle"></i></button>' +
             '<button class="button add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>' +
             '<button class="button proj-save" title="Сохранить как текущий проект"><i class="fa fa-floppy-o"></i></button>' +
             '<button class="button proj-saveas" title="Сохранить как…"><i class="fa fa-file-text"></i></button>' +
@@ -1861,31 +1884,44 @@ $(function () {
                 if (filePath === undefined) {
                     $wrapper.removeClass('is-loading');
                 } else {
-                    const json = {
-                        type: 'page',
-                        hash: getStringHash(pageName),
-                        name: pageName
-                    };
-                    const blocks = {};
-
-                    if (allPages[currentTab].added.length > 0) {
-                        json.added = allPages[currentTab].added;
-                    }
-
-                    if (_.size(allPages[currentTab].blocks) > 0) {
-                        _.each(allPages[currentTab].blocks, function (block, hash) {
-                            blocks[hash] = _.omit(block, ['path', 'counter', 'addedDate', 'lastDate']);
-                        });
-                        json.blocks = blocks;
-                    }
-
-                    fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
+                    exportSavedPage(allPages[currentTab], filePath);
                     $wrapper.removeClass('is-loading');
                     showNotification('Сохранено в <b>' + fileName + '</b>');
                 }
             });
         } else {
             showNotification('Нет активной страницы', true, 1500);
+        }
+    });
+
+    // Export all pages
+    $('#batch-export').click(function () {
+        if (_.size(allPages) > 0) {
+            $wrapper.addClass('is-loading');
+
+            dialog.showOpenDialog({
+                title: 'Выберите папку для экспорта',
+                properties: ['openDirectory']
+            }, function (dirs) {
+                if (dirs === undefined) {
+                    $wrapper.removeClass('is-loading');
+                } else {
+                    const dirName = path.basename(dirs[0]);
+                    const pageCount = _.size(allPages);
+
+                    _.keys(allPages).forEach(function (pageHash) {
+                        const page = allPages[pageHash];
+                        const filePath = path.join(dirs[0], getPageName(page.name));
+                        exportSavedPage(page, filePath);
+                    });
+
+                    showNotification('Экспортировано страниц: <b>' + pageCount + '</b> в папку <b>' + dirName + '</b>');
+
+                    $wrapper.removeClass('is-loading');
+                }
+            });
+        } else {
+            showNotification('В базе нет сохраненных страниц', true, 1500);
         }
     });
 
@@ -1909,7 +1945,7 @@ $(function () {
                 let pageCount = 0;
 
                 files.forEach(function (file) {
-                    let json = JSON.parse(fs.readFileSync(file));
+                    const json = JSON.parse(fs.readFileSync(file));
 
                     if (json.type && json.type === 'page' && !pageExists(json.hash)) {
                         const result = importSavedPage(file, json);
@@ -1945,7 +1981,7 @@ $(function () {
                 });
             }
         } else {
-            showNotification('Удалять нечего o_O', true, 1500);
+            showNotification('Удалять нечего', true, 1500);
         }
     });
 
@@ -2027,20 +2063,24 @@ $(function () {
 
     // Apply color to selected blocks
     $('#color-apply').click(function () {
-        applySelectedBlockColor();
+        if (_.size(activePages) > 0) {
+            applySelectedBlockColor();
+        }
     });
 
     // Apply color to selected blocks
     $('#color-brush').click(function () {
-        const $this = $(this);
+        if (_.size(activePages) > 0) {
+            const $this = $(this);
 
-        if ($this.hasClass('selected')) {
-            removeBrushState();
-        } else {
-            $this.addClass('selected');
-            $('body').addClass('brush');
-            $('.main').selectable('disable');
-            $('.sound-block').draggable('disable').resizable('disable');
+            if ($this.hasClass('selected')) {
+                removeBrushState();
+            } else {
+                $this.addClass('selected');
+                $('body').addClass('brush');
+                $('.main').selectable('disable');
+                $('.sound-block').draggable('disable').resizable('disable');
+            }
         }
     });
 
