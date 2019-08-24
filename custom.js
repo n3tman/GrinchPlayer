@@ -1577,7 +1577,7 @@ function processJsonFiles(files, json) {
 
     for (const file of files) {
         const hash = getFileHash(file);
-        if (_.keys(json.blocks).includes(hash)) {
+        if (_.keys(json.blocks).includes(hash) && json.blocks[hash].path === undefined) {
             json.blocks[hash].path = path.normalize(file);
             json.blocks[hash].addedDate = new Date().toISOString();
             json.blocks[hash].counter = 0;
