@@ -863,7 +863,7 @@ function addPageToList(hash, text, reindex) {
     }).dblclick(function (e) {
         const hash = e.currentTarget.dataset.page;
         if (activePageExists(hash)) {
-            showNotification('Такой таб уже есть!', true, 1500);
+            showNotification('Такая вкладка уже есть!', true, 1500);
         } else {
             actionWithLoading(function () {
                 loadPageFromList(hash);
@@ -1708,7 +1708,7 @@ $(function () {
                 const hash = ui.item.attr('data-page');
 
                 if (activePageExists(hash)) {
-                    showNotification('Такой таб уже есть!', true, 1500);
+                    showNotification('Такая вкладка уже есть!', true, 1500);
                     ui.item.remove();
                 } else {
                     const text = ui.item.text();
@@ -1768,8 +1768,8 @@ $(function () {
     // Show tooltip with buttons in Edit mode
     tippy(document.querySelector('#tab-actions'), {
         content: '<div class="block-controls">' +
-            '<button class="button close-tabs" title="Закрыть все табы (Ctrl+Alt+W)"><i class="fa fa-times-circle"></i></button>' +
-            '<button class="button add-tab" title="Добавить таб"><i class="fa fa-plus-circle"></i></button>' +
+            '<button class="button close-tabs" title="Закрыть все вкладки (Ctrl+Alt+W)"><i class="fa fa-times-circle"></i></button>' +
+            '<button class="button add-tab" title="Добавить вкладку"><i class="fa fa-plus-circle"></i></button>' +
             '<button class="button proj-save" title="Сохранить как текущий проект"><i class="fa fa-floppy-o"></i></button>' +
             '<button class="button proj-saveas" title="Сохранить как…"><i class="fa fa-file-text"></i></button>' +
             '</div>',
