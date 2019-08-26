@@ -284,6 +284,7 @@ textarea:focus {
     & {
         background-color: $grey;
         padding: 4px;
+        overflow: visible !important;
     }
 
     &.green-theme {
@@ -312,6 +313,10 @@ textarea:focus {
 }
 
 .tippy-content {
+    & {
+        padding: 0 !important;
+    }
+
     .block-controls {
         display: flex;
         flex-direction: column;
@@ -326,6 +331,7 @@ textarea:focus {
         width: 32px;
         height: 32px;
         border-radius: .25rem;
+        pointer-events: auto !important;
     }
 
     .button:focus,
@@ -1049,4 +1055,36 @@ textarea:focus {
 
 .modal-card {
     width: auto;
+}
+
+// ------------------ //
+//  Shepherd - Intro
+// ------------------ //
+
+.shepherd-element {
+    & {
+        min-width: 530px;
+    }
+
+    &.with-grinch {
+        & {
+            min-width: 730px;
+        }
+
+        .shepherd-content {
+            padding-right: 200px;
+            position: relative;
+        }
+
+        .shepherd-content::before {
+            display: block;
+            content: '';
+            width: 200px;
+            height: 200px;
+            position: absolute;
+            right: 0;
+            border-radius: 50%;
+            background: url("static/grinch-face.png") no-repeat center;
+        }
+    }
 }

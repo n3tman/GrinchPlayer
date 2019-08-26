@@ -12968,6 +12968,7 @@ textarea:focus {
 .tippy-tooltip {
   background-color: #4E5D6C;
   padding: 4px;
+  overflow: visible !important;
 }
 .tippy-tooltip.green-theme {
   background-color: rgba(92, 184, 92, 0.8);
@@ -12993,6 +12994,9 @@ textarea:focus {
   border-bottom-color: #4E5D6C;
 }
 
+.tippy-content {
+  padding: 0 !important;
+}
 .tippy-content .block-controls {
   display: flex;
   flex-direction: column;
@@ -13005,6 +13009,7 @@ textarea:focus {
   width: 32px;
   height: 32px;
   border-radius: 0.25rem;
+  pointer-events: auto !important;
 }
 .tippy-content .button:focus,
 .tippy-content .button.is-focused {
@@ -13549,6 +13554,27 @@ textarea:focus {
 
 .modal-card {
   width: auto;
+}
+
+.shepherd-element {
+  min-width: 530px;
+}
+.shepherd-element.with-grinch {
+  min-width: 730px;
+}
+.shepherd-element.with-grinch .shepherd-content {
+  padding-right: 200px;
+  position: relative;
+}
+.shepherd-element.with-grinch .shepherd-content::before {
+  display: block;
+  content: "";
+  width: 200px;
+  height: 200px;
+  position: absolute;
+  right: 0;
+  border-radius: 50%;
+  background: url("static/grinch-face.png") no-repeat center;
 }
 
 /*# sourceMappingURL=index.css.map */

@@ -40,6 +40,7 @@
 		"jquery-ui-dist": "^1.12.1",
 		"list.js": "^1.5.0",
 		"lodash": "^4.17.11",
+		"shepherd.js": "^5.0.0",
 		"simplebar": "^4.1.0",
 		"tippy.js": "^4.3.4",
 		"v8-compile-cache": "^2.1.0"

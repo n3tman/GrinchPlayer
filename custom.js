@@ -15,6 +15,7 @@ const _ = require('lodash');
 const fg = require('fast-glob');
 const List = require('list.js');
 const Store = require('electron-store');
+const Shepherd = require('shepherd.js');
 
 const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
@@ -45,6 +46,7 @@ let lastPlayedHash = '';
 let lastAddedHash = '';
 let $currentBlock;
 let selectedColor;
+let tour;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -123,6 +125,8 @@ function toggleEditMode() {
             unselectBlocks();
             saveAllData(true);
         }
+
+        advanceIfTourStep(2);
     });
 }
 
@@ -1080,6 +1084,8 @@ function initEditableTab($tab) {
                         allProjects[proj].pages[index] = newHash;
                     }
                 });
+
+                advanceIfTourStep(4);
             }
         }
     });
@@ -1290,11 +1296,86 @@ function exportSavedPage(page, filePath) {
     fs.writeFileSync(filePath, JSON.stringify(json, null, '\t'), 'utf-8');
 }
 
+// Intro to using the player
+function startIntro() {
+    tour = new Shepherd.Tour({
+        defaultStepOptions: {
+            cancelIcon: {
+                enabled: true
+            },
+            tippyOptions: {
+                maxWidth: '800px',
+                distance: 5
+            }
+        },
+        useModalOverlay: true,
+        styleVariables: {
+            overlayOpacity: 0.7
+        }
+    });
+
+    const steps = [{
+        title: 'Здравствуй, друг-пранкер! Пройдем обучение?',
+        text: 'Похоже, ты запустил плеер в первый раз.<br>Нажми «<b>Начать</b>», чтобы пройти краткое обучение.<br>Если сейчас не хочешь, нажми «<b>Не сейчас</b>» или на крестик.<br>Чтобы окно больше не появлялось, жми «<b>Больше не показывать</b>».',
+        classes: 'with-grinch',
+        buttons: [
+            {
+                action: tour.cancel,
+                secondary: true,
+                text: 'Больше не показывать'
+            },
+            {
+                action: tour.cancel,
+                secondary: true,
+                text: 'Не сейчас'
+            },
+            {
+                action: tour.next,
+                text: 'Начать'
+            }
+        ]
+    }, {
+        title: 'Вход в режим редактирования',
+        text: 'По умолчанию плеер запускается в режиме <b>воспроизведения</b>.<br>Чтобы начать добавлять звуки, нужно войти в режим <b>редактирования</b>.<br><br>Для этого <b>нажми на Пробел</b>, чтобы здесь появилось новое меню.',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        }
+    }, {
+        title: 'Создание новой страницы',
+        text: 'Теперь наведи мышь на <b>иконку со стрелкой</b> в <b>правом верхнем</b> углу и выбери вторую сверху <b>иконку с плюсом</b>.<br><br>Появится новая страница со случайным названием.',
+        attachTo: {
+            element: '.wrapper'
+        }
+    }, {
+        title: 'Переименование страниц',
+        text: 'Вкладки (страницы) можно переименовывать.<br><br>Для этого нажми на нее <b>правой кнопкой</b> мыши, введи <b>новое название</b> и нажми <b>Enter</b>',
+        attachTo: {
+            element: '.tab',
+            on: 'bottom'
+        }
+    }];
+
+    tour.addSteps(steps);
+
+    tour.start();
+}
+
 // ==================== //
 //                      //
 //   Helper Functions   //
 //                      //
 // ==================== //
+
+// Tour helper: advance if event was fired
+function advanceIfTourStep(num) {
+    if (tour !== undefined) {
+        const stepId = tour.getCurrentStep().id;
+        if (stepId === 'step-' + num) {
+            tour.next();
+        }
+    }
+}
 
 // Autosize text inside block
 function autoSizeText($elements) {
@@ -2168,6 +2249,7 @@ $(function () {
         if (isEditMode) {
             addNewEmptyPage();
             tabClick(false);
+            advanceIfTourStep(3);
         }
     }).on('click', '.proj-saveas', function () {
         projectSaveAs();
@@ -2509,6 +2591,9 @@ $(function () {
         flushSavedPages();
         showNotification('Кеш страниц очищен!', false, 3000);
     });
+
+    // Start the intro
+    startIntro();
 
     // --------- //
     //  HotKeys  //
