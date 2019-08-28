@@ -107,6 +107,11 @@ function toggleEditMode() {
             $('.main, .deck-items').selectable('enable');
             $('.page-remove, .proj-remove, #batch-btn, #remove-deck').prop('disabled', false);
         } else {
+            resetPageSearch();
+            if (activePages[currentTab] !== undefined) {
+                resetDeckList();
+            }
+
             $blocks.draggable('disable').resizable('disable');
             $('.deck-items .panel-block').draggable('disable');
             $('.main, .deck-items').selectable('disable');
@@ -286,7 +291,7 @@ function autoPosition(block) {
 
 // Add a sound block from the deck
 function addSoundBlockFromDeck($element, position, offsetTop, offsetLeft) {
-    const hash = $element.data('hash');
+    const hash = $element.attr('data-hash');
     const selector = '[data-hash="' + hash + '"]';
     const height = $element.find('.sound-text').outerHeight();
     let positioned;
@@ -977,6 +982,7 @@ function closeTab(hash) {
     const selector = '[data-page="' + hash + '"]';
     const $prevTab = $('.tab' + selector).prev();
 
+    resetPageSearch();
     document.querySelectorAll(selector).forEach(function (el, i) {
         if (i > 0) {
             el.remove();
