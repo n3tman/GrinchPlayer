@@ -298,6 +298,7 @@ textarea:focus {
 
 .tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
     border-left-color: rgba($green, 0.8);
+    right: -11px;
 }
 
 .tippy-popper[x-placement^=right] .tippy-arrow {
