@@ -126,7 +126,7 @@ function toggleEditMode() {
             saveAllData(true);
         }
 
-        advanceIfTourStep(2);
+        advanceIfTourStep(5);
     });
 }
 
@@ -1085,7 +1085,7 @@ function initEditableTab($tab) {
                     }
                 });
 
-                advanceIfTourStep(4);
+                advanceIfTourStep(7);
             }
         }
     });
@@ -1304,56 +1304,261 @@ function startIntro() {
                 enabled: true
             },
             tippyOptions: {
-                maxWidth: '800px',
-                distance: 5
+                maxWidth: '750px',
+                distance: 0
             }
         },
         useModalOverlay: true,
         styleVariables: {
-            overlayOpacity: 0.7
+            shepherdThemePrimary: '#2B3E50',
+            shepherdTextBackground: '#dee5ed'
         }
     });
 
     const steps = [{
         title: 'Здравствуй, друг-пранкер! Пройдем обучение?',
-        text: 'Похоже, ты запустил плеер в первый раз.<br>Нажми «<b>Начать</b>», чтобы пройти краткое обучение.<br>Если сейчас не хочешь, нажми «<b>Не сейчас</b>» или на крестик.<br>Чтобы окно больше не появлялось, жми «<b>Больше не показывать</b>».',
+        text: 'Нажми <b>Начать</b>, чтобы пройти краткое обучение.<br>Если нет желания, кликай <b>Не сейчас</b> или на крестик.<br>Чтобы не видеть это окно, жми <b>Больше не показывать</b>.<br><b>Повторить</b> обучение можно через меню <b>О программе</b>.',
         classes: 'with-grinch',
         buttons: [
             {
                 action: tour.cancel,
-                secondary: true,
+                classes: 'button is-link',
                 text: 'Больше не показывать'
             },
             {
                 action: tour.cancel,
-                secondary: true,
+                classes: 'button',
                 text: 'Не сейчас'
             },
             {
                 action: tour.next,
+                classes: 'button is-info',
                 text: 'Начать'
             }
         ]
     }, {
+        title: 'Главная область',
+        text: 'В центре находится <b>главная область</b>, куда будут загружаться страницы со звуками.<br>Сверху — <b>панель вкладок</b>, справа от нее — иконка вызова <b>меню вкладок</b>.',
+        attachTo: {
+            element: '.wrapper'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: '«Навигатор»',
+        text: 'Это — <b>Навигатор</b>, в котором есть меню <b>Настроек</b> и <b>О программе</b>,<br>а также список всех добавленных <b>страниц</b> и <b>проектов</b>.<br>Списки можно <b>сортировать</b> (кнопкой A-Z справа) и <b>фильтровать</b> (вводя текст в поле).',
+        attachTo: {
+            element: '#navigator',
+            on: 'right'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: '«Колода»',
+        text: 'Это — <b>Колода</b>, в которой находятся все добавленные,<br>но <b>неразмещенные</b> на странице звуки.<br>Также здесь появляется <b>меню редактирования</b>.',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
         title: 'Вход в режим редактирования',
-        text: 'По умолчанию плеер запускается в режиме <b>воспроизведения</b>.<br>Чтобы начать добавлять звуки, нужно войти в режим <b>редактирования</b>.<br><br>Для этого <b>нажми на Пробел</b>, чтобы здесь появилось новое меню.',
+        text: 'По умолчанию плеер запускается в режиме <b>воспроизведения</b>.<br>Чтобы начать добавлять звуки, нужно войти в режим <b>редактирования</b>.<br>Для этого <b>нажми на Пробел</b>, чтобы здесь появилось новое меню.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
             element: '#deck',
             on: 'left'
         }
     }, {
         title: 'Создание новой страницы',
-        text: 'Теперь наведи мышь на <b>иконку со стрелкой</b> в <b>правом верхнем</b> углу и выбери вторую сверху <b>иконку с плюсом</b>.<br><br>Появится новая страница со случайным названием.',
+        text: 'Теперь наведи мышь на <b>иконку со стрелкой</b> в <b>правом верхнем</b> углу и выбери вторую сверху <b>иконку с плюсом</b>.<br>Появится новая страница со случайным названием.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
             element: '.wrapper'
         }
     }, {
         title: 'Переименование страниц',
-        text: 'Вкладки (страницы) можно переименовывать.<br><br>Для этого нажми на нее <b>правой кнопкой</b> мыши, введи <b>новое название</b> и нажми <b>Enter</b>',
+        text: 'Вкладки (страницы) можно переименовывать.<br>Для этого нажми на нее <b>правой кнопкой</b> мыши,<br>введи <b>новое название</b> и нажми <b>Enter</b>.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
             element: '.tab',
             on: 'bottom'
         }
+    }, {
+        title: 'Меню редактирования',
+        text: 'Отлично!<br>Теперь давай подробнее разберем кнопки <b>меню редактирования</b>.</i>',
+        attachTo: {
+            element: '.edit-mode',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Файлы»',
+        text: 'Кнопка для добавления <b>звуковых файлов</b> в колоду.<br>В открывшемся окне выбрать <b>один или несколько</b> файлов через Ctrl или Shift.<br><b>Форматы</b>: mp3, mpeg, opus, ogg, oga, wav, aac, caf, m4a, mp4, weba, webm, dolby, flac.',
+        attachTo: {
+            element: '#add-sound',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Папки»',
+        text: 'Кнопка для добавления <b>папок со звуками</b> в колоду.<br>В открывшемся окне выбрать <b>одну или несколько</b> папок через Ctrl или Shift.<br>Имейте в виду, что если звуков много, процесс может занять несколько минут.',
+        attachTo: {
+            element: '#add-folder',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «PPv2»',
+        text: 'Кнопка для <b>импорта</b> страницы в старом <b>формате Prank Player v2</b>.<br>В открывшемся окне выбрать <b>один файл prank.txt</b>.',
+        attachTo: {
+            element: '#add-pp',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Nx PPv2»',
+        text: 'Кнопка для <b>массового импорта</b> страниц в старом <b>формате PPv2</b>.<br>В открывшемся окне выбрать <b>одну папку</b> с множеством <b>prank.txt</b> файлов.<br>Ищется также <b>внутри подпапок</b>, так что можно выбирать, например, всю папку MP3.<br>Имейте в виду, что если страниц много, процесс может занять несколько минут.',
+        attachTo: {
+            element: '#add-ppx',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Цвет»',
+        text: 'Кнопка <b>выбора цвета</b> для покраски блоков.',
+        attachTo: {
+            element: '#color-choose',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Применить»',
+        text: 'Позволяет <b>применить цвет</b> к выделенным блокам.<br>Горячая клавиша: <b>Ctrl+D</b>.',
+        attachTo: {
+            element: '#color-apply',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Кисть»',
+        text: 'Позволяет включить или выключить режим <b>рисования кистью</b>.<br>Выйти из режима Кисти можно также клавишей <b>Escape</b>.',
+        attachTo: {
+            element: '#color-brush',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Удалить»',
+        text: 'Кнопка для <b>удаления всех блоков</b> со <b>страницы</b> обратно в <b>колоду</b>.',
+        attachTo: {
+            element: '#remove-main',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Сохранить»',
+        text: 'Кнопка для ручного <b>сохранения базы данных</b><br>со страницами, звуками и их расположением.<br>Горячая клавиша: <b>Ctrl+S</b>.',
+        attachTo: {
+            element: '#save-all',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Импорт»',
+        text: 'Кнопка для <b>импорта</b> страниц в <b>новом формате</b> JSON.<br>В открывшемся окне выбрать <b>один или несколько</b> файлов JSON через Ctrl или Shift.',
+        attachTo: {
+            element: '#page-import',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Экспорт»',
+        text: 'Кнопка для <b>экспорта</b> страниц в <b>новом формате</b> JSON.<br>В открывшемся окне выбрать <b>место сохранения</b> JSON-файла.',
+        attachTo: {
+            element: '#page-export',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Экспорт всех страниц»',
+        text: 'Кнопка для <b>массового экспорта</b> всех страниц в <b>новом формате</b>.<br>В открывшемся окне выбрать <b>папку для сохранения</b> всех JSON-файлов.',
+        attachTo: {
+            element: '#batch-export',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Очистить кеш страниц»',
+        text: 'Позволяет <b>очистить кеш страниц</b>, то есть удалить файлы JSON из папки <b>pages</b>.<br>Перед очисткой нужно <b>закрыть все активные страницы</b>.<br>Обычно очистка не требуется. Использовать только при возникновении проблем.',
+        attachTo: {
+            element: '#flush-cache',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
     }];
 
     tour.addSteps(steps);
@@ -2249,7 +2454,7 @@ $(function () {
         if (isEditMode) {
             addNewEmptyPage();
             tabClick(false);
-            advanceIfTourStep(3);
+            advanceIfTourStep(6);
         }
     }).on('click', '.proj-saveas', function () {
         projectSaveAs();

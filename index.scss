@@ -960,7 +960,7 @@ textarea:focus {
     }
 
     .panel.deck .deck-items {
-        height: calc(100% - 610px);
+        height: calc(100% - 575px);
     }
 }
 
@@ -1066,6 +1066,45 @@ textarea:focus {
         min-width: 530px;
     }
 
+    .shepherd-content,
+    .shepherd-text {
+        font-size: 1.1rem;
+    }
+
+    .shepherd-cancel-icon {
+        line-height: 1;
+        margin-top: -7px;
+    }
+
+    .shepherd-content .shepherd-header {
+        padding: 0 0.3rem 0 1rem;
+    }
+
+    .shepherd-text {
+        line-height: 1.5;
+    }
+
+    .shepherd-title {
+        font-weight: bold;
+    }
+
+    .shepherd-footer {
+        padding: 0;
+    }
+
+    .shepherd-button {
+        width: auto;
+        height: 2.25em;
+        font-size: 1rem;
+        line-height: 1;
+        text-transform: none;
+        border-radius: 0;
+        padding-bottom: 0.375em;
+        padding-left: 0.625em;
+        padding-right: 0.625em;
+        padding-top: 0.375em;
+    }
+
     &.with-grinch {
         & {
             min-width: 730px;
@@ -1074,6 +1113,10 @@ textarea:focus {
         .shepherd-content {
             padding-right: 200px;
             position: relative;
+        }
+
+        .shepherd-footer {
+            justify-content: center;
         }
 
         .shepherd-content::before {

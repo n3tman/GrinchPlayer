@@ -13483,7 +13483,7 @@ textarea:focus {
   pointer-events: auto;
 }
 .has-bottom .panel.deck .deck-items {
-  height: calc(100% - 610px);
+  height: calc(100% - 575px);
 }
 
 .window.buttons {
@@ -13559,12 +13559,47 @@ textarea:focus {
 .shepherd-element {
   min-width: 530px;
 }
+.shepherd-element .shepherd-content,
+.shepherd-element .shepherd-text {
+  font-size: 1.1rem;
+}
+.shepherd-element .shepherd-cancel-icon {
+  line-height: 1;
+  margin-top: -7px;
+}
+.shepherd-element .shepherd-content .shepherd-header {
+  padding: 0 0.3rem 0 1rem;
+}
+.shepherd-element .shepherd-text {
+  line-height: 1.5;
+}
+.shepherd-element .shepherd-title {
+  font-weight: bold;
+}
+.shepherd-element .shepherd-footer {
+  padding: 0;
+}
+.shepherd-element .shepherd-button {
+  width: auto;
+  height: 2.25em;
+  font-size: 1rem;
+  line-height: 1;
+  text-transform: none;
+  border-radius: 0;
+  padding-bottom: 0.375em;
+  padding-left: 0.625em;
+  padding-right: 0.625em;
+  padding-top: 0.375em;
+}
 .shepherd-element.with-grinch {
   min-width: 730px;
 }
 .shepherd-element.with-grinch .shepherd-content {
   padding-right: 200px;
   position: relative;
+}
+.shepherd-element.with-grinch .shepherd-footer {
+  justify-content: center;
 }
 .shepherd-element.with-grinch .shepherd-content::before {
   display: block;
