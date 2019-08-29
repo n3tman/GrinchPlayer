@@ -27,10 +27,11 @@ const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf
 const howlDb = {};
 const pageSearch = {};
 const projectSearch = {};
+const blockBuffer = {type: '', blocks: {}};
+const tutorial = config.get('tutorial') || false;
+
 let allPages = config.get('pages') || {};
 let allProjects = config.get('projects') || {};
-const blockBuffer = {type: '', blocks: {}};
-
 let isEditMode = false;
 let activePages = {};
 let currentTab = config.get('currentTab') || '';
@@ -1324,7 +1325,10 @@ function startIntro() {
         classes: 'with-grinch',
         buttons: [
             {
-                action: tour.cancel,
+                action: function () {
+                    config.set('tutorial', true);
+                    return this.cancel();
+                },
                 classes: 'button is-link',
                 text: 'Больше не показывать'
             },
@@ -1341,7 +1345,7 @@ function startIntro() {
         ]
     }, {
         title: 'Главная область',
-        text: 'В центре находится <b>главная область</b>, куда будут загружаться страницы со звуками.<br>Сверху — <b>панель вкладок</b>, справа от нее — иконка вызова <b>меню вкладок</b>.',
+        text: 'В центре находится <b>главная область</b>, куда будут загружаться страницы со звуками.<br>Сверху — <b>панель вкладок</b>, справа от нее — иконка вызова <b>меню вкладок</b>.<br>Можно <b>изменять масштаб</b> интерфейса через <b>Ctrl + колесо</b> или клавишами <b>+/−</b>.',
         attachTo: {
             element: '.wrapper'
         },
@@ -1730,6 +1734,7 @@ function startIntro() {
         buttons: [
             {
                 action: function () {
+                    config.set('tutorial', true);
                     return this.complete();
                 },
                 classes: 'button is-success',
@@ -2128,6 +2133,7 @@ $(function () {
             '<p class="panel-heading">О программе</p>' +
             '<a class="panel-block show-info" title="Описание плеера"><i class="fa fa-info-circle"></i> Описание</a>' +
             '<a class="panel-block show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>' +
+            '<a class="panel-block start-intro" title="Пройти интерактивное обучение"><i class="fa fa-star"></i> Обучение</a>' +
             '<a class="panel-block discord" title="Обсуждение в #grinch-player"><i class="fa fa-discord-alt"></i> Discord</a>' +
             '<a class="panel-block youtube" title="Канал Гринча"><i class="fa fa-youtube-play"></i> ArsenalGrinch</a>' +
             '<a class="panel-block check-updates" title="Открыть страницу на GitHub"><i class="fa fa-external-link-square"></i> Обновления</a>' +
@@ -2671,6 +2677,9 @@ $(function () {
     }).on('click', '.show-info', function () {
         document.querySelector('#about')._tippy.hide();
         $('#info').addClass('is-active');
+    }).on('click', '.start-intro', function () {
+        document.querySelector('#about')._tippy.hide();
+        startIntro();
     }).on('click', '.youtube', function () {
         document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
@@ -2976,7 +2985,9 @@ $(function () {
     });
 
     // Start the intro
-    startIntro();
+    if (!tutorial) {
+        startIntro();
+    }
 
     // --------- //
     //  HotKeys  //
