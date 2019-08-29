@@ -126,7 +126,7 @@ function toggleEditMode() {
             saveAllData(true);
         }
 
-        advanceIfTourStep(5);
+        advanceIfTourStep('edit-mode');
     });
 }
 
@@ -1088,7 +1088,7 @@ function initEditableTab($tab) {
                     }
                 });
 
-                advanceIfTourStep(9);
+                advanceIfTourStep('rename-page');
             }
         }
     });
@@ -1383,13 +1383,15 @@ function startIntro() {
         attachTo: {
             element: '#deck',
             on: 'left'
-        }
+        },
+        id: 'edit-mode'
     }, {
         title: 'Создание новой страницы',
         text: 'Теперь наведи мышь на <b>иконку со стрелкой</b> в <b>правом верхнем</b> углу и выбери вторую сверху <b>иконку с плюсом</b>.<br>Появится новая страница со случайным названием.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
             element: '.wrapper'
-        }
+        },
+        id: 'add-page'
     }, {
         title: 'Список страниц',
         text: 'Новые страницы автоматически добавляются в этот список.<br>Чтобы открыть их заново, <b>кликни</b> по ним <b>два раза</b> или <b>перетащи</b> в область вкладок.<br>Страницы можно <b>удалять</b>, нажав на <b>крестик</b> слева.',
@@ -1420,7 +1422,8 @@ function startIntro() {
         attachTo: {
             element: '.tab',
             on: 'bottom'
-        }
+        },
+        id: 'rename-page'
     }, {
         title: 'Меню редактирования',
         text: 'Отлично!<br>Теперь давай подробнее разберем кнопки <b>меню редактирования</b>.</i>',
@@ -1595,7 +1598,8 @@ function startIntro() {
         attachTo: {
             element: '#deck',
             on: 'left'
-        }
+        },
+        id: 'add-file'
     }, {
         title: 'Список файлов в колоде',
         text: 'Это — <b>список</b> добавленных файлов (звуков).<br>Чтобы <b>прослушать</b> звук, нажми на него <b>правой кнопкой</b> мыши.<br>Чтобы <b>добавить</b> звук на страницу, <b>перетяни</b> его в <b>главную область</b>.<br>Также можно быстро добавить звук в пустое место <b>двойным кликом</b>.',
@@ -1765,10 +1769,10 @@ function startIntro() {
 // ==================== //
 
 // Tour helper: advance if event was fired
-function advanceIfTourStep(num) {
+function advanceIfTourStep(id) {
     if (tour !== undefined) {
         const stepId = tour.getCurrentStep().id;
-        if (stepId === 'step-' + num) {
+        if (stepId === id) {
             tour.next();
         }
     }
@@ -2345,7 +2349,7 @@ $(function () {
                 } else {
                     addFileBlocks(files);
                     $wrapper.removeClass('is-loading');
-                    advanceIfTourStep(24);
+                    advanceIfTourStep('add-file');
                 }
             });
         } else {
@@ -2648,7 +2652,7 @@ $(function () {
         if (isEditMode) {
             addNewEmptyPage();
             tabClick(false);
-            advanceIfTourStep(6);
+            advanceIfTourStep('add-page');
         }
     }).on('click', '.proj-saveas', function () {
         projectSaveAs();
