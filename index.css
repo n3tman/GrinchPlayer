@@ -12988,6 +12988,7 @@ textarea:focus {
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
   border-right-color: rgba(92, 184, 92, 0.8);
+  left: -11px;
 }
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
@@ -13590,6 +13591,12 @@ textarea:focus {
   padding-left: 0.625em;
   padding-right: 0.625em;
   padding-top: 0.375em;
+}
+.shepherd-element a {
+  font-weight: bold;
+}
+.shepherd-element a:hover {
+  color: inherit;
 }
 .shepherd-element.with-grinch {
   min-width: 730px;

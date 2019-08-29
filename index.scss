@@ -306,6 +306,7 @@ textarea:focus {
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
     border-right-color: rgba($green, 0.8);
+    left: -11px;
 }
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
@@ -1103,6 +1104,14 @@ textarea:focus {
         padding-left: 0.625em;
         padding-right: 0.625em;
         padding-top: 0.375em;
+    }
+
+    a {
+        font-weight: bold;
+    }
+
+    a:hover {
+        color: inherit;
     }
 
     &.with-grinch {

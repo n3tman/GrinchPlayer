@@ -544,7 +544,7 @@ function showFolderSelectionDialog(callback, finish, title) {
     let files = [];
 
     dialog.showOpenDialog({
-        title: title ? title : 'Выберите папки со звуками',
+        title: title ? title : 'Выбери папки со звуками',
         properties: ['openDirectory', 'multiSelections']
     }, function (dirs) {
         if (dirs === undefined) {
@@ -1077,6 +1077,9 @@ function initEditableTab($tab) {
                 updatePageSearch();
                 $('[data-page="' + oldHash + '"]').attr('data-page', newHash);
 
+                // Fix having old hashes in cached html
+                saveAllData(true);
+
                 // Update hash in projects
                 _.keys(allProjects).forEach(function (proj) {
                     const index = allProjects[proj].pages.indexOf(oldHash);
@@ -1085,7 +1088,7 @@ function initEditableTab($tab) {
                     }
                 });
 
-                advanceIfTourStep(7);
+                advanceIfTourStep(9);
             }
         }
     });
@@ -1264,7 +1267,7 @@ function importSavedPage(file, json) {
             counter = processJsonFiles(files, json);
         }, function () {
             showNotification('Добавлена страница <b>' + json.name + '</b>. Звуков: <b>' + counter + '</b>, пропущено: <b>' + (filesNum - counter) + '</b>');
-        }, 'Выберите папку со звуками для страницы "' + json.name + '"');
+        }, 'Выбери папку со звуками для страницы "' + json.name + '"');
     }
 
     return {
@@ -1385,6 +1388,30 @@ function startIntro() {
             element: '.wrapper'
         }
     }, {
+        title: 'Список страниц',
+        text: 'Новые страницы автоматически добавляются в этот список.<br>Чтобы открыть их заново, <b>кликни</b> по ним <b>два раза</b> или <b>перетащи</b> в область вкладок.<br>Страницы можно <b>удалять</b>, нажав на <b>крестик</b> слева.',
+        attachTo: {
+            element: '#page-search',
+            on: 'right'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Список вкладок',
+        text: 'Слева от названий вкладок ты увидишь <b>цифры</b> или <b>буквы</b>.<br>Это — <b>горячие клавиши</b> для переключения вкладок с клавиатуры.<br>Чтобы <b>закрыть</b> вкладку, нажми на крестик или используй сочетание <b>Ctrl+W</b>.<br>Закрыть <b>все вкладки</b> можно <b>кнопкой</b> справа в меню или сочетанием <b>Ctrl+Alt+W</b>.',
+        attachTo: {
+            element: '#tabs',
+            on: 'bottom'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
         title: 'Переименование страниц',
         text: 'Вкладки (страницы) можно переименовывать.<br>Для этого нажми на нее <b>правой кнопкой</b> мыши,<br>введи <b>новое название</b> и нажми <b>Enter</b>.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
@@ -1477,7 +1504,7 @@ function startIntro() {
         }]
     }, {
         title: 'Кнопка «Кисть»',
-        text: 'Позволяет включить или выключить режим <b>рисования кистью</b>.<br>Выйти из режима Кисти можно также клавишей <b>Escape</b>.',
+        text: 'Позволяет включить или выключить режим <b>покраски кистью</b>.<br>Выйти из режима Кисти можно также клавишей <b>Escape</b>.',
         attachTo: {
             element: '#color-brush',
             on: 'left'
@@ -1549,9 +1576,28 @@ function startIntro() {
         }]
     }, {
         title: 'Кнопка «Очистить кеш страниц»',
-        text: 'Позволяет <b>очистить кеш страниц</b>, то есть удалить файлы JSON из папки <b>pages</b>.<br>Перед очисткой нужно <b>закрыть все активные страницы</b>.<br>Обычно очистка не требуется. Использовать только при возникновении проблем.',
+        text: 'Позволяет <b>очистить кеш страниц</b>, то есть удалить временные файлы (pages).<br>Перед очисткой нужно <b>закрыть все активные страницы</b>.<br>Обычно очистка <b>не требуется</b>. Использовать только при возникновении проблем.',
         attachTo: {
             element: '#flush-cache',
+            on: 'top'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Добавление файлов',
+        text: 'Давай добавим пару файлов в колоду.<br>Нажми на кнопку <b>Файлы</b>, выбери <b>несколько звуков</b> и нажми <b>Открыть</b>.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        }
+    }, {
+        title: 'Список файлов в колоде',
+        text: 'Это — <b>список</b> добавленных файлов (звуков).<br>Чтобы <b>прослушать</b> звук, нажми на него <b>правой кнопкой</b> мыши.<br>Чтобы <b>добавить</b> звук на страницу, <b>перетяни</b> его в <b>главную область</b>.<br>Также можно быстро добавить звук в пустое место <b>двойным кликом</b>.',
+        attachTo: {
+            element: '#deck',
             on: 'left'
         },
         buttons: [{
@@ -1559,6 +1605,137 @@ function startIntro() {
             classes: 'button is-info',
             text: 'Дальше'
         }]
+    }, {
+        title: 'Операции со списком файлов',
+        text: 'Список можно <b>сортировать</b> по алфавиту или по длине названия.<br>Также можно <b>фильтровать</b> фразы по тексту.<br>Чтобы <b>удалить</b> звуки из колоды, <b>выдели</b> их <b>левой кнопкой мыши</b><br>от пустого места и нажми клавишу <b>Delete</b> на клавиатуре.',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Массовое добавление на страницу',
+        text: 'Это — поле для <b>массового добавления</b> звуков из колоды <b>на страницу</b>.<br>Введи желаемое <b>количество звуков</b> и нажми на кнопку <b>с плюсом</b> справа.<br>Звуки автоматически добавятся в пустое место с фиксированной шириной блока.',
+        attachTo: {
+            element: '.batch',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Очистка колоды',
+        text: 'Кнопка <b>Очистить</b> позволяет <b>удалить</b> все оставшиеся фразы в колоде.',
+        attachTo: {
+            element: '#deck-bottom',
+            on: 'top'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Операции с блоками',
+        text: 'Блоки, добавленные на страницу, можно <b>перемещать</b>, а также менять их <b>размер</b>.<br>Быстро изменить размер можно, зажав <b>правую кнопку</b> мыши в любом месте блока.<br>Для <b>изменения текста</b> в блоке, кликни по нему <b>Ctrl + правой кнопкой</b> мыши.<br>Чтобы <b>массово переместить</b> блоки, выдели их через <b>Shift + левую кнопку</b> мыши.<br>Выделенные таким образом блоки можно также <b>удалить</b> в колоду клавишей <b>Delete</b>.',
+        attachTo: {
+            element: '.wrapper'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Проекты',
+        text: 'Текущий набор вкладок (страниц) можно сохранить как новый <b>проект</b>.<br>Проекты позволяют быстро открыть <b>сразу несколько</b> страниц.<br>Чтобы создать проект, наведи мышкой на иконку справа и нажми <b>Сохранить как</b>.<br>Горячая клавиша создания проекта: <b>Shift+Alt+S</b>.<br><b>Обновить</b> активный проект можно кнопкой <b>Перезаписать проект</b> или <b>Alt+S</b>.',
+        attachTo: {
+            element: '#tabs',
+            on: 'bottom'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Список проектов',
+        text: 'После сохранения проекты появляются здесь.<br>Чтобы открыть проект, <b>кликни</b> по нему <b>два раза</b>.<br>При этом все текущие вкладки <b>закроются</b> и новый проект станет <b>активным</b>.<br>Чтобы вкладки не закрывались, можно <b>добавить</b> проект к текущему <b>кнопкой</b> справа.',
+        attachTo: {
+            element: '#project-search',
+            on: 'right'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Кнопка «Снять выделение»',
+        text: 'Эта кнопка позволяет <b>снять выделение</b> с активного проекта.<br>Полезно, например, для того, чтобы случайно не перезаписать активный проект.<br>Или для того, чтобы <b>закончить</b> работу с проектами, но <b>не закрывать</b> вкладки.',
+        attachTo: {
+            element: '.close-proj',
+            on: 'top'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Копирование и вставка блоков',
+        text: 'Блоки также можно <b>копировать</b> и <b>вырезать</b> на другие страницы.<br>Для этого сначала <b>выдели</b> их и нажми <b>Ctrl+C</b> или <b>Ctrl+X</b>.<br>Затем перейди на другую страницу и нажми <b>Ctrl+V</b>.',
+        attachTo: {
+            element: '.wrapper'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Копирование и вставка фраз',
+        text: 'То же самое можно делать и в <b>Колоде</b>.<br><b>Выдели</b> фразы, нажми <b>Ctrl+C</b> для копирования или <b>Ctrl+X</b> для вырезания,<br>и наконец <b>Ctrl+V</b> для вставки на другой странице.',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Drag and drop',
+        text: 'Еще один способ <b>добавить звуки</b> в колоду — перетащить их <b>из проводника</b>.<br>Просто включи режим <b>редактирования</b>, затем <b>выдели</b> файлы/папки в проводнике,<br><b>перетащи</b> их в область <b>колоды</b> и <b>отпусти</b> левую кнопку мыши.',
+        attachTo: {
+            element: '#deck',
+            on: 'left'
+        },
+        buttons: [{
+            action: tour.next,
+            classes: 'button is-info',
+            text: 'Дальше'
+        }]
+    }, {
+        title: 'Обучение пройдено!',
+        text: '<b>Поздравляю</b>! Ты прошел обучение.<br>Остались вопросы? Заходи в <a href="#" class="discord">Discord</a> на канал <b>#grinch-player</b>.<br>Увидеть плеер в действии можно на канале <a href="#" class="youtube">ArsenalGrinch</a>.<br><b>Удачи</b> и <b>успехов</b>!',
+        classes: 'with-grinch',
+        buttons: [
+            {
+                action: function () {
+                    return this.complete();
+                },
+                classes: 'button is-success',
+                text: 'Закончить обучение'
+            }
+        ]
     }];
 
     tour.addSteps(steps);
@@ -2062,7 +2239,7 @@ $(function () {
         content: '<div class="block-controls">' +
             '<button class="button close-tabs" title="Закрыть все вкладки (Ctrl+Alt+W)"><i class="fa fa-times-circle"></i></button>' +
             '<button class="button add-tab" title="Добавить вкладку"><i class="fa fa-plus-circle"></i></button>' +
-            '<button class="button proj-save" title="Сохранить как текущий проект"><i class="fa fa-floppy-o"></i></button>' +
+            '<button class="button proj-save" title="Перезаписать проект"><i class="fa fa-floppy-o"></i></button>' +
             '<button class="button proj-saveas" title="Сохранить как…"><i class="fa fa-file-text"></i></button>' +
             '</div>',
         arrow: true,
@@ -2140,7 +2317,7 @@ $(function () {
             $wrapper.addClass('is-loading');
 
             dialog.showOpenDialog({
-                title: 'Выберите звуки',
+                title: 'Выбери звуки',
                 properties: ['openFile', 'multiSelections'],
                 filters: [{
                     name: 'Аудио',
@@ -2152,6 +2329,7 @@ $(function () {
                 } else {
                     addFileBlocks(files);
                     $wrapper.removeClass('is-loading');
+                    advanceIfTourStep(24);
                 }
             });
         } else {
@@ -2209,7 +2387,7 @@ $(function () {
             $wrapper.addClass('is-loading');
 
             dialog.showOpenDialog({
-                title: 'Выберите папку для экспорта',
+                title: 'Выбери папку для экспорта',
                 properties: ['openDirectory']
             }, function (dirs) {
                 if (dirs === undefined) {
@@ -2239,7 +2417,7 @@ $(function () {
         $wrapper.addClass('is-loading');
 
         dialog.showOpenDialog({
-            title: 'Выберите сохраненную страницу',
+            title: 'Выбери сохраненную страницу',
             properties: ['openFile', 'multiSelections'],
             filters: [{
                 name: 'JSON',
@@ -2304,7 +2482,7 @@ $(function () {
         $wrapper.addClass('is-loading');
 
         dialog.showOpenDialog({
-            title: 'Выберите файл prank.txt из PrankPlayer v2',
+            title: 'Выбери файл prank.txt из PrankPlayer v2',
             properties: ['openFile'],
             filters: [{
                 name: 'prank.txt (PPv2)',
@@ -2331,7 +2509,7 @@ $(function () {
         $wrapper.addClass('is-loading');
 
         dialog.showOpenDialog({
-            title: 'Выберите папку со вложенными папками (напр. mp3)',
+            title: 'Выбери папку со вложенными папками (напр. mp3)',
             properties: ['openDirectory']
         }, function (dirs) {
             if (dirs === undefined) {
@@ -2787,7 +2965,7 @@ $(function () {
                 flushSavedPages();
             });
 
-            showNotification('Готово! Перезапустите плеер');
+            showNotification('Готово! Перезапусти плеер');
         }
     });
 
