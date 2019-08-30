@@ -4,7 +4,13 @@
 
 ## Install
 
-*Windows 7+ is supported (64-bit only).*
+*Linux and Windows 7+ are supported (64-bit only).*
+
+**Linux**
+
+[**Download**](https://github.com/n3tman/GrinchPlayer/releases/latest) the `.AppImage` file.
+
+*The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.*
 
 **Windows**
 

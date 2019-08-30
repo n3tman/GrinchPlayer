@@ -13,7 +13,7 @@
 		"test": "npm run lint",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --windows",
+		"dist": "electron-builder --linux --win",
 		"release": "np",
 		"sass": "node-sass index.scss index.css"
 	},
@@ -83,6 +83,11 @@
 		"appId": "com.Nik.GrinchPlayer",
 		"win": {
 			"target": "portable"
-		}
+		},
+        "linux": {
+            "target": [
+                "AppImage"
+            ]
+        }
 	}
 }
