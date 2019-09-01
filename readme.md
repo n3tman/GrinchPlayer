@@ -2,6 +2,7 @@
 
 > Технопранк-плеер для троллинга звуками
 
+[![Видеогайд по плееру](https://img.youtube.com/vi/Tqy9zhD82Ik/0.jpg)](https://www.youtube.com/watch?v=Tqy9zhD82Ik)
 ## Install
 
 *macOS 10.10+, Linux and Windows 7+ are supported (64-bit only).*
