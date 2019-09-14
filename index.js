@@ -33,8 +33,8 @@ const createMainWindow = async () => {
         show: false,
         frame: false,
         icon: iconPath,
-        width: 1600,
-        height: 1200,
+        width: 1280,
+        height: 768,
         webPreferences: {
             nodeIntegration: true
         }

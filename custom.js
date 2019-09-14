@@ -3178,4 +3178,14 @@ $(function () {
     addHotkey('ctrl+d', function () {
         applySelectedBlockColor();
     });
+
+    // Toggle left sidebar
+    addHotkey('ctrl+1', function () {
+        $('#navigator').toggleClass('hide');
+    });
+
+    // Toggle right sidebar
+    addHotkey('ctrl+2', function () {
+        $('#deck').toggleClass('hide');
+    });
 });

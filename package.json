@@ -84,11 +84,11 @@
 		"win": {
 			"target": "portable"
 		},
-        "mac": {
-            "target": "zip"
-        },
-        "linux": {
-            "target": "AppImage"
-        }
+		"mac": {
+			"target": "zip"
+		},
+		"linux": {
+			"target": "AppImage"
+		}
 	}
 }

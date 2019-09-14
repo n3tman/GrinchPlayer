@@ -12863,6 +12863,10 @@ textarea:focus {
   transform: skewY(-15deg);
 }
 
+.hide {
+  display: none !important;
+}
+
 .bg-yellow {
   background-color: rgba(183, 93, 1, 0.5) !important;
 }
