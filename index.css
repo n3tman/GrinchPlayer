@@ -1463,7 +1463,7 @@ a.has-text-danger:hover, a.has-text-danger:focus {
 }
 
 .box {
-  background-color: white;
+  background-color: #2B3E50;
   border-radius: 6px;
   box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
   color: #dee5ed;
@@ -4638,15 +4638,15 @@ a.tag:hover {
 }
 
 .card {
-  background-color: white;
-  box-shadow: 0 2px 3px rgba(10, 10, 10, 0.1), 0 0 0 1px rgba(10, 10, 10, 0.1);
+  background-color: #1d2a38;
+  box-shadow: none;
   color: #dee5ed;
   max-width: 100%;
   position: relative;
 }
 
 .card-header {
-  background-color: transparent;
+  background-color: #1a2531;
   align-items: stretch;
   box-shadow: 0 1px 2px rgba(10, 10, 10, 0.1);
   display: flex;
@@ -4683,7 +4683,7 @@ a.tag:hover {
 }
 
 .card-footer {
-  background-color: transparent;
+  background-color: #1a2531;
   border-top: 1px solid #4E5D6C;
   align-items: stretch;
   display: flex;
@@ -9153,10 +9153,6 @@ label.panel-block:hover {
   background-color: #1f2d3b;
 }
 
-.box {
-  background-color: #2B3E50;
-}
-
 .button.is-hovered, .button:hover {
   background-color: #485563;
 }
@@ -9240,21 +9236,14 @@ label.panel-block:hover {
 }
 
 .card {
-  box-shadow: none;
   border: 1px solid #4E5D6C;
-  background-color: #1d2a38;
   border-radius: 0;
 }
 .card .card-image img {
   border-radius: 0 0 0 0;
 }
 .card .card-header {
-  box-shadow: none;
-  background-color: #1a2531;
   border-radius: 0 0 0 0;
-}
-.card .card-footer {
-  background-color: #1a2531;
 }
 .card .card-footer,
 .card .card-footer-item {
@@ -12878,7 +12867,7 @@ textarea:focus {
   background-color: rgba(183, 93, 1, 0.5) !important;
 }
 
-.bg-orange {
+.bg-orange, .tabs.is-toggle .tab:nth-child(n+16):nth-child(-n+20) {
   background-color: rgba(191, 54, 12, 0.5) !important;
 }
 
@@ -12886,11 +12875,11 @@ textarea:focus {
   background-color: rgba(183, 28, 28, 0.5) !important;
 }
 
-.bg-pink {
+.bg-pink, .tabs.is-toggle .tab:nth-child(n+6):nth-child(-n+10) {
   background-color: rgba(136, 14, 79, 0.5) !important;
 }
 
-.bg-purple {
+.bg-purple, .tabs.is-toggle .tab:nth-child(n+11):nth-child(-n+15) {
   background-color: rgba(74, 20, 140, 0.5) !important;
 }
 
@@ -12898,7 +12887,7 @@ textarea:focus {
   background-color: rgba(26, 35, 126, 0.5) !important;
 }
 
-.bg-blue {
+.bg-blue, .tabs.is-toggle .tab:nth-child(-n+5) {
   background-color: rgba(13, 71, 161, 0.5) !important;
 }
 
@@ -13124,8 +13113,11 @@ textarea:focus {
 .tabs.is-toggle .tab {
   -webkit-app-region: no-drag;
 }
-.tabs.is-toggle .tab:nth-child(n+11):nth-child(-n+20) {
-  background: rgba(43, 62, 80, 0.8);
+.tabs.is-toggle .tab.is-active[data-page] {
+  background-color: rgba(0, 96, 100, 0.5) !important;
+}
+.tabs.is-toggle .tab.is-active .link {
+  background: transparent;
 }
 .tabs.is-toggle .buttons,
 .tabs.is-toggle .button {

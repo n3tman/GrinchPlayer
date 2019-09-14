@@ -471,8 +471,28 @@ textarea:focus {
         -webkit-app-region: no-drag;
     }
 
-    .tab:nth-child(n+11):nth-child(-n+20) {
-        background: rgba($grey-dark, 0.8);
+    .tab:nth-child(-n+5) {
+        @extend .bg-blue;
+    }
+
+    .tab:nth-child(n+6):nth-child(-n+10) {
+        @extend .bg-pink;
+    }
+
+    .tab:nth-child(n+11):nth-child(-n+15) {
+        @extend .bg-purple;
+    }
+
+    .tab:nth-child(n+16):nth-child(-n+20) {
+        @extend .bg-orange;
+    }
+
+    .tab.is-active[data-page] {
+        background-color: rgba(#006064, 0.5) !important;
+    }
+
+    .tab.is-active .link {
+        background: transparent;
     }
 
     .buttons,

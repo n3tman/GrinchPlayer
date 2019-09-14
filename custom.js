@@ -21,7 +21,8 @@ const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
-const keyboardArray = ['0', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p'];
+const keyboardArray = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'];
+const russianArray = ['й', 'ц', 'у', 'к', 'е', 'ф', 'ы', 'в', 'а', 'п', 'я', 'ч', 'с', 'м', 'и'];
 const editClass = 'has-bottom';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
@@ -1142,10 +1143,10 @@ function initEditableProject($item) {
 // Update numbers in tabs
 function reorderTabs() {
     $('#tabs .tab').each(function (index) {
-        if (index < 9 || index > 19) {
+        if (index < 5 || index > 19) {
             $(this).find('strong').text(index + 1);
         } else {
-            $(this).find('strong').text(keyboardArray[index - 9].toUpperCase());
+            $(this).find('strong').text(russianArray[index - 5].toUpperCase());
         }
     });
 }
@@ -3056,7 +3057,7 @@ $(function () {
     });
 
     // Quick switch keys 1-10
-    [1, 2, 3, 4, 5, 6, 7, 8, 9].forEach(function (val, i) {
+    [1, 2, 3, 4, 5].forEach(function (val, i) {
         addHotkey(val.toString(), function () {
             $tabList.find('li').eq(i).click();
         });
@@ -3065,18 +3066,12 @@ $(function () {
     // Quick switch keys 11-20
     keyboardArray.forEach(function (val, i) {
         addHotkey(val, function () {
-            $tabList.find('li').eq(i + 9).click();
+            $tabList.find('li').eq(i + 5).click();
         });
     });
 
     // Global scope
     hotkeys('*', function (e) {
-        if (e.code.includes('Numpad')) {
-            e.preventDefault();
-            const num = e.code.slice(-1);
-            $tabList.find('li').eq(num - 1).click();
-        }
-
         if (e.key === '-') {
             updateZoom(1);
         }
