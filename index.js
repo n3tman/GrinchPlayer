@@ -6,12 +6,10 @@ const cache = require('v8-compile-cache');
 const {is} = require('electron-util');
 const unhandled = require('electron-unhandled');
 const debug = require('electron-debug');
-const contextMenu = require('electron-context-menu');
 const config = require('./config');
 
 unhandled();
 debug();
-contextMenu();
 
 // Note: Must match `build.appId` in package.json
 app.setAppUserModelId('com.Nik.GrinchPlayer');
