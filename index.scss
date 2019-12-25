@@ -1165,3 +1165,62 @@ textarea:focus {
         }
     }
 }
+
+// ------------------ //
+//  Snow - Effect
+// ------------------ //
+
+@keyframes snow-1 {
+    0% { transform: translate3d(0, 0, 0);}
+    100% { transform: translate3d(500px, 1000px, 0); }
+}
+
+@keyframes snow-2 {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(400px, 400px, 0); }
+}
+
+@keyframes snow-3 {
+    0% { transform: translate3d(0, 0, 0); }
+    100% { transform: translate3d(300px, 300px, 0); }
+}
+
+body {
+    backface-visibility: hidden;
+
+    &:before {
+        content: '';
+        position: absolute;
+        background: url('static/snow.png');
+        animation: snow-1 12s linear infinite;
+        z-index: 0;
+        left: -500px;
+        top: -1000px;
+        right: 0;
+        bottom: 0;
+    }
+
+    &:after {
+        content: '';
+        position: absolute;
+        background: url('static/snow2.png');
+        animation: snow-3 12s linear infinite;
+        z-index: -1;
+        left: -400px;
+        top: -400px;
+        right: 0;
+        bottom: 0;
+    }
+}
+
+.layout:after {
+    content: '';
+    position: absolute;
+    background: url('static/snow3.png');
+    animation: snow-2 12s linear infinite;
+    z-index: -1;
+    left: -300px;
+    top: -300px;
+    right: 0;
+    bottom: 0;
+}
