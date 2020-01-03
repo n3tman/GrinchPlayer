@@ -520,8 +520,11 @@ function saveAllData(skipNotify) {
     activeTabs.forEach(function (hash) {
         const selector = '[data-page="' + hash + '"]';
         const mainHtml = document.querySelector('.main' + selector).outerHTML
+            // Filter jQuery UI classes
             .replace(/ui[-\w]+\s*/g, '')
+            // Filter is-searched and is-found classes for quick search
             .replace(/is-\w+\s*/g, '')
+            // Filter random empty block
             .replace(/<div class="".+?<\/div>/g, '');
 
         if (_.size(activePages) > 0) {
@@ -1586,18 +1589,6 @@ function startIntro() {
             text: 'Дальше'
         }]
     }, {
-        title: 'Кнопка «Очистить кеш страниц»',
-        text: 'Позволяет <b>очистить кеш страниц</b>, то есть удалить временные файлы (pages).<br>Перед очисткой нужно <b>закрыть все активные страницы</b>.<br>Обычно очистка <b>не требуется</b>. Использовать только при возникновении проблем.',
-        attachTo: {
-            element: '#flush-cache',
-            on: 'top'
-        },
-        buttons: [{
-            action: tour.next,
-            classes: 'button is-info',
-            text: 'Дальше'
-        }]
-    }, {
         title: 'Добавление файлов',
         text: 'Давай добавим пару файлов в колоду.<br>Нажми на кнопку <b>Файлы</b>, выбери <b>несколько звуков</b> и нажми <b>Открыть</b>.<br><br><i>(сделай это сейчас, чтобы продолжить обучение)</i>',
         attachTo: {
@@ -2142,6 +2133,7 @@ $(function () {
         content: '<div class="panel">' +
             '<p class="panel-heading">Настройки</p>' +
             '<a class="panel-block set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>' +
+            '<a class="panel-block flush-cache" title="Очистить кеш (сначала закрой вкладки)"><i class="fa fa-eraser"></i> Очистить кеш страниц</a>' +
             '<div class="panel-block"><i class="fa fa-volume-up"></i> Громкость' +
             '<input id="volume-slider" class="slider has-output is-fullwidth" min="0" max="100"' +
             ' value="' + (volume * 100) + '" step="1" type="range"></div>' +
@@ -2704,6 +2696,9 @@ $(function () {
 
             $devices.addClass('is-active');
         });
+    }).on('click', '.flush-cache', function() {
+        flushSavedPages();
+        showNotification('Кеш страниц очищен!', false, 3000);
     }).on('click', '.show-help', function () {
         document.querySelector('#about')._tippy.hide();
         $('#help').addClass('is-active');
@@ -3009,12 +3004,6 @@ $(function () {
 
             showNotification('Готово! Перезапусти плеер');
         }
-    });
-
-    // Flush cached pages button
-    $('#flush-cache').click(function () {
-        flushSavedPages();
-        showNotification('Кеш страниц очищен!', false, 3000);
     });
 
     // Start the intro
