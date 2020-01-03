@@ -2103,6 +2103,7 @@ window.addEventListener('beforeunload', function () {
 $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
+    const $quickSearch = $('#quick-search');
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
 
@@ -2635,13 +2636,20 @@ $(function () {
         if (e.which === 13) {
             projectSaveAction(e.target);
         }
+    }).on('keydown', '#quick-search .input', function (e) {
+        // Close quick search input
+        if (e.which === 27 && $quickSearch.hasClass('active')) {
+            $quickSearch.removeClass('active');
+            document.activeElement.blur();
+        }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
             const delta = e.originalEvent.deltaY;
             updateZoom(delta);
         }
     }).on('mouseenter', '.main', function () {
-        document.activeElement.blur();
+        // Remove focus from active inputs so the hotkeys work fine
+        // document.activeElement.blur();
     }).on('click', '.close-tabs', function () {
         if (_.size(activePages) > 0) {
             actionWithLoading(function () {
@@ -3187,5 +3195,17 @@ $(function () {
     // Toggle right sidebar
     addHotkey('ctrl+2', function () {
         $('#deck').toggleClass('hide');
+    });
+
+    // ------------- //
+    //  Search page  //
+    // ------------- //
+
+    // Close current tab
+    addHotkey('ctrl+f', function () {
+        $quickSearch.addClass('active');
+        if ($quickSearch.hasClass('active')) {
+            $quickSearch.find('.input').val('').focus();
+        }
     });
 });

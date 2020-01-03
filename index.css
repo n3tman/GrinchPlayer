@@ -13112,7 +13112,8 @@ textarea:focus {
   margin-bottom: 0;
   margin-left: -2px;
   box-shadow: inset 1px 0 0 1px #4E5D6C;
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
 }
 .tabs.is-toggle .tab {
   -webkit-app-region: no-drag;
@@ -13175,6 +13176,31 @@ textarea:focus {
 }
 .tabs.is-toggle .fa-stack-1x {
   color: #2B3E50;
+}
+.tabs.is-toggle .quick-search {
+  position: absolute;
+  right: 25px;
+  height: 100%;
+  top: 90%;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+}
+.tabs.is-toggle .quick-search.active {
+  top: calc(100% + 25px);
+  opacity: 1;
+}
+.tabs.is-toggle .quick-search .input {
+  background: rgba(31, 45, 59, 0.95);
+  box-shadow: 0 0 0 4px rgba(92, 184, 92, 0.8);
+  border-radius: 0.25rem;
+  font-size: 1.1rem;
+  border: 0;
+  pointer-events: none;
+}
+.tabs.is-toggle .quick-search.active .input {
+  pointer-events: auto;
 }
 
 .add-tab,

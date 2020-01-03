@@ -468,7 +468,8 @@ textarea:focus {
         margin-bottom: 0;
         margin-left: -2px;
         box-shadow: inset 1px 0 0 1px $border;
-        overflow: hidden;
+        overflow: visible;
+        position: relative;
     }
 
     .tab {
@@ -569,6 +570,35 @@ textarea:focus {
 
     .fa-stack-1x {
         color: $background;
+    }
+
+    .quick-search {
+        position: absolute;
+        right: 25px;
+        height: 100%;
+        top: 90%;
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s;
+    }
+
+    .quick-search.active {
+        top: calc(100% + 25px);
+        opacity: 1;
+    }
+
+    .quick-search .input {
+        background: rgba($grey-darker, 0.95);
+        box-shadow: 0 0 0 4px rgba($green, 0.8);
+        border-radius: 0.25rem;
+        font-size: 1.1rem;
+        border: 0;
+        pointer-events: none;
+    }
+
+    .quick-search.active .input {
+        pointer-events: auto;
     }
 }
 
