@@ -571,35 +571,6 @@ textarea:focus {
     .fa-stack-1x {
         color: $background;
     }
-
-    .quick-search {
-        position: absolute;
-        right: 25px;
-        height: 100%;
-        top: 90%;
-        z-index: 10000;
-        opacity: 0;
-        pointer-events: none;
-        transition: all 0.3s;
-    }
-
-    .quick-search.active {
-        top: calc(100% + 25px);
-        opacity: 1;
-    }
-
-    .quick-search .input {
-        background: rgba($grey-darker, 0.95);
-        box-shadow: 0 0 0 4px rgba($green, 0.8);
-        border-radius: 0.25rem;
-        font-size: 1.1rem;
-        border: 0;
-        pointer-events: none;
-    }
-
-    .quick-search.active .input {
-        pointer-events: auto;
-    }
 }
 
 .add-tab,
@@ -625,6 +596,10 @@ textarea:focus {
         position: relative;
     }
 
+    &.is-searched .sound-block {
+        display: none;
+    }
+
     .sound-block {
         position: absolute !important;
         left: 10px;
@@ -640,6 +615,10 @@ textarea:focus {
         overflow: hidden;
         background-color: rgba($grey-darker, 0.5);
         box-shadow: inset 0 0 0 1px rgba($white, 0.15) !important;
+    }
+
+    .sound-block.is-found {
+        display: inline-flex;
     }
 
     .sound-block:hover,
@@ -1193,5 +1172,40 @@ textarea:focus {
             border-radius: 50%;
             background: url("static/grinch-face.png") no-repeat center;
         }
+    }
+}
+
+// ------------------ //
+//  Quick Search
+// ------------------ //
+
+.quick-search {
+    & {
+        position: absolute;
+        right: 25px;
+        height: 100%;
+        top: 90%;
+        z-index: 10000;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s;
+    }
+
+    &.active {
+        top: calc(100% + 25px);
+        opacity: 1;
+    }
+
+    .input {
+        background: rgba($grey-darker, 0.9);
+        box-shadow: 0 0 0 4px rgba($green, 0.8);
+        border-radius: 0.25rem;
+        font-size: 1.1rem;
+        border: 0;
+        pointer-events: none;
+    }
+
+    &.active .input {
+        pointer-events: auto;
     }
 }

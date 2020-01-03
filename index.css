@@ -13177,31 +13177,6 @@ textarea:focus {
 .tabs.is-toggle .fa-stack-1x {
   color: #2B3E50;
 }
-.tabs.is-toggle .quick-search {
-  position: absolute;
-  right: 25px;
-  height: 100%;
-  top: 90%;
-  z-index: 10000;
-  opacity: 0;
-  pointer-events: none;
-  transition: all 0.3s;
-}
-.tabs.is-toggle .quick-search.active {
-  top: calc(100% + 25px);
-  opacity: 1;
-}
-.tabs.is-toggle .quick-search .input {
-  background: rgba(31, 45, 59, 0.95);
-  box-shadow: 0 0 0 4px rgba(92, 184, 92, 0.8);
-  border-radius: 0.25rem;
-  font-size: 1.1rem;
-  border: 0;
-  pointer-events: none;
-}
-.tabs.is-toggle .quick-search.active .input {
-  pointer-events: auto;
-}
 
 .add-tab,
 .proj-save,
@@ -13219,6 +13194,9 @@ textarea:focus {
   height: 100%;
   position: relative;
 }
+.main.is-searched .sound-block {
+  display: none;
+}
 .main .sound-block {
   position: absolute !important;
   left: 10px;
@@ -13234,6 +13212,9 @@ textarea:focus {
   overflow: hidden;
   background-color: rgba(31, 45, 59, 0.5);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
+}
+.main .sound-block.is-found {
+  display: inline-flex;
 }
 .main .sound-block:hover,
 .main .sound-block:focus {
@@ -13640,6 +13621,32 @@ textarea:focus {
   right: 0;
   border-radius: 50%;
   background: url("static/grinch-face.png") no-repeat center;
+}
+
+.quick-search {
+  position: absolute;
+  right: 25px;
+  height: 100%;
+  top: 90%;
+  z-index: 10000;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s;
+}
+.quick-search.active {
+  top: calc(100% + 25px);
+  opacity: 1;
+}
+.quick-search .input {
+  background: rgba(31, 45, 59, 0.9);
+  box-shadow: 0 0 0 4px rgba(92, 184, 92, 0.8);
+  border-radius: 0.25rem;
+  font-size: 1.1rem;
+  border: 0;
+  pointer-events: none;
+}
+.quick-search.active .input {
+  pointer-events: auto;
 }
 
 /*# sourceMappingURL=index.css.map */

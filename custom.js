@@ -16,6 +16,7 @@ const fg = require('fast-glob');
 const List = require('list.js');
 const Store = require('electron-store');
 const Shepherd = require('shepherd.js');
+const Fuse = require('fuse.js');
 
 const tippy = require('tippy.js/umd/index');
 const hp = require('./vendor/howler');
@@ -49,6 +50,8 @@ let lastAddedHash = '';
 let $currentBlock;
 let selectedColor;
 let tour;
+let $quickSearch;
+let fuseSearch;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -518,6 +521,7 @@ function saveAllData(skipNotify) {
         const selector = '[data-page="' + hash + '"]';
         const mainHtml = document.querySelector('.main' + selector).outerHTML
             .replace(/ui[-\w]+\s*/g, '')
+            .replace(/is-\w+\s*/g, '')
             .replace(/<div class="".+?<\/div>/g, '');
 
         if (_.size(activePages) > 0) {
@@ -1451,7 +1455,7 @@ function startIntro() {
         }]
     }, {
         title: 'Кнопка «Папки»',
-        text: 'Кнопка для добавления <b>папок со звуками</b> в колоду.<br>В открывшемся окне выбрать <b>одну или несколько</b> папок через Ctrl или Shift.<br>Имейте в виду, что если звуков много, процесс может занять несколько минут.',
+        text: 'Кнопка для добавления <b>папок со звуками</b> в колоду.<br>В открывшемся окне выбрать <b>одну или несколько</b> папок через Ctrl или Shift.<br>Имей в виду, что если звуков много, процесс может занять несколько минут.',
         attachTo: {
             element: '#add-folder',
             on: 'left'
@@ -1475,7 +1479,7 @@ function startIntro() {
         }]
     }, {
         title: 'Кнопка «Nx PPv2»',
-        text: 'Кнопка для <b>массового импорта</b> страниц в старом <b>формате PPv2</b>.<br>В открывшемся окне выбрать <b>одну папку</b> со множеством <b>prank.txt</b> файлов.<br>Ищется также <b>внутри подпапок</b>, так что можно выбирать, например, всю папку MP3.<br>Имейте в виду, что если страниц много, процесс может занять несколько минут.',
+        text: 'Кнопка для <b>массового импорта</b> страниц в старом <b>формате PPv2</b>.<br>В открывшемся окне выбрать <b>одну папку</b> со множеством <b>prank.txt</b> файлов.<br>Ищется также <b>внутри подпапок</b>, так что можно выбирать, например, всю папку MP3.<br>Имей в виду, что если страниц много, процесс может занять несколько минут.',
         attachTo: {
             element: '#add-ppx',
             on: 'left'
@@ -2083,6 +2087,12 @@ function processJsonFiles(files, json) {
     return counter;
 }
 
+function resetQuickSearch() {
+    $quickSearch.removeClass('active');
+    document.activeElement.blur();
+    $('.is-searched, .is-found').removeClass('is-searched is-found');
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -2103,7 +2113,7 @@ window.addEventListener('beforeunload', function () {
 $(function () {
     const mainWindow = remote.getCurrentWindow();
     const $body = $('body');
-    const $quickSearch = $('#quick-search');
+    $quickSearch = $('#quick-search');
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
 
@@ -2213,12 +2223,13 @@ $(function () {
             reorderTabs();
         }
     }).on('click', '.tab', function (e) {
-        // Tab change event
+        // Tab change event (page change)
         if (activePages[currentTab] !== undefined) {
             resetDeckList();
         }
 
         unselectBlocks();
+        resetQuickSearch();
         currentTab = e.currentTarget.dataset.page;
 
         const selector = '[data-page="' + currentTab + '"]';
@@ -2639,8 +2650,7 @@ $(function () {
     }).on('keydown', '#quick-search .input', function (e) {
         // Close quick search input
         if (e.which === 27 && $quickSearch.hasClass('active')) {
-            $quickSearch.removeClass('active');
-            document.activeElement.blur();
+            resetQuickSearch();
         }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
@@ -3201,11 +3211,39 @@ $(function () {
     //  Search page  //
     // ------------- //
 
+    const fuseOptions = {
+        threshold: 0.5,
+        keys: ['text']
+    };
+
+    let fuseArray;
+
     // Close current tab
     addHotkey('ctrl+f', function () {
         $quickSearch.addClass('active');
         if ($quickSearch.hasClass('active')) {
             $quickSearch.find('.input').val('').focus();
         }
+
+        fuseArray = _.map(allPages[currentTab].blocks, function (val, key) {
+            val.id = key;
+            return val;
+        });
+        fuseSearch = new Fuse(fuseArray, fuseOptions);
     });
+
+    // Input change event
+    $quickSearch.find('.input').on('input', _.debounce(function () {
+        const value = this.value.trim();
+        $('.is-found').removeClass('is-found');
+
+        if (value) {
+            $main.addClass('is-searched');
+            fuseSearch.search(value).forEach(function (val) {
+                $main.find('[data-hash="' + val.id + '"]').addClass('is-found');
+            });
+        } else {
+            $main.removeClass('is-searched');
+        }
+    }, 250));
 });
