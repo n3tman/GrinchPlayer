@@ -13020,6 +13020,7 @@ textarea:focus {
 }
 .tippy-content .fa, .tippy-content .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .tippy-content a::before {
   font-size: 1.5rem;
+  width: 25px;
 }
 .tippy-content .panel .fa, .tippy-content .panel.deck .panel-tabs a::before {
   font-size: 1.3rem;

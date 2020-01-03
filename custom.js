@@ -53,6 +53,7 @@ let selectedColor;
 let tour;
 let $quickSearch;
 let fuseSearch;
+let infoTipsActive = false;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -2141,6 +2142,7 @@ $(function () {
             '<div class="panel-block"><i class="fa fa-volume-up"></i> Громкость' +
             '<input id="volume-slider" class="slider has-output is-fullwidth" min="0" max="100"' +
             ' value="' + (volume * 100) + '" step="1" type="range"></div>' +
+            '<a class="panel-block info-tips" title="Информационные подсказки"><i class="fa fa-toggle-off"></i> Инфо-подсказки</a>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -2703,6 +2705,16 @@ $(function () {
     }).on('click', '.flush-cache', function () {
         flushSavedPages();
         showNotification('Кеш страниц очищен!', false, 3000);
+    }).on('click', '.info-tips', function () {
+        $(this).find('.fa').toggleClass('fa-toggle-off fa-toggle-on');
+
+        if (infoTipsActive) {
+            infoTipsActive = false;
+            showNotification('Инфо-подсказки <b>выключены</b>', false, 3000);
+        } else {
+            infoTipsActive = true;
+            showNotification('<b>Включены</b> инфо-подсказки', false, 3000);
+        }
     }).on('click', '.about-panel a.panel-block', function () {
         document.querySelector('#about')._tippy.hide();
     }).on('click', '.show-help', function () {
@@ -3247,20 +3259,24 @@ $(function () {
         arrow: true,
         aria: null,
         onShow: function (tip) {
-            const hash = tip.reference.dataset.hash;
-            const block = allPages[currentTab].blocks[hash];
-            const addedDate = moment.utc(block.addedDate);
-            const lastDate = moment.utc(block.lastDate);
-            const addedDiff = moment().diff(addedDate, 'days');
-            const lastDiff = moment().diff(lastDate, 'days');
-            tip.set({
-                boundary: $main[0],
-                content: '<p>Проигрывался <b>' + block.counter + '</b> раз(а)</p>' +
-                    '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
-                    lastDate.format('D MMM YY') + ')</p>' +
-                    '<p>Добавлен: <b>' + addedDiff + '</b> дн. (' +
-                    addedDate.format('D MMM YY') + ')</p>'
-            });
+            if ($main && infoTipsActive) {
+                const hash = tip.reference.dataset.hash;
+                const block = allPages[currentTab].blocks[hash];
+                const addedDate = moment.utc(block.addedDate);
+                const lastDate = moment.utc(block.lastDate);
+                const addedDiff = moment().diff(addedDate, 'days');
+                const lastDiff = moment().diff(lastDate, 'days');
+                tip.set({
+                    boundary: $main[0],
+                    content: '<p>Проигрывался <b>' + block.counter + '</b> раз(а)</p>' +
+                        '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
+                        lastDate.format('D MMM YY') + ')</p>' +
+                        '<p>Добавлен: <b>' + addedDiff + '</b> дн. (' +
+                        addedDate.format('D MMM YY') + ')</p>'
+                });
+            } else {
+                return false;
+            }
         }
     });
 });
