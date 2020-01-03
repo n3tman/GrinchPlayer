@@ -16,9 +16,10 @@ const fg = require('fast-glob');
 const List = require('list.js');
 const Store = require('electron-store');
 const Shepherd = require('shepherd.js');
-const Fuse = require('fuse.js');
-
 const tippy = require('tippy.js/umd/index');
+const Fuse = require('fuse.js');
+const moment = require('moment');
+
 const hp = require('./vendor/howler');
 const config = require('./config');
 
@@ -2108,6 +2109,9 @@ $(function () {
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
 
+    // Set moment.js locale globally
+    moment.locale('ru');
+
     // Window controls
     $('#win-minimize').click(function () {
         mainWindow.minimize();
@@ -2130,7 +2134,7 @@ $(function () {
 
     // Settings and About tooltips
     tippy(document.querySelector('#settings'), {
-        content: '<div class="panel">' +
+        content: '<div class="panel settings-panel">' +
             '<p class="panel-heading">Настройки</p>' +
             '<a class="panel-block set-device" title="Выбрать устройство вывода звука"><i class="fa fa-gear"></i> Устройство вывода</a>' +
             '<a class="panel-block flush-cache" title="Очистить кеш (сначала закрой вкладки)"><i class="fa fa-eraser"></i> Очистить кеш страниц</a>' +
@@ -2147,7 +2151,7 @@ $(function () {
     });
 
     tippy(document.querySelector('#about'), {
-        content: '<div class="panel">' +
+        content: '<div class="panel about-panel">' +
             '<p class="panel-heading">О программе</p>' +
             '<a class="panel-block show-info" title="Описание плеера"><i class="fa fa-info-circle"></i> Описание</a>' +
             '<a class="panel-block show-help" title="Справка по плееру"><i class="fa fa-question-circle"></i> Помощь</a>' +
@@ -2673,11 +2677,11 @@ $(function () {
         unselectProjects();
     }).on('click', '.proj-save', function () {
         projectSaveButton();
+    }).on('click', '.settings-panel a.panel-block', function () {
+        document.querySelector('#settings')._tippy.hide();
     }).on('click', '.set-device', function () {
         const $devices = $('#devices');
         const $list = $devices.find('.list');
-
-        document.querySelector('#settings')._tippy.hide();
 
         $list.empty();
 
@@ -2696,26 +2700,22 @@ $(function () {
 
             $devices.addClass('is-active');
         });
-    }).on('click', '.flush-cache', function() {
+    }).on('click', '.flush-cache', function () {
         flushSavedPages();
         showNotification('Кеш страниц очищен!', false, 3000);
-    }).on('click', '.show-help', function () {
+    }).on('click', '.about-panel a.panel-block', function () {
         document.querySelector('#about')._tippy.hide();
+    }).on('click', '.show-help', function () {
         $('#help').addClass('is-active');
     }).on('click', '.show-info', function () {
-        document.querySelector('#about')._tippy.hide();
         $('#info').addClass('is-active');
     }).on('click', '.start-intro', function () {
-        document.querySelector('#about')._tippy.hide();
         startIntro();
     }).on('click', '.youtube', function () {
-        document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://www.youtube.com/user/arsenalgrinch');
     }).on('click', '.discord', function () {
-        document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://discord.gg/EEkpKp2');
     }).on('click', '.check-updates', function () {
-        document.querySelector('#about')._tippy.hide();
         shell.openExternal('https://github.com/n3tman/GrinchPlayer/releases');
     }).on('click', '.releases', function () {
         shell.openExternal('https://github.com/n3tman/GrinchPlayer/releases');
@@ -3235,4 +3235,32 @@ $(function () {
             $main.removeClass('is-searched');
         }
     }, 250));
+
+    // --------------- //
+    //  Info Tooltips  //
+    // --------------- //
+
+    tippy(document.querySelector('.wrapper'), {
+        target: '.sound-block',
+        theme: 'info',
+        distance: 5,
+        arrow: true,
+        aria: null,
+        onShow: function (tip) {
+            const hash = tip.reference.dataset.hash;
+            const block = allPages[currentTab].blocks[hash];
+            const addedDate = moment.utc(block.addedDate);
+            const lastDate = moment.utc(block.lastDate);
+            const addedDiff = moment().diff(addedDate, 'days');
+            const lastDiff = moment().diff(lastDate, 'days');
+            tip.set({
+                boundary: $main[0],
+                content: '<p>Проигрывался <b>' + block.counter + '</b> раз(а)</p>' +
+                    '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
+                    lastDate.format('D MMM YY') + ')</p>' +
+                    '<p>Добавлен: <b>' + addedDiff + '</b> дн. (' +
+                    addedDate.format('D MMM YY') + ')</p>'
+            });
+        }
+    });
 });

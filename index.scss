@@ -294,19 +294,18 @@ textarea:focus {
     &.green-theme {
         background-color: rgba($green, 0.8);
     }
-}
 
-.tippy-popper[x-placement^=left] .tippy-arrow {
-    border-left-color: $grey;
+    &.info-theme {
+        font-size: 1rem;
+        padding: 4px 6px;
+        background-color: $grey-dark;
+        border: 2px solid $grey-light;
+    }
 }
 
 .tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
     border-left-color: rgba($green, 0.8);
     right: -11px;
-}
-
-.tippy-popper[x-placement^=right] .tippy-arrow {
-    border-right-color: $grey;
 }
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
@@ -316,6 +315,16 @@ textarea:focus {
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
     border-bottom-color: $grey;
+}
+
+.tippy-popper[x-placement^=bottom] .info-theme .tippy-arrow {
+    border-bottom-color: $grey-light;
+    top: -11px;
+}
+
+.tippy-popper[x-placement^=top] .info-theme .tippy-arrow {
+    border-top-color: $grey-light;
+    bottom: -11px;
 }
 
 .tippy-content {

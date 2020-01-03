@@ -12966,18 +12966,16 @@ textarea:focus {
 .tippy-tooltip.green-theme {
   background-color: rgba(92, 184, 92, 0.8);
 }
-
-.tippy-popper[x-placement^=left] .tippy-arrow {
-  border-left-color: #4E5D6C;
+.tippy-tooltip.info-theme {
+  font-size: 1rem;
+  padding: 4px 6px;
+  background-color: #2B3E50;
+  border: 2px solid #8694a4;
 }
 
 .tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
   border-left-color: rgba(92, 184, 92, 0.8);
   right: -11px;
-}
-
-.tippy-popper[x-placement^=right] .tippy-arrow {
-  border-right-color: #4E5D6C;
 }
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
@@ -12987,6 +12985,16 @@ textarea:focus {
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
   border-bottom-color: #4E5D6C;
+}
+
+.tippy-popper[x-placement^=bottom] .info-theme .tippy-arrow {
+  border-bottom-color: #8694a4;
+  top: -11px;
+}
+
+.tippy-popper[x-placement^=top] .info-theme .tippy-arrow {
+  border-top-color: #8694a4;
+  bottom: -11px;
 }
 
 .tippy-content {
