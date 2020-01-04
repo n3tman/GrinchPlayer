@@ -13257,6 +13257,9 @@ textarea:focus {
 .main.is-searched .sound-block {
   display: none;
 }
+.main.is-gradient .sound-block {
+  background-color: transparent !important;
+}
 .main .sound-block {
   position: absolute !important;
   left: 10px;

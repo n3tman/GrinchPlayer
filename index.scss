@@ -661,6 +661,10 @@ textarea:focus {
         display: none;
     }
 
+    &.is-gradient .sound-block {
+        background-color: transparent !important;
+    }
+
     .sound-block {
         position: absolute !important;
         left: 10px;

@@ -54,6 +54,7 @@ let tour;
 let $quickSearch;
 let fuseSearch;
 let infoTipsActive = false;
+let infoGradientActive = false;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -1760,6 +1761,90 @@ function startIntro() {
     tour.start();
 }
 
+// Toggle info tooltips
+function toggleInfoTooltips() {
+    $('.info-tips .fa').toggleClass('fa-toggle-off fa-toggle-on');
+
+    if (infoTipsActive) {
+        infoTipsActive = false;
+        showNotification('Инфо-подсказки <b>выключены</b>', false, 2000);
+    } else {
+        infoTipsActive = true;
+        showNotification('<b>Включены</b> инфо-подсказки', false, 2000);
+    }
+}
+
+// Show single info tooltip
+function infoTipsShow(tip, tag, phrase, bound) {
+    const hash = tip.reference.dataset[tag];
+    let element;
+    if (tag === 'hash') {
+        element = allPages[currentTab].blocks[hash];
+    } else {
+        element = allPages[hash];
+    }
+
+    const addedDate = moment.utc(element.addedDate);
+    const lastDate = moment.utc(element.lastDate);
+    const addedDiff = moment().diff(addedDate, 'days');
+    const lastDiff = moment().diff(lastDate, 'days');
+    tip.set({
+        boundary: bound,
+        content: '<p>' + phrase + '<b> ' + element.counter + '</b> раз(а)</p>' +
+            '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
+            lastDate.format('D MMM YY') + ')</p>' +
+            '<p>Добавлено: <b>' + addedDiff + '</b> дн. (' +
+            addedDate.format('D MMM YY') + ')</p>'
+    });
+}
+
+// Add gradient background to page list based on info
+function addPageGradient() {
+    if (_.size(allPages) > 0) {
+        const pages = _.values(allPages);
+        const maxCount = _.maxBy(pages, 'counter').counter;
+        const maxDate = new Date(_.maxBy(pages, function (o) {
+            return new Date(o.addedDate);
+        }).addedDate).getTime();
+        const minDate = new Date(_.minBy(pages, function (o) {
+            return new Date(o.addedDate);
+        }).addedDate).getTime();
+
+        $('#page-search .panel-block').each(function () {
+            const page = this.dataset.page;
+            this.style.backgroundImage = getPageGradient(page, maxCount, maxDate, minDate);
+        });
+    }
+}
+
+// Get a gradient string for background-image based on info
+function getPageGradient(page, maxCount, maxDate, minDate) {
+    const counter = allPages[page].counter;
+    let countValue = _.round(counter / maxCount, 4);
+    if (countValue > 1) {
+        countValue = 1;
+    }
+
+    const date = new Date(allPages[page].addedDate).getTime();
+    let dateValue = _.round(1 - ((maxDate - date) / (maxDate - minDate)), 4);
+    if (dateValue > 1) {
+        dateValue = 1;
+    }
+
+    return 'linear-gradient(90deg, rgba(35,109,40,' + countValue + ') 20%, rgba(13,71,161,' + dateValue + ') 80%)';
+}
+
+// Add gradient background to blocks based on info
+function addBlockGradient() {
+    if ($main) {
+        $main.addClass('is-gradient');
+
+        $main.find('.sound-block').each(function () {
+            const hash = this.dataset.hash;
+        });
+    }
+}
+
 // ==================== //
 //                      //
 //   Helper Functions   //
@@ -2086,29 +2171,6 @@ function closeQuickSearch() {
     $('.is-searched, .is-found').removeClass('is-searched is-found');
 }
 
-function infoTipsShow(tip, tag, phrase, bound) {
-    const hash = tip.reference.dataset[tag];
-    let element;
-    if (tag === 'hash') {
-        element = allPages[currentTab].blocks[hash];
-    } else {
-        element = allPages[hash];
-    }
-
-    const addedDate = moment.utc(element.addedDate);
-    const lastDate = moment.utc(element.lastDate);
-    const addedDiff = moment().diff(addedDate, 'days');
-    const lastDiff = moment().diff(lastDate, 'days');
-    tip.set({
-        boundary: bound,
-        content: '<p>' + phrase + '<b> ' + element.counter + '</b> раз(а)</p>' +
-            '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
-            lastDate.format('D MMM YY') + ')</p>' +
-            '<p>Добавлено: <b>' + addedDiff + '</b> дн. (' +
-            addedDate.format('D MMM YY') + ')</p>'
-    });
-}
-
 // ================== //
 //                    //
 //   Global actions   //
@@ -2165,7 +2227,8 @@ $(function () {
             '<div class="panel-block"><i class="fa fa-volume-up"></i> Громкость' +
             '<input id="volume-slider" class="slider has-output is-fullwidth" min="0" max="100"' +
             ' value="' + (volume * 100) + '" step="1" type="range"></div>' +
-            '<a class="panel-block info-tips" title="Информационные подсказки"><i class="fa fa-toggle-off"></i> Инфо-подсказки</a>' +
+            '<a class="panel-block info-tips" title="Информационные подсказки (Ctrl+Q)"><i class="fa fa-toggle-off"></i> Инфо-подсказки</a>' +
+            '<a class="panel-block info-gradient" title="Информационная подсветка (Ctrl+A)"><i class="fa fa-toggle-off"></i> Инфо-подсветка</a>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -2738,14 +2801,21 @@ $(function () {
         flushSavedPages();
         showNotification('Кеш страниц очищен!', false, 3000);
     }).on('click', '.info-tips', function () {
+        toggleInfoTooltips();
+    }).on('click', '.info-gradient', function () {
         $(this).find('.fa').toggleClass('fa-toggle-off fa-toggle-on');
 
-        if (infoTipsActive) {
-            infoTipsActive = false;
-            showNotification('Инфо-подсказки <b>выключены</b>', false, 2000);
+        if (infoGradientActive) {
+            infoGradientActive = false;
+            showNotification('Инфо-подсветка <b>выключена</b>', false, 2000);
         } else {
-            infoTipsActive = true;
-            showNotification('<b>Включены</b> инфо-подсказки', false, 2000);
+            infoGradientActive = true;
+
+            addPageGradient();
+
+            addBlockGradient();
+
+            showNotification('<b>Включена</b> инфо-подсветка', false, 2000);
         }
     }).on('click', '.about-panel a.panel-block', function () {
         document.querySelector('#about')._tippy.hide();
@@ -3287,6 +3357,11 @@ $(function () {
     // --------------- //
     //  Info Tooltips  //
     // --------------- //
+
+    // Close current tab
+    addHotkey('ctrl+q', function () {
+        toggleInfoTooltips();
+    });
 
     tippy(document.querySelector('.wrapper'), {
         target: '.sound-block',
