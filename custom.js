@@ -2197,18 +2197,27 @@ $(function () {
         content: '<div class="panel">' +
             '<p class="panel-heading">Выбрать цвет</p>' +
             '<div class="panel-block colors">' +
-            '<div class="color bg-yellow" data-color="yellow">Текст</div>' +
-            '<div class="color bg-orange" data-color="orange">Текст</div>' +
-            '<div class="color bg-red" data-color="red">Текст</div>' +
-            '<div class="color bg-pink" data-color="pink">Текст</div>' +
-            '<div class="color bg-purple" data-color="purple">Текст</div>' +
-            '<div class="color bg-indigo" data-color="indigo">Текст</div>' +
-            '<div class="color bg-blue" data-color="blue">Текст</div>' +
-            '<div class="color bg-light-blue" data-color="light-blue">Текст</div>' +
-            '<div class="color bg-cyan" data-color="cyan">Текст</div>' +
-            '<div class="color bg-green" data-color="green">Текст</div>' +
-            '<div class="color bg-grey" data-color="grey">Текст</div>' +
-            '<div class="color bg-default" data-color="default">Стандарт</div>' +
+            '<div class="color bg-yellow" data-color="yellow">Dark Yellow</div>' +
+            '<div class="color bg-amber" data-color="amber">Amber</div>' +
+            '<div class="color bg-deep-orange" data-color="deep-orange">Orange</div>' +
+            '<div class="color bg-orange" data-color="orange">Deep Orange</div>' +
+            '<div class="color bg-red" data-color="red">Red</div>' +
+            '<div class="color bg-pink" data-color="pink">Pink</div>' +
+            '<div class="color bg-indigo" data-color="indigo">Indigo</div>' +
+            '<div class="color bg-purple" data-color="purple">Purple</div>' +
+            '<div class="color bg-deep-purple" data-color="deep-purple">Deep Purple</div>' +
+            '<div class="color bg-cyan" data-color="cyan">Cyan</div>' +
+            '<div class="color bg-blue" data-color="blue">Blue</div>' +
+            '<div class="color bg-light-blue" data-color="light-blue">Light Blue</div>' +
+            '<div class="color bg-teal" data-color="teal">Teal</div>' +
+            '<div class="color bg-green" data-color="green">Green</div>' +
+            '<div class="color bg-light-green" data-color="light-green">Light Green</div>' +
+            '<div class="color bg-lime" data-color="lime">Lime</div>' +
+            '<div class="color bg-brown" data-color="brown">Brown</div>' +
+            '<div class="color bg-light-brown" data-color="light-brown">Light Brown</div>' +
+            '<div class="color bg-grey" data-color="grey">Grey</div>' +
+            '<div class="color bg-black" data-color="black">Black</div>' +
+            '<div class="color bg-default" data-color="default">Default</div>' +
             '</div></div>',
         arrow: true,
         aria: null,

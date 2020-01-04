@@ -182,8 +182,16 @@ textarea:focus {
     background-color: rgba(#b75d01, 0.5) !important;
 }
 
+.bg-amber {
+    background-color: rgba(#ff8f00, 0.45) !important;
+}
+
 .bg-orange {
     background-color: rgba(#bf360c, 0.5) !important;
+}
+
+.bg-deep-orange {
+    background-color: rgba(#ff6d00, 0.45) !important;
 }
 
 .bg-red {
@@ -196,6 +204,10 @@ textarea:focus {
 
 .bg-purple {
     background-color: rgba(#4a148c, 0.5) !important;
+}
+
+.bg-deep-purple {
+    background-color: rgba(#311b92, 0.5) !important;
 }
 
 .bg-indigo {
@@ -214,12 +226,36 @@ textarea:focus {
     background-color: rgba(#006064, 0.5) !important;
 }
 
+.bg-teal {
+    background-color: rgba(#009688, 0.5) !important;
+}
+
 .bg-green {
     background-color: rgba(#236d28, 0.5) !important;
 }
 
+.bg-light-green {
+    background-color: rgba(#689f38, 0.5) !important;
+}
+
+.bg-lime {
+    background-color: rgba(#827717, 0.5) !important;
+}
+
+.bg-brown {
+    background-color: rgba(#3e2723, 0.5) !important;
+}
+
+.bg-light-brown {
+    background-color: rgba(#6d4c41, 0.5) !important;
+}
+
 .bg-grey {
     background-color: rgba($grey, 0.5) !important;
+}
+
+.bg-black {
+    background-color: rgba(#000000, 0.5) !important;
 }
 
 .bg-default {
@@ -396,6 +432,7 @@ textarea:focus {
         display: flex;
         flex-wrap: wrap;
         padding: 4px !important;
+        font-size: 0.9rem;
     }
 
     .colors > .color {

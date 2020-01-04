@@ -12871,8 +12871,16 @@ textarea:focus {
   background-color: rgba(183, 93, 1, 0.5) !important;
 }
 
+.bg-amber {
+  background-color: rgba(255, 143, 0, 0.45) !important;
+}
+
 .bg-orange, .tabs.is-toggle .tab:nth-child(n+16):nth-child(-n+20) {
   background-color: rgba(191, 54, 12, 0.5) !important;
+}
+
+.bg-deep-orange {
+  background-color: rgba(255, 109, 0, 0.45) !important;
 }
 
 .bg-red {
@@ -12885,6 +12893,10 @@ textarea:focus {
 
 .bg-purple, .tabs.is-toggle .tab:nth-child(n+11):nth-child(-n+15) {
   background-color: rgba(74, 20, 140, 0.5) !important;
+}
+
+.bg-deep-purple {
+  background-color: rgba(49, 27, 146, 0.5) !important;
 }
 
 .bg-indigo {
@@ -12903,12 +12915,36 @@ textarea:focus {
   background-color: rgba(0, 96, 100, 0.5) !important;
 }
 
+.bg-teal {
+  background-color: rgba(0, 150, 136, 0.5) !important;
+}
+
 .bg-green {
   background-color: rgba(35, 109, 40, 0.5) !important;
 }
 
+.bg-light-green {
+  background-color: rgba(104, 159, 56, 0.5) !important;
+}
+
+.bg-lime {
+  background-color: rgba(130, 119, 23, 0.5) !important;
+}
+
+.bg-brown {
+  background-color: rgba(62, 39, 35, 0.5) !important;
+}
+
+.bg-light-brown {
+  background-color: rgba(109, 76, 65, 0.5) !important;
+}
+
 .bg-grey {
   background-color: rgba(78, 93, 108, 0.5) !important;
+}
+
+.bg-black {
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 .bg-default {
@@ -13055,6 +13091,7 @@ textarea:focus {
   display: flex;
   flex-wrap: wrap;
   padding: 4px !important;
+  font-size: 0.9rem;
 }
 .tippy-content .colors > .color {
   width: 103px;
