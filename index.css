@@ -12973,14 +12973,20 @@ textarea:focus {
   border: 2px solid #8694a4;
 }
 
+.tippy-popper[x-placement^=left] .tippy-arrow {
+  right: -11px;
+}
+
+.tippy-popper[x-placement^=right] .tippy-arrow {
+  left: -11px;
+}
+
 .tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
   border-left-color: rgba(92, 184, 92, 0.8);
-  right: -11px;
 }
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
   border-right-color: rgba(92, 184, 92, 0.8);
-  left: -11px;
 }
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
@@ -12995,6 +13001,14 @@ textarea:focus {
 .tippy-popper[x-placement^=top] .info-theme .tippy-arrow {
   border-top-color: #8694a4;
   bottom: -11px;
+}
+
+.tippy-popper[x-placement^=left] .info-theme .tippy-arrow {
+  border-left-color: #8694a4;
+}
+
+.tippy-popper[x-placement^=right] .info-theme .tippy-arrow {
+  border-right-color: #8694a4;
 }
 
 .tippy-content {

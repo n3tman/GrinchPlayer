@@ -303,14 +303,20 @@ textarea:focus {
     }
 }
 
+.tippy-popper[x-placement^=left] .tippy-arrow {
+    right: -11px;
+}
+
+.tippy-popper[x-placement^=right] .tippy-arrow {
+    left: -11px;
+}
+
 .tippy-popper[x-placement^=left] .green-theme .tippy-arrow {
     border-left-color: rgba($green, 0.8);
-    right: -11px;
 }
 
 .tippy-popper[x-placement^=right] .green-theme .tippy-arrow {
     border-right-color: rgba($green, 0.8);
-    left: -11px;
 }
 
 .tippy-popper[x-placement^=bottom] .tippy-arrow {
@@ -325,6 +331,14 @@ textarea:focus {
 .tippy-popper[x-placement^=top] .info-theme .tippy-arrow {
     border-top-color: $grey-light;
     bottom: -11px;
+}
+
+.tippy-popper[x-placement^=left] .info-theme .tippy-arrow {
+    border-left-color: $grey-light;
+}
+
+.tippy-popper[x-placement^=right] .info-theme .tippy-arrow {
+    border-right-color: $grey-light;
 }
 
 .tippy-content {

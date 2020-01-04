@@ -2086,6 +2086,29 @@ function resetQuickSearch() {
     $('.is-searched, .is-found').removeClass('is-searched is-found');
 }
 
+function infoTipsShow(tip, tag, phrase, bound) {
+    const hash = tip.reference.dataset[tag];
+    let element;
+    if (tag === 'hash') {
+        element = allPages[currentTab].blocks[hash];
+    } else {
+        element = allPages[hash];
+    }
+
+    const addedDate = moment.utc(element.addedDate);
+    const lastDate = moment.utc(element.lastDate);
+    const addedDiff = moment().diff(addedDate, 'days');
+    const lastDiff = moment().diff(lastDate, 'days');
+    tip.set({
+        boundary: bound,
+        content: '<p>' + phrase + '<b> ' + element.counter + '</b> раз(а)</p>' +
+            '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
+            lastDate.format('D MMM YY') + ')</p>' +
+            '<p>Добавлено: <b>' + addedDiff + '</b> дн. (' +
+            addedDate.format('D MMM YY') + ')</p>'
+    });
+}
+
 // ================== //
 //                    //
 //   Global actions   //
@@ -2270,8 +2293,8 @@ $(function () {
         content: '<div class="block-controls">' +
             '<button class="button close-tabs" title="Закрыть все вкладки (Ctrl+Alt+W)"><i class="fa fa-times-circle"></i></button>' +
             '<button class="button add-tab" title="Добавить вкладку"><i class="fa fa-plus-circle"></i></button>' +
-            '<button class="button proj-save" title="Перезаписать проект"><i class="fa fa-floppy-o"></i></button>' +
-            '<button class="button proj-saveas" title="Сохранить как…"><i class="fa fa-file-text"></i></button>' +
+            '<button class="button proj-save" title="Перезаписать проект (Alt+S)"><i class="fa fa-floppy-o"></i></button>' +
+            '<button class="button proj-saveas" title="Сохранить как… (Shift+Alt+S)"><i class="fa fa-file-text"></i></button>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -2710,10 +2733,10 @@ $(function () {
 
         if (infoTipsActive) {
             infoTipsActive = false;
-            showNotification('Инфо-подсказки <b>выключены</b>', false, 3000);
+            showNotification('Инфо-подсказки <b>выключены</b>', false, 2000);
         } else {
             infoTipsActive = true;
-            showNotification('<b>Включены</b> инфо-подсказки', false, 3000);
+            showNotification('<b>Включены</b> инфо-подсказки', false, 2000);
         }
     }).on('click', '.about-panel a.panel-block', function () {
         document.querySelector('#about')._tippy.hide();
@@ -3260,20 +3283,38 @@ $(function () {
         aria: null,
         onShow: function (tip) {
             if ($main && infoTipsActive) {
-                const hash = tip.reference.dataset.hash;
-                const block = allPages[currentTab].blocks[hash];
-                const addedDate = moment.utc(block.addedDate);
-                const lastDate = moment.utc(block.lastDate);
-                const addedDiff = moment().diff(addedDate, 'days');
-                const lastDiff = moment().diff(lastDate, 'days');
-                tip.set({
-                    boundary: $main[0],
-                    content: '<p>Проигрывался <b>' + block.counter + '</b> раз(а)</p>' +
-                        '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
-                        lastDate.format('D MMM YY') + ')</p>' +
-                        '<p>Добавлен: <b>' + addedDiff + '</b> дн. (' +
-                        addedDate.format('D MMM YY') + ')</p>'
-                });
+                infoTipsShow(tip, 'hash', 'Проигрывался', $main[0]);
+            } else {
+                return false;
+            }
+        }
+    });
+
+    tippy(document.querySelector('.deck'), {
+        target: '.deck-items .panel-block',
+        theme: 'info',
+        distance: 5,
+        arrow: true,
+        placement: 'left',
+        aria: null,
+        onShow: function (tip) {
+            if ($main && infoTipsActive) {
+                infoTipsShow(tip, 'hash', 'Проигрывался', $main[0]);
+            } else {
+                return false;
+            }
+        }
+    });
+
+    tippy(document.querySelector('.pages'), {
+        target: '.panel-block',
+        theme: 'info',
+        arrow: true,
+        placement: 'right',
+        aria: null,
+        onShow: function (tip) {
+            if (infoTipsActive) {
+                infoTipsShow(tip, 'page', 'Открывалась', 'window');
             } else {
                 return false;
             }
