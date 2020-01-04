@@ -2080,7 +2080,7 @@ function processJsonFiles(files, json) {
     return counter;
 }
 
-function resetQuickSearch() {
+function closeQuickSearch() {
     $quickSearch.removeClass('active');
     document.activeElement.blur();
     $('.is-searched, .is-found').removeClass('is-searched is-found');
@@ -2250,7 +2250,7 @@ $(function () {
         }
 
         unselectBlocks();
-        resetQuickSearch();
+        closeQuickSearch();
         currentTab = e.currentTarget.dataset.page;
 
         const selector = '[data-page="' + currentTab + '"]';
@@ -2671,7 +2671,7 @@ $(function () {
     }).on('keydown', '#quick-search .input', function (e) {
         // Close quick search input
         if (e.which === 27 && $quickSearch.hasClass('active')) {
-            resetQuickSearch();
+            closeQuickSearch();
         }
     }).on('wheel', function (e) {
         if (e.ctrlKey) {
@@ -3075,6 +3075,10 @@ $(function () {
         $('.modal.is-active').removeClass('is-active');
         if (isEditMode) {
             removeBrushState();
+        }
+
+        if ($quickSearch.hasClass('active')) {
+            closeQuickSearch();
         }
     });
 
