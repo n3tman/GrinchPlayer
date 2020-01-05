@@ -1788,13 +1788,22 @@ function infoTipsShow(tip, tag, phrase, bound) {
     const lastDate = moment.utc(element.lastDate);
     const addedDiff = moment().diff(addedDate, 'days');
     const lastDiff = moment().diff(lastDate, 'days');
+
+    let content = '<p><span class="dim">' + phrase + '</span><b> ' + element.counter + '</b> раз(а)</p>' +
+        '<p><span class="dim">Последний:</span> <b>' + lastDiff + '</b> дн. <span class="dim">(' +
+        lastDate.format('D MMM YY') + ')</span></p>' +
+        '<p><span class="dim">Добавлено:</span> <b>' + addedDiff + '</b> дн. <span class="dim">(' +
+        addedDate.format('D MMM YY') + ')</span></p>';
+
+    if (tag === 'hash') {
+        content += '<p><span class="dim">Папка:</span> <u>' +
+            path.basename(path.dirname(element.path)) + '</u></p>' +
+            '<p><a class="show-file" data-id="' + hash + '">🡕 Показать в папке 🡕</a></p>';
+    }
+
     tip.set({
         boundary: bound,
-        content: '<p>' + phrase + '<b> ' + element.counter + '</b> раз(а)</p>' +
-            '<p>Последний: <b>' + lastDiff + '</b> дн. (' +
-            lastDate.format('D MMM YY') + ')</p>' +
-            '<p>Добавлено: <b>' + addedDiff + '</b> дн. (' +
-            addedDate.format('D MMM YY') + ')</p>'
+        content: content
     });
 }
 
@@ -1870,7 +1879,7 @@ function getItemGradient(type, hash, opt) {
         dateValue = 1;
     }
 
-    return 'linear-gradient(90deg, rgba(35,109,40,' + countValue + ') 20%, rgba(13,71,161,' + dateValue + ') 80%)';
+    return 'linear-gradient(90deg, rgba(35,109,40,' + countValue + ') 50%, rgba(13,71,161,' + dateValue + ') 80%)';
 }
 
 // Add gradient background to page list based on info
@@ -2870,6 +2879,9 @@ $(function () {
         $('#help').addClass('is-active');
     }).on('click', '.show-info', function () {
         $('#info').addClass('is-active');
+    }).on('click', '.show-file', function () {
+        const path = allPages[currentTab].blocks[this.dataset.id].path;
+        shell.showItemInFolder(path);
     }).on('click', '.start-intro', function () {
         startIntro();
     }).on('click', '.youtube', function () {
@@ -3419,6 +3431,7 @@ $(function () {
         distance: 5,
         arrow: true,
         aria: null,
+        interactive: true,
         onShow: function (tip) {
             if ($main && infoTipsActive) {
                 infoTipsShow(tip, 'hash', 'Проигрывался', $main[0]);
@@ -3435,9 +3448,10 @@ $(function () {
         arrow: true,
         placement: 'left',
         aria: null,
+        interactive: true,
         onShow: function (tip) {
             if ($main && infoTipsActive) {
-                infoTipsShow(tip, 'hash', 'Проигрывался', $main[0]);
+                infoTipsShow(tip, 'hash', 'Проигрывался', 'window');
             } else {
                 return false;
             }
