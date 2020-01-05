@@ -527,6 +527,8 @@ function saveAllData(skipNotify) {
             .replace(/ui[-\w]+\s*/g, '')
             // Filter is-searched and is-found classes for quick search
             .replace(/is-\w+\s*/g, '')
+            // Filter info gradients
+            .replace(/background-image[^;]+;/g, '')
             // Filter random empty block
             .replace(/<div class="".+?<\/div>/g, '');
 
@@ -1763,8 +1765,6 @@ function startIntro() {
 
 // Toggle info tooltips
 function toggleInfoTooltips() {
-    $('.info-tips .fa').toggleClass('fa-toggle-off fa-toggle-on');
-
     if (infoTipsActive) {
         infoTipsActive = false;
         showNotification('Инфо-подсказки <b>выключены</b>', false, 2000);
@@ -1798,16 +1798,38 @@ function infoTipsShow(tip, tag, phrase, bound) {
     });
 }
 
+// Toggle info backgounds
+function toggleInfoGradients() {
+    if (infoGradientActive) {
+        infoGradientActive = false;
+
+        $main.removeClass('is-gradient');
+
+        $('#page-search .panel-block').add($main.find('.sound-block'))
+            .add($deckItems.find('.panel-block')).each(function () {
+                this.style.removeProperty('background-image');
+            });
+    } else {
+        infoGradientActive = true;
+
+        addPageGradient();
+        addBlockGradient();
+    }
+}
+
 // Get background gradient options based on element type
 function getGradientOptions(type) {
     let items;
+    let maxCount;
+
     if (type === 'page') {
         items = _.values(allPages);
+        maxCount = _.maxBy(items, 'counter').counter;
     } else {
         items = _.values(allPages[currentTab].blocks);
+        maxCount = 50;
     }
 
-    const maxCount = _.maxBy(items, 'counter').counter;
     const maxDate = new Date(_.maxBy(items, function (o) {
         return new Date(o.addedDate);
     }).addedDate).getTime();
@@ -1831,13 +1853,19 @@ function getItemGradient(type, hash, opt) {
         element = allPages[currentTab].blocks[hash];
     }
 
-    let countValue = _.round(element.counter / opt.maxCount, 4);
+    const maxCount = opt.maxCount ? opt.maxCount : 1;
+    let countValue = _.round(element.counter / maxCount, 4);
     if (countValue > 1) {
         countValue = 1;
     }
 
+    let dateDiff = opt.maxDate - opt.minDate;
+    if (dateDiff === 0) {
+        dateDiff = 1;
+    }
+
     const date = new Date(element.addedDate).getTime();
-    let dateValue = _.round(1 - ((opt.maxDate - date) / (opt.maxDate - opt.minDate)), 4);
+    let dateValue = _.round(1 - ((opt.maxDate - date) / dateDiff), 4);
     if (dateValue > 1) {
         dateValue = 1;
     }
@@ -2255,8 +2283,8 @@ $(function () {
             '<div class="panel-block"><i class="fa fa-volume-up"></i> Громкость' +
             '<input id="volume-slider" class="slider has-output is-fullwidth" min="0" max="100"' +
             ' value="' + (volume * 100) + '" step="1" type="range"></div>' +
-            '<a class="panel-block info-tips" title="Информационные подсказки (Ctrl+Q)"><i class="fa fa-toggle-off"></i> Инфо-подсказки</a>' +
-            '<a class="panel-block info-gradient" title="Информационная подсветка (Ctrl+A)"><i class="fa fa-toggle-off"></i> Инфо-подсветка</a>' +
+            '<a class="panel-block info-tips" title="Информационные подсказки (Ctrl+Q)"><i class="fa fa-comment"></i> Инфо-подсказки</a>' +
+            '<a class="panel-block info-gradient" title="Информационная подсветка (Ctrl+A)"><i class="fa fa-lightbulb-o"></i> Инфо-подсветка</a>' +
             '</div>',
         arrow: true,
         aria: null,
@@ -2351,6 +2379,10 @@ $(function () {
 
         unselectBlocks();
         closeQuickSearch();
+        if (infoGradientActive) {
+            toggleInfoGradients();
+        }
+
         currentTab = e.currentTarget.dataset.page;
 
         const selector = '[data-page="' + currentTab + '"]';
@@ -2831,20 +2863,7 @@ $(function () {
     }).on('click', '.info-tips', function () {
         toggleInfoTooltips();
     }).on('click', '.info-gradient', function () {
-        $(this).find('.fa').toggleClass('fa-toggle-off fa-toggle-on');
-
-        if (infoGradientActive) {
-            infoGradientActive = false;
-            showNotification('Инфо-подсветка <b>выключена</b>', false, 2000);
-        } else {
-            infoGradientActive = true;
-
-            addPageGradient();
-
-            addBlockGradient();
-
-            showNotification('<b>Включена</b> инфо-подсветка', false, 2000);
-        }
+        toggleInfoGradients();
     }).on('click', '.about-panel a.panel-block', function () {
         document.querySelector('#about')._tippy.hide();
     }).on('click', '.show-help', function () {
@@ -3382,13 +3401,16 @@ $(function () {
         }
     }, 250));
 
-    // --------------- //
-    //  Info Tooltips  //
-    // --------------- //
+    // ----------------------------- //
+    //  Info Tooltips and Gradients  //
+    // ----------------------------- //
 
-    // Close current tab
     addHotkey('ctrl+q', function () {
         toggleInfoTooltips();
+    });
+
+    addHotkey('ctrl+a', function () {
+        toggleInfoGradients();
     });
 
     tippy(document.querySelector('.wrapper'), {
