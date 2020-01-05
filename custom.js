@@ -1798,35 +1798,46 @@ function infoTipsShow(tip, tag, phrase, bound) {
     });
 }
 
-// Add gradient background to page list based on info
-function addPageGradient() {
-    if (_.size(allPages) > 0) {
-        const pages = _.values(allPages);
-        const maxCount = _.maxBy(pages, 'counter').counter;
-        const maxDate = new Date(_.maxBy(pages, function (o) {
-            return new Date(o.addedDate);
-        }).addedDate).getTime();
-        const minDate = new Date(_.minBy(pages, function (o) {
-            return new Date(o.addedDate);
-        }).addedDate).getTime();
-
-        $('#page-search .panel-block').each(function () {
-            const page = this.dataset.page;
-            this.style.backgroundImage = getPageGradient(page, maxCount, maxDate, minDate);
-        });
+// Get background gradient options based on element type
+function getGradientOptions(type) {
+    let items;
+    if (type === 'page') {
+        items = _.values(allPages);
+    } else {
+        items = _.values(allPages[currentTab].blocks);
     }
+
+    const maxCount = _.maxBy(items, 'counter').counter;
+    const maxDate = new Date(_.maxBy(items, function (o) {
+        return new Date(o.addedDate);
+    }).addedDate).getTime();
+    const minDate = new Date(_.minBy(items, function (o) {
+        return new Date(o.addedDate);
+    }).addedDate).getTime();
+
+    return {
+        maxCount: maxCount,
+        maxDate: maxDate,
+        minDate: minDate
+    };
 }
 
 // Get a gradient string for background-image based on info
-function getPageGradient(page, maxCount, maxDate, minDate) {
-    const counter = allPages[page].counter;
-    let countValue = _.round(counter / maxCount, 4);
+function getItemGradient(type, hash, opt) {
+    let element;
+    if (type === 'page') {
+        element = allPages[hash];
+    } else {
+        element = allPages[currentTab].blocks[hash];
+    }
+
+    let countValue = _.round(element.counter / opt.maxCount, 4);
     if (countValue > 1) {
         countValue = 1;
     }
 
-    const date = new Date(allPages[page].addedDate).getTime();
-    let dateValue = _.round(1 - ((maxDate - date) / (maxDate - minDate)), 4);
+    const date = new Date(element.addedDate).getTime();
+    let dateValue = _.round(1 - ((opt.maxDate - date) / (opt.maxDate - opt.minDate)), 4);
     if (dateValue > 1) {
         dateValue = 1;
     }
@@ -1834,13 +1845,30 @@ function getPageGradient(page, maxCount, maxDate, minDate) {
     return 'linear-gradient(90deg, rgba(35,109,40,' + countValue + ') 20%, rgba(13,71,161,' + dateValue + ') 80%)';
 }
 
+// Add gradient background to page list based on info
+function addPageGradient() {
+    if (_.size(allPages) > 0) {
+        const options = getGradientOptions('page');
+
+        $('#page-search .panel-block').each(function () {
+            this.style.backgroundImage = getItemGradient(
+                'page', this.dataset.page, options
+            );
+        });
+    }
+}
+
 // Add gradient background to blocks based on info
 function addBlockGradient() {
-    if ($main) {
+    if (_.size(activePages) > 0) {
         $main.addClass('is-gradient');
 
-        $main.find('.sound-block').each(function () {
-            const hash = this.dataset.hash;
+        const options = getGradientOptions('block');
+
+        $main.find('.sound-block').add($deckItems.find('.panel-block')).each(function () {
+            this.style.backgroundImage = getItemGradient(
+                'block', this.dataset.hash, options
+            );
         });
     }
 }
