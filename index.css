@@ -13359,6 +13359,9 @@ textarea:focus {
   border-bottom: 0;
   border-top: 0;
   padding: 5px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
 }
 .panel .bottom .button {
   height: 30px;
@@ -13549,7 +13552,7 @@ textarea:focus {
   transition: opacity 0.3s;
 }
 
-.has-bottom .edit-mode {
+.has-bottom .edit-mode, .has-bottom .bottom {
   opacity: 1;
   pointer-events: auto;
 }

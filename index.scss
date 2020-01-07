@@ -797,6 +797,9 @@ textarea:focus {
         border-bottom: 0;
         border-top: 0;
         padding: 5px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
     }
 
     .bottom .button {
@@ -1058,7 +1061,7 @@ textarea:focus {
 }
 
 .has-bottom {
-    .edit-mode {
+    .edit-mode, .bottom {
         opacity: 1;
         pointer-events: auto;
     }
