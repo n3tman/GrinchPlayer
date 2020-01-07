@@ -799,12 +799,18 @@ function initNewPageBlocks(hash, isSaved) {
     reorderTabs();
     updateMainHeight();
 
-    $mainSelector.on('click', '.sound-block', function () {
-        if (!isEditMode) {
-            const hash = this.dataset.hash;
+    $mainSelector.on('click', '.sound-block', function (e) {
+        const hash = this.dataset.hash;
+
+        if (!isEditMode && !e.ctrlKey) {
             playSound(this);
             allPages[currentTab].blocks[hash].lastDate = new Date().toISOString();
             allPages[currentTab].blocks[hash].counter += 1;
+        }
+
+        if (e.ctrlKey) {
+            const path = allPages[currentTab].blocks[hash].path;
+            shell.showItemInFolder(path);
         }
     }).on('contextmenu', function (e) {
         // Pause/play already playing sound
@@ -1797,8 +1803,7 @@ function infoTipsShow(tip, tag, phrase, bound) {
 
     if (tag === 'hash') {
         content += '<p><span class="dim">Папка:</span> <u>' +
-            path.basename(path.dirname(element.path)) + '</u></p>' +
-            '<p><a class="show-file" data-id="' + hash + '">🡕 Показать в папке 🡕</a></p>';
+            path.basename(path.dirname(element.path)) + '</u></p>';
     }
 
     tip.set({
@@ -2879,9 +2884,6 @@ $(function () {
         $('#help').addClass('is-active');
     }).on('click', '.show-info', function () {
         $('#info').addClass('is-active');
-    }).on('click', '.show-file', function () {
-        const path = allPages[currentTab].blocks[this.dataset.id].path;
-        shell.showItemInFolder(path);
     }).on('click', '.start-intro', function () {
         startIntro();
     }).on('click', '.youtube', function () {
@@ -2987,6 +2989,11 @@ $(function () {
 
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
         playSound(this);
+    }).on('click', '.deck-items .panel-block', function (e) {
+        if (e.ctrlKey) {
+            const path = allPages[currentTab].blocks[this.dataset.hash].path;
+            shell.showItemInFolder(path);
+        }
     }).on('click', '#batch-btn', function () {
         if (isEditMode && _.size(activePages) > 0) {
             // Batch add several blocks from the top
@@ -3431,7 +3438,6 @@ $(function () {
         distance: 5,
         arrow: true,
         aria: null,
-        interactive: true,
         onShow: function (tip) {
             if ($main && infoTipsActive) {
                 infoTipsShow(tip, 'hash', 'Проигрывался', $main[0]);
