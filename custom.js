@@ -26,6 +26,7 @@ const config = require('./config');
 const keyboardArray = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'];
 const russianArray = ['й', 'ц', 'у', 'к', 'е', 'ф', 'ы', 'в', 'а', 'п', 'я', 'ч', 'с', 'м', 'и'];
 const editClass = 'has-bottom';
+const trainingClass = 'has-training';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
 const pageSearch = {};
@@ -36,6 +37,7 @@ const tutorial = config.get('tutorial') || false;
 let allPages = config.get('pages') || {};
 let allProjects = config.get('projects') || {};
 let isEditMode = false;
+let isTrainingMode = false;
 let activePages = {};
 let currentTab = config.get('currentTab') || '';
 let currentProject = config.get('currentProject') || '';
@@ -135,6 +137,12 @@ function toggleEditMode() {
 
         advanceIfTourStep('edit-mode');
     });
+}
+
+// Toggle training mode
+function toggleTrainingMode() {
+    isTrainingMode = !isTrainingMode;
+    $('body').toggleClass(trainingClass);
 }
 
 // Initialize draggable/resizable block
@@ -1802,8 +1810,8 @@ function infoTipsShow(tip, tag, phrase, bound) {
         addedDate.format('D MMM YY') + ')</span></p>';
 
     if (tag === 'hash') {
-        content += '<p><span class="dim">Папка:</span> <u>' +
-            path.basename(path.dirname(element.path)) + '</u></p>';
+        content += '<p><span class="dim">Папка:</span> ' +
+            path.basename(path.dirname(element.path)) + '</p>';
     }
 
     tip.set({
@@ -3100,6 +3108,11 @@ $(function () {
                 });
             }
         }
+    });
+
+    // Toggle training mode button
+    $('#toggle-training').click(function () {
+        toggleTrainingMode();
     });
 
     // --------------- //

@@ -654,6 +654,23 @@ textarea:focus {
 //  Main Block
 // ------------------ //
 
+.sound-block {
+    position: absolute !important;
+    left: 10px;
+    top: 0;
+    width: 200px;
+    height: auto;
+    white-space: normal;
+    box-sizing: content-box;
+    padding: 0;
+    border: 0;
+    z-index: 1;
+    user-select: none;
+    overflow: hidden;
+    background-color: rgba($grey-darker, 0.5);
+    box-shadow: inset 0 0 0 1px rgba($white, 0.15) !important;
+}
+
 .main {
     & {
         display: none;
@@ -669,23 +686,6 @@ textarea:focus {
         background-color: transparent !important;
     }
 
-    .sound-block {
-        position: absolute !important;
-        left: 10px;
-        top: 0;
-        width: 200px;
-        height: auto;
-        white-space: normal;
-        box-sizing: content-box;
-        padding: 0;
-        border: 0;
-        z-index: 1;
-        user-select: none;
-        overflow: hidden;
-        background-color: rgba($grey-darker, 0.5);
-        box-shadow: inset 0 0 0 1px rgba($white, 0.15) !important;
-    }
-
     .sound-block.is-found {
         display: inline-flex;
     }
@@ -693,6 +693,7 @@ textarea:focus {
     .sound-block:hover,
     .sound-block:focus {
         box-shadow: inset 0 0 0 2px rgba($white, 0.4) !important;
+        background-color: inherit;
     }
 
 
@@ -797,14 +798,16 @@ textarea:focus {
         border-bottom: 0;
         border-top: 0;
         padding: 5px;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.3s;
     }
 
     .bottom .button {
         height: 30px;
+        width: 100%;
         padding: 0 0.75em;
+    }
+
+    .erase {
+        display: none;
     }
 }
 
@@ -987,7 +990,7 @@ textarea:focus {
         }
     }
 
-    .batch .input {
+    .batch .input, .training-mode .input {
         & {
             height: 30px;
             border: 0;
@@ -1055,17 +1058,102 @@ textarea:focus {
 }
 
 .edit-mode {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
+    display: none;
+}
+
+.training-mode {
+    & {
+        padding: 5px;
+    }
+
+    .option {
+        text-align: center;
+        min-height: 30px;
+    }
+
+    .option.columns {
+        margin: 7px 0;
+    }
+
+    .option .column {
+        position: relative;
+    }
+
+    .option .column + .column::before {
+        @extend .fa;
+        content: '\f178';
+        position: absolute;
+        width: 30px;
+        left: -15px;
+        top: 8px;
+        color: white;
+    }
+
+    .input {
+        width: 30px;
+        text-align: center;
+        margin: 0 5px;
+        box-shadow: $input-focus-box-shadow-size $input-focus-box-shadow-color;
+    }
+
+    .bullet {
+        margin-right: 5px;
+    }
+
+    .input, .bullet {
+        vertical-align: middle;
+    }
+
+    .radio {
+        margin-left: 0.5rem;
+    }
+
+    .fa {
+        opacity: 0.2;
+    }
+
+    .num {
+        display: block;
+    }
+
+    .start {
+        width: 75%;
+        font-size: 1.8rem;
+        padding: 5px 10px;
+        height: auto;
+        line-height: 1;
+        font-family: 'Consolas', monospace;
+    }
+
+    .html {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 95px;
+        margin-top: 10px;
+        background-color: $grey-dark;
+    }
+
+    .html .sound-text {
+        padding: 0;
+    }
+
+    .html .sound-block {
+        position: static !important;
+    }
 }
 
 .has-bottom {
-    .edit-mode, .bottom {
-        opacity: 1;
-        pointer-events: auto;
+    .erase, .edit-mode {
+        display: block;
     }
 
+    .training, .training-mode {
+        display: none;
+    }
+}
+
+.has-bottom, .has-training {
     .panel.deck .deck-items {
         height: calc(100% - 505px);
     }

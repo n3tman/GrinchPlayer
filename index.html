@@ -112,9 +112,51 @@
             </p>
         </div>
         <div class="panel-block bottom" id="deck-bottom">
-            <button class="button is-link is-outlined is-fullwidth" id="remove-deck" title="Очистить колоду" disabled>
+            <button class="button is-link is-outlined training" id="toggle-training">
+                Режим обучения
+            </button>
+            <button class="button is-link is-outlined erase" id="remove-deck" title="Очистить колоду" disabled>
                 Очистить
             </button>
+        </div>
+        <div class="training-mode">
+            <div class="option">
+                Успевать кликать за <input class="input" min="1" type="number" value="2" id="train-secs"> сек.
+            </div>
+            <div class="option">
+                Стр.
+                <label class="radio"><input class="bullet" type="radio" name="train-area" checked>текущая</label>
+                <label class="radio"><input class="bullet" type="radio" name="train-area">активные</label>
+            </div>
+            <div class="option">
+                Звуки
+                <label class="radio"><input class="bullet" type="radio" name="train-pack" checked>все сразу</label>
+                <label class="radio"><input class="bullet" type="radio" name="train-pack">по 30</label>
+            </div>
+            <div class="option columns is-gapless">
+                <div class="column">
+                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">1</strong></span>
+                    <span class="num" id="box-1">0</span>
+                </div>
+                <div class="column">
+                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">2</strong></span>
+                    <span class="num" id="box-2">0</span>
+                </div>
+                <div class="column">
+                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">3</strong></span>
+                    <span class="num" id="box-3">0</span>
+                </div>
+                <div class="column">
+                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">4</strong></span>
+                    <span class="num" id="box-4">0</span>
+                </div>
+            </div>
+            <div class="option">
+                <button class="button is-medium start" id="start-training">Начать</button>
+            </div>
+            <div class="html">
+
+            </div>
         </div>
         <div class="edit-mode">
             <div class="panel-heading edit">

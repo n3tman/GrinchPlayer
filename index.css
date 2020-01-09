@@ -4127,13 +4127,13 @@ a.tag:hover {
 .file.is-medium {
   font-size: 1.25rem;
 }
-.file.is-medium .file-icon .fa, .file.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-medium .file-icon a::before {
+.file.is-medium .file-icon .fa, .file.is-medium .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-medium .file-icon .column + .column::before, .file.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-medium .file-icon a::before {
   font-size: 21px;
 }
 .file.is-large {
   font-size: 1.5rem;
 }
-.file.is-large .file-icon .fa, .file.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-large .file-icon a::before {
+.file.is-large .file-icon .fa, .file.is-large .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-large .file-icon .column + .column::before, .file.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-large .file-icon a::before {
   font-size: 28px;
 }
 .file.has-name .file-cta {
@@ -4165,16 +4165,16 @@ a.tag:hover {
   height: 1.5em;
   width: 1.5em;
 }
-.file.is-boxed .file-icon .fa, .file.is-boxed .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed .file-icon a::before {
+.file.is-boxed .file-icon .fa, .file.is-boxed .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-boxed .file-icon .column + .column::before, .file.is-boxed .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed .file-icon a::before {
   font-size: 21px;
 }
-.file.is-boxed.is-small .file-icon .fa, .file.is-boxed.is-small .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-small .file-icon a::before {
+.file.is-boxed.is-small .file-icon .fa, .file.is-boxed.is-small .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-boxed.is-small .file-icon .column + .column::before, .file.is-boxed.is-small .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-small .file-icon a::before {
   font-size: 14px;
 }
-.file.is-boxed.is-medium .file-icon .fa, .file.is-boxed.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-medium .file-icon a::before {
+.file.is-boxed.is-medium .file-icon .fa, .file.is-boxed.is-medium .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-boxed.is-medium .file-icon .column + .column::before, .file.is-boxed.is-medium .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-medium .file-icon a::before {
   font-size: 28px;
 }
-.file.is-boxed.is-large .file-icon .fa, .file.is-boxed.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-large .file-icon a::before {
+.file.is-boxed.is-large .file-icon .fa, .file.is-boxed.is-large .file-icon .training-mode .option .column + .column::before, .training-mode .option .file.is-boxed.is-large .file-icon .column + .column::before, .file.is-boxed.is-large .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file.is-boxed.is-large .file-icon a::before {
   font-size: 35px;
 }
 .file.is-boxed.has-name .file-cta {
@@ -4273,7 +4273,7 @@ a.tag:hover {
   margin-right: 0.5em;
   width: 1em;
 }
-.file-icon .fa, .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file-icon a::before {
+.file-icon .fa, .file-icon .training-mode .option .column + .column::before, .training-mode .option .file-icon .column + .column::before, .file-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .file-icon a::before {
   font-size: 14px;
 }
 
@@ -6549,7 +6549,7 @@ label.panel-block:hover {
   color: #8694a4;
   margin-right: 0.75em;
 }
-.panel-icon .fa, .panel-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-icon a::before {
+.panel-icon .fa, .panel-icon .training-mode .option .column + .column::before, .training-mode .option .panel-icon .column + .column::before, .panel-icon .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-icon a::before {
   font-size: inherit;
   line-height: inherit;
 }
@@ -9419,7 +9419,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   font-weight: normal;
   font-style: normal;
 }
-.fa, .panel.deck .panel-tabs a::before {
+.fa, .training-mode .option .column + .column::before, .panel.deck .panel-tabs a::before {
   display: inline-block;
   font: normal normal normal 14px/1 ForkAwesome;
   font-size: inherit;
@@ -9490,10 +9490,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   float: right;
 }
 
-.fa.fa-pull-left, .panel.deck .panel-tabs a.fa-pull-left::before {
+.fa.fa-pull-left, .training-mode .option .column + .fa-pull-left.column::before, .panel.deck .panel-tabs a.fa-pull-left::before {
   margin-right: 0.3em;
 }
-.fa.fa-pull-right, .panel.deck .panel-tabs a.fa-pull-right::before {
+.fa.fa-pull-right, .training-mode .option .column + .fa-pull-right.column::before, .panel.deck .panel-tabs a.fa-pull-right::before {
   margin-left: 0.3em;
 }
 
@@ -9506,10 +9506,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
   float: left;
 }
 
-.fa.pull-left, .panel.deck .panel-tabs a.pull-left::before {
+.fa.pull-left, .training-mode .option .column + .pull-left.column::before, .panel.deck .panel-tabs a.pull-left::before {
   margin-right: 0.3em;
 }
-.fa.pull-right, .panel.deck .panel-tabs a.pull-right::before {
+.fa.pull-right, .training-mode .option .column + .pull-right.column::before, .panel.deck .panel-tabs a.pull-right::before {
   margin-left: 0.3em;
 }
 
@@ -12760,12 +12760,12 @@ html, body {
   border-right: 0;
 }
 
-.panel-heading .fa, .panel-heading .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-heading a::before {
+.panel-heading .fa, .panel-heading .training-mode .option .column + .column::before, .training-mode .option .panel-heading .column + .column::before, .panel-heading .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .panel-heading a::before {
   vertical-align: middle;
   padding-bottom: 2px;
 }
 
-.panel-block > .fa, .panel.deck .panel-tabs .panel-block > a::before {
+.panel-block > .fa, .training-mode .option .panel-block > .column + .column::before, .panel.deck .panel-tabs .panel-block > a::before {
   margin-right: 10px;
   font-size: 1.3rem;
 }
@@ -13068,11 +13068,11 @@ textarea:focus {
 .tippy-content .button.is-focused {
   border-color: #4E5D6C;
 }
-.tippy-content .fa, .tippy-content .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .tippy-content a::before {
+.tippy-content .fa, .tippy-content .training-mode .option .column + .column::before, .training-mode .option .tippy-content .column + .column::before, .tippy-content .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .tippy-content a::before {
   font-size: 1.5rem;
   width: 25px;
 }
-.tippy-content .panel .fa, .tippy-content .panel.deck .panel-tabs a::before {
+.tippy-content .panel .fa, .tippy-content .panel .training-mode .option .column + .column::before, .training-mode .option .tippy-content .panel .column + .column::before, .tippy-content .panel.deck .panel-tabs a::before {
   font-size: 1.3rem;
 }
 .tippy-content .panel .panel-block {
@@ -13252,18 +13252,7 @@ textarea:focus {
   display: block;
 }
 
-.main {
-  display: none;
-  height: 100%;
-  position: relative;
-}
-.main.is-searched .sound-block {
-  display: none;
-}
-.main.is-gradient .sound-block {
-  background-color: transparent !important;
-}
-.main .sound-block {
+.sound-block {
   position: absolute !important;
   left: 10px;
   top: 0;
@@ -13279,12 +13268,25 @@ textarea:focus {
   background-color: rgba(31, 45, 59, 0.5);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.15) !important;
 }
+
+.main {
+  display: none;
+  height: 100%;
+  position: relative;
+}
+.main.is-searched .sound-block {
+  display: none;
+}
+.main.is-gradient .sound-block {
+  background-color: transparent !important;
+}
 .main .sound-block.is-found {
   display: inline-flex;
 }
 .main .sound-block:hover,
 .main .sound-block:focus {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
+  background-color: inherit;
 }
 .brush .main, .brush .main .sound-block {
   cursor: crosshair;
@@ -13359,13 +13361,14 @@ textarea:focus {
   border-bottom: 0;
   border-top: 0;
   padding: 5px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
 }
 .panel .bottom .button {
   height: 30px;
+  width: 100%;
   padding: 0 0.75em;
+}
+.panel .erase {
+  display: none;
 }
 
 .panel.navigator {
@@ -13498,11 +13501,11 @@ textarea:focus {
   background: #2B3E50;
   opacity: 0.8;
 }
-.panel.deck .batch .input {
+.panel.deck .batch .input, .panel.deck .training-mode .input {
   height: 30px;
   border: 0;
 }
-.panel.deck .batch .input::-webkit-inner-spin-button, .panel.deck .batch .input::-webkit-outer-spin-button {
+.panel.deck .batch .input::-webkit-inner-spin-button, .panel.deck .batch .input::-webkit-outer-spin-button, .panel.deck .training-mode .input::-webkit-inner-spin-button, .panel.deck .training-mode .input::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -13531,14 +13534,14 @@ textarea:focus {
   height: 30px;
   padding: 0 10px;
 }
-.panel.deck .buttons.edit .fa, .panel.deck .buttons.edit .panel-tabs a::before, .panel.deck .panel-tabs .buttons.edit a::before {
+.panel.deck .buttons.edit .fa, .panel.deck .buttons.edit .training-mode .option .column + .column::before, .training-mode .option .panel.deck .buttons.edit .column + .column::before, .panel.deck .buttons.edit .panel-tabs a::before, .panel.deck .panel-tabs .buttons.edit a::before {
   margin-right: 5px;
 }
 .panel.deck .buttons.color .button:first-child {
   padding: 0 25px;
   background: #1f2d3b;
 }
-.panel.deck .buttons.color .button.apply .fa, .panel.deck .buttons.color .button.apply .panel-tabs a::before, .panel.deck .panel-tabs .buttons.color .button.apply a::before {
+.panel.deck .buttons.color .button.apply .fa, .panel.deck .buttons.color .button.apply .training-mode .option .column + .column::before, .training-mode .option .panel.deck .buttons.color .button.apply .column + .column::before, .panel.deck .buttons.color .button.apply .panel-tabs a::before, .panel.deck .panel-tabs .buttons.color .button.apply a::before {
   margin-right: 0;
 }
 .panel.deck .buttons.color .button.selected {
@@ -13547,16 +13550,82 @@ textarea:focus {
 }
 
 .edit-mode {
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
+  display: none;
 }
 
-.has-bottom .edit-mode, .has-bottom .bottom {
-  opacity: 1;
-  pointer-events: auto;
+.training-mode {
+  padding: 5px;
 }
-.has-bottom .panel.deck .deck-items {
+.training-mode .option {
+  text-align: center;
+  min-height: 30px;
+}
+.training-mode .option.columns {
+  margin: 7px 0;
+}
+.training-mode .option .column {
+  position: relative;
+}
+.training-mode .option .column + .column::before {
+  content: "";
+  position: absolute;
+  width: 30px;
+  left: -15px;
+  top: 8px;
+  color: white;
+}
+.training-mode .input {
+  width: 30px;
+  text-align: center;
+  margin: 0 5px;
+  box-shadow: 0 0 0 0.125em rgba(134, 148, 164, 0.25);
+}
+.training-mode .bullet {
+  margin-right: 5px;
+}
+.training-mode .input, .training-mode .bullet {
+  vertical-align: middle;
+}
+.training-mode .radio {
+  margin-left: 0.5rem;
+}
+.training-mode .fa, .training-mode .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .training-mode a::before, .training-mode .option .column + .column::before {
+  opacity: 0.2;
+}
+.training-mode .num {
+  display: block;
+}
+.training-mode .start {
+  width: 75%;
+  font-size: 1.8rem;
+  padding: 5px 10px;
+  height: auto;
+  line-height: 1;
+  font-family: "Consolas", monospace;
+}
+.training-mode .html {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 95px;
+  margin-top: 10px;
+  background-color: #2B3E50;
+}
+.training-mode .html .sound-text {
+  padding: 0;
+}
+.training-mode .html .sound-block {
+  position: static !important;
+}
+
+.has-bottom .erase, .has-bottom .edit-mode {
+  display: block;
+}
+.has-bottom .training, .has-bottom .training-mode {
+  display: none;
+}
+
+.has-bottom .panel.deck .deck-items, .has-training .panel.deck .deck-items {
   height: calc(100% - 505px);
 }
 
