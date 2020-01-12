@@ -29,6 +29,7 @@ const editClass = 'has-bottom';
 const trainingClass = 'has-training';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
 const howlDb = {};
+const howlSounds = {};
 const pageSearch = {};
 const projectSearch = {};
 const blockBuffer = {type: '', blocks: {}};
@@ -99,7 +100,7 @@ function confirmAction(text, buttons) {
 
 // Toggle edit mode
 function toggleEditMode() {
-    const $blocks = $('.sound-block');
+    const $blocks = $('.main .sound-block');
     isEditMode = !isEditMode;
     $('body').toggleClass(editClass).removeClass(trainingClass);
 
@@ -452,11 +453,15 @@ function addDeckItemFromFile(soundPath) {
 }
 
 // Play sound, load if it's not loaded
-function playSound(element) {
+function playSound(element, onEnd, maxTime) {
     const hash = element.dataset.hash;
     const howl = howlDb[hash];
 
     stopCurrentSound();
+
+    if (onEnd !== undefined) {
+        howl.on('end', onEnd).on('stop', onEnd);
+    }
 
     if (howl.state() === 'unloaded') {
         howl.load();
@@ -469,6 +474,14 @@ function playSound(element) {
 
     lastPlayedHash = hash;
     $currentBlock = $(element);
+
+    if (maxTime !== undefined) {
+        setTimeout(function () {
+            if (howl.playing()) {
+                stopCurrentSound();
+            }
+        }, maxTime);
+    }
 }
 
 // Add multiple files as blocks
@@ -2198,8 +2211,8 @@ function unselectBlocks() {
 function removeBrushState() {
     $('#color-brush').removeClass('selected');
     $('body').removeClass('brush');
-    $('.main').selectable('enable');
-    $('.sound-block').draggable('enable').resizable('enable');
+    $('.main').selectable('enable')
+        .find('.sound-block').draggable('enable').resizable('enable');
 }
 
 // Erase 'pages' folder with cached pages
@@ -2263,6 +2276,13 @@ function getRandomHashFromBox(trainDb) {
     }
 
     return hash;
+}
+
+function updateBoxNumbers(trainDb) {
+    for (let i = 1; i < 5; i++) {
+        const picked = getfilteredHashesByBox(trainDb, i);
+        document.getElementById('box-' + i).textContent = picked.length;
+    }
 }
 
 // ================== //
@@ -2789,8 +2809,8 @@ $(function () {
             } else {
                 $this.addClass('selected');
                 $('body').addClass('brush');
-                $('.main').selectable('disable');
-                $('.sound-block').draggable('disable').resizable('disable');
+                $('.main').selectable('disable')
+                    .find('.sound-block').draggable('disable').resizable('disable');
             }
         }
     });
@@ -3133,15 +3153,20 @@ $(function () {
 
     // Start training button
     $('#start-training').click(function () {
+        const secNum = parseInt($('#train-secs').val(), 10);
         const pageMode = $('input[name="page-mode"]:checked').val();
         // 1const soundMode = $('input[name="sound-mode"]:checked').val();
 
+        const $timerBtn = $('#start-training');
         let trainDb = {};
+        let timerInterval;
+        let soundInterval;
+        let classTimeout;
 
         if (pageMode) {
             _.keys(allPages[currentTab].blocks).forEach(function (hash) {
                 if (allPages[currentTab].added.includes(hash)) {
-                    trainDb[hash] = _.random(3, 4);
+                    trainDb[hash] = 1;
                 }
             });
         }
@@ -3151,6 +3176,35 @@ $(function () {
         const hash = getRandomHashFromBox(trainDb);
         const $block = $('.sound-block[data-hash="' + hash + '"]').first().clone(true);
         $wrapper.html($block);
+
+        // Update box numbers
+        updateBoxNumbers(trainDb);
+
+        // Play sound
+        playSound($block[0], function () {
+            // When playing is finished
+            $timerBtn.removeClass('bg-pink').addClass('bg-green');
+
+            const startTime = Date.now();
+            timerInterval = setInterval(function () {
+                const elapsedTime = Date.now() - startTime - 1000;
+                $timerBtn[0].textContent = (elapsedTime / 1000).toFixed(1);
+            }, 100);
+
+            let counter = 1;
+            howlSounds.tick1.play();
+            soundInterval = setInterval(function () {
+                counter++;
+                howlSounds['tick' + counter].play();
+                if (counter === 8) {
+                    clearInterval(soundInterval);
+                }
+            }, 1000);
+
+            classTimeout = setTimeout(function () {
+                $timerBtn.removeClass('bg-green').addClass('bg-pink');
+            }, (secNum + 1) * 1000);
+        }, 3000);
     });
 
     // --------------- //
@@ -3528,5 +3582,20 @@ $(function () {
                 return false;
             }
         }
+    });
+
+    // -------------------------- //
+    //  Tick sounds for training  //
+    // -------------------------- //
+
+    const sounds = getAudioFilesInFolder('sounds');
+    sounds.forEach(function (file) {
+        const name = path.basename(file, path.extname(file));
+        const filePath = path.normalize(file);
+        howlSounds[name] = new hp.Howl({
+            src: filePath,
+            html5: true,
+            sinkId: deviceId
+        });
     });
 });

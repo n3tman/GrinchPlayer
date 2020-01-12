@@ -13596,7 +13596,7 @@ textarea:focus {
   display: block;
 }
 .training-mode .start {
-  width: 75%;
+  width: 85%;
   font-size: 1.8rem;
   padding: 5px 10px;
   height: auto;
@@ -13610,12 +13610,16 @@ textarea:focus {
   height: 95px;
   margin-top: 10px;
   background-color: #2B3E50;
+  position: relative;
 }
 .training-mode .html .sound-text {
   padding: 0;
 }
 .training-mode .html .sound-block {
   position: static !important;
+}
+.training-mode .html .sound-overlay {
+  background-color: rgba(255, 255, 255, 0.25);
 }
 
 .has-bottom .erase, .has-bottom .edit-mode {
