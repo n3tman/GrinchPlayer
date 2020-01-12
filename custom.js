@@ -101,7 +101,7 @@ function confirmAction(text, buttons) {
 function toggleEditMode() {
     const $blocks = $('.sound-block');
     isEditMode = !isEditMode;
-    toggleBodyClass(editClass);
+    $('body').toggleClass(editClass).removeClass(trainingClass);
 
     actionWithLoading(function () {
         if (isEditMode) {
@@ -2072,11 +2072,6 @@ function updateMainHeight() {
     }, 500);
 }
 
-// Toggle sidebar classes
-function toggleBodyClass(name) {
-    $('body').toggleClass(name);
-}
-
 // Return HTML code for a tab
 function getTabHtml(text, hash) {
     return '<li class="tab" data-page="' + hash + '">' +
@@ -2247,6 +2242,27 @@ function closeQuickSearch() {
     $quickSearch.removeClass('active');
     document.activeElement.blur();
     $('.is-searched, .is-found').removeClass('is-searched is-found');
+}
+
+function getfilteredHashesByBox(trainDb, box) {
+    return _.keys(_.pickBy(trainDb, function (num) {
+        return num === box;
+    }));
+}
+
+function getRandomHashFromBox(trainDb) {
+    let hash;
+
+    for (let i = 1; i < 4; i++) {
+        const picked = getfilteredHashesByBox(trainDb, i);
+        const size = picked.length;
+        if (size > 0) {
+            hash = picked[_.random(0, size - 1)];
+            break;
+        }
+    }
+
+    return hash;
 }
 
 // ================== //
@@ -3113,6 +3129,28 @@ $(function () {
     // Toggle training mode button
     $('#toggle-training').click(function () {
         toggleTrainingMode();
+    });
+
+    // Start training button
+    $('#start-training').click(function () {
+        const pageMode = $('input[name="page-mode"]:checked').val();
+        // 1const soundMode = $('input[name="sound-mode"]:checked').val();
+
+        let trainDb = {};
+
+        if (pageMode) {
+            _.keys(allPages[currentTab].blocks).forEach(function (hash) {
+                if (allPages[currentTab].added.includes(hash)) {
+                    trainDb[hash] = _.random(3, 4);
+                }
+            });
+        }
+
+        // Copy sound block to area
+        const $wrapper = $('.training-mode > .html');
+        const hash = getRandomHashFromBox(trainDb);
+        const $block = $('.sound-block[data-hash="' + hash + '"]').first().clone(true);
+        $wrapper.html($block);
     });
 
     // --------------- //
