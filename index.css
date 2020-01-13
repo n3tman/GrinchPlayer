@@ -12833,12 +12833,22 @@ textarea:focus {
   overflow: hidden;
 }
 
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
 .drag {
   -webkit-app-region: drag;
 }
 
 .no-drag {
   -webkit-app-region: no-drag;
+}
+
+.is-outline {
+  outline: 4px solid yellow;
 }
 
 .sound-overlay {
@@ -13501,14 +13511,9 @@ textarea:focus {
   background: #2B3E50;
   opacity: 0.8;
 }
-.panel.deck .batch .input, .panel.deck .training-mode .input {
-  height: 20px;
+.panel.deck .batch .input {
+  height: 30px;
   border: 0;
-  padding: 0 2px;
-}
-.panel.deck .batch .input::-webkit-inner-spin-button, .panel.deck .batch .input::-webkit-outer-spin-button, .panel.deck .training-mode .input::-webkit-inner-spin-button, .panel.deck .training-mode .input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
 }
 .panel.deck .control + .control {
   border-left: 1px solid #4E5D6C;
@@ -13562,7 +13567,7 @@ textarea:focus {
   min-height: 30px;
 }
 .training-mode .option.columns {
-  margin: 7px 0;
+  margin: 5px 0;
 }
 .training-mode .option .column {
   position: relative;
@@ -13577,6 +13582,9 @@ textarea:focus {
 }
 .training-mode .input {
   width: 30px;
+  height: 20px;
+  border: 0;
+  padding: 0 2px;
   text-align: center;
   margin: 0 5px;
   box-shadow: 0 0 0 0.125em rgba(134, 148, 164, 0.25);
@@ -13595,6 +13603,7 @@ textarea:focus {
 }
 .training-mode .num {
   display: block;
+  font-size: 1.2rem;
 }
 .training-mode .start {
   width: 85%;

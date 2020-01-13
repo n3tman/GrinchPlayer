@@ -133,6 +133,12 @@ textarea:focus {
     overflow: hidden;
 }
 
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 // ------------------ //
 //  Utilities
 // ------------------ //
@@ -143,6 +149,10 @@ textarea:focus {
 
 .no-drag {
     -webkit-app-region: no-drag;
+}
+
+.is-outline {
+    outline: 4px solid yellow;
 }
 
 .sound-overlay {
@@ -990,18 +1000,9 @@ textarea:focus {
         }
     }
 
-    .batch .input, .training-mode .input {
-        & {
-            height: 20px;
-            border: 0;
-            padding: 0 2px;
-        }
-
-        &::-webkit-inner-spin-button,
-        &::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+    .batch .input {
+        height: 30px;
+        border: 0;
     }
 
     .control + .control {
@@ -1073,7 +1074,7 @@ textarea:focus {
     }
 
     .option.columns {
-        margin: 7px 0;
+        margin: 5px 0;
     }
 
     .option .column {
@@ -1092,6 +1093,9 @@ textarea:focus {
 
     .input {
         width: 30px;
+        height: 20px;
+        border: 0;
+        padding: 0 2px;
         text-align: center;
         margin: 0 5px;
         box-shadow: $input-focus-box-shadow-size $input-focus-box-shadow-color;
@@ -1115,6 +1119,7 @@ textarea:focus {
 
     .num {
         display: block;
+        font-size: 1.2rem;
     }
 
     .start {

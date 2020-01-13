@@ -64,6 +64,7 @@ let $trainButton;
 let $trainMode;
 let currentBox;
 let training = {active: false, hash: ''};
+let trainFindTime;
 let trainPlayTime;
 
 window.$ = require('jquery');
@@ -853,13 +854,28 @@ function initNewPageBlocks(hash, isSaved) {
             } else if (training.active && training.hash === hash) {
                 howlDb[hash].off('end').off('stop');
                 clearTrainTimers();
+                $(this).removeClass('is-outline');
 
                 howlSounds.success.play();
                 if (training.inTime) {
                     $trainButton.addClass('bg-green');
+                    if (trainDb[training.hash] < 4) {
+                        trainDb[training.hash] += 1;
+                    }
+                } else {
+                    trainDb[training.hash] = 1;
                 }
 
-                playSound(this, trainPlayTime);
+                updateBoxNumbers();
+
+                playSound(this, trainPlayTime, function () {
+                    clearTimeout(training.maxTime);
+
+                    training.next = setTimeout(function () {
+                        $trainButton.removeClass('bg-green bg-pink');
+                        pickNextTrainingSound();
+                    }, 300);
+                });
             } else if (training.active) {
                 howlSounds.fail.play();
             }
@@ -2307,8 +2323,11 @@ function getfilteredHashesByBox(trainDb, box, exact) {
 
 // Extract random hash from currentBox recursively
 function getRandomHashFromBox(trainDb) {
-    const picked = getfilteredHashesByBox(trainDb, currentBox);
+    if (currentBox === 4) {
+        return false;
+    }
 
+    const picked = getfilteredHashesByBox(trainDb, currentBox);
     const size = picked.length;
     if (size > 0) {
         return picked[_.random(0, size - 1)];
@@ -2323,7 +2342,7 @@ function getRandomHashFromBox(trainDb) {
 }
 
 // Update number of items in boxes
-function updateBoxNumbers(trainDb) {
+function updateBoxNumbers() {
     for (let i = 1; i < 5; i++) {
         const picked = getfilteredHashesByBox(trainDb, i, true);
         document.querySelector('#box-' + i).textContent = picked.length;
@@ -2344,6 +2363,7 @@ function clearTrainTimers() {
     clearInterval(training.timer);
     clearInterval(training.sound);
     clearTimeout(training.class);
+    clearTimeout(training.next);
     clearTimeout(training.maxTime);
 }
 
@@ -2358,8 +2378,51 @@ function resetTrainingMode() {
     $trainButton.removeClass('bg-green bg-pink').text('Начать');
     $trainMode.find('.num').text('0');
     $trainMode.find('.html').html('');
+    $('.is-outline').removeClass('is-outline');
     training = {active: false, hash: ''};
     trainDb = {};
+}
+
+// Pick next sounds when in training mode
+function pickNextTrainingSound() {
+    const hash = getRandomHashFromBox(trainDb);
+    if (!hash) {
+        howlSounds.win.play();
+        return;
+    }
+
+    training.hash = hash;
+    training.inTime = true;
+    $trainButton.text('🔊');
+
+    // Copy sound block to area
+    const $original = $('.sound-block[data-hash="' + hash + '"]').first();
+    const $block = $original.clone(true);
+    $trainMode.find('.html').html($block);
+
+    // Play sound
+    playSound($block[0], trainPlayTime, function () {
+        clearTimeout(training.maxTime);
+        $trainButton.removeClass('bg-pink').addClass('bg-green');
+
+        updateTrainCounter(1000);
+
+        let counter = 1;
+        howlSounds.tick1.play();
+        training.sound = setInterval(function () {
+            counter++;
+            howlSounds['tick' + counter].play();
+            if (counter === 8) {
+                $original.addClass('is-outline');
+                clearInterval(training.sound);
+            }
+        }, 1000);
+
+        training.class = setTimeout(function () {
+            $trainButton.removeClass('bg-green').addClass('bg-pink');
+            training.inTime = false;
+        }, trainFindTime + 1000);
+    });
 }
 
 // ================== //
@@ -3628,11 +3691,11 @@ $(function () {
             const $trainSecs = $('#train-secs');
             const $playSecs = $('#play-secs');
 
-            let trainSecs = parseInt($trainSecs.val(), 10);
+            trainFindTime = parseInt($trainSecs.val(), 10) * 1000;
             trainPlayTime = parseInt($playSecs.val(), 10) * 1000;
 
-            if (trainSecs < 1) {
-                trainSecs = 2;
+            if (trainFindTime < 1) {
+                trainFindTime = 2000;
                 $trainSecs.val('2');
             }
 
@@ -3654,44 +3717,9 @@ $(function () {
             }
 
             currentBox = 1;
-            updateBoxNumbers(trainDb);
+            updateBoxNumbers();
 
-            // Pick hash from DB randomly
-            const hash = getRandomHashFromBox(trainDb);
-            if (!hash) {
-                return;
-            }
-
-            training.hash = hash;
-            training.inTime = true;
-            $trainButton.text('🔊');
-
-            // Copy sound block to area
-            const $block = $('.sound-block[data-hash="' + hash + '"]').first().clone(true);
-            $trainMode.find('.html').html($block);
-
-            // Play sound
-            playSound($block[0], trainPlayTime, function () {
-                // When playing is finished
-                $trainButton.removeClass('bg-pink').addClass('bg-green');
-
-                updateTrainCounter(1000);
-
-                let counter = 1;
-                howlSounds.tick1.play();
-                training.sound = setInterval(function () {
-                    counter++;
-                    howlSounds['tick' + counter].play();
-                    if (counter === 8) {
-                        clearInterval(training.sound);
-                    }
-                }, 1000);
-
-                training.class = setTimeout(function () {
-                    $trainButton.removeClass('bg-green').addClass('bg-pink');
-                    training.inTime = false;
-                }, (trainSecs + 1) * 1000);
-            });
+            pickNextTrainingSound();
         }
     });
 
