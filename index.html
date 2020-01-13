@@ -113,41 +113,39 @@
         </div>
         <div class="panel-block bottom" id="deck-bottom">
             <button class="button is-link is-outlined training" id="toggle-training">
-                Режим обучения
+                Тренировка
             </button>
             <button class="button is-link is-outlined erase" id="remove-deck" title="Очистить колоду" disabled>
                 Очистить
             </button>
         </div>
-        <div class="training-mode">
+        <div class="training-mode" id="training-mode">
             <div class="option">
                 Успевать кликать за <input class="input" min="1" type="number" value="2" id="train-secs"> сек.
             </div>
             <div class="option">
-                Стр.
-                <label class="radio"><input class="bullet" type="radio" name="page-mode" value="1" checked>текущая</label>
-                <label class="radio"><input class="bullet" type="radio" name="page-mode" value="0">активные</label>
+                Проигрывать макс. <input class="input" min="1" type="number" value="3" id="play-secs"> сек.
             </div>
             <div class="option">
-                Звуки
-                <label class="radio"><input class="bullet" type="radio" name="sound-mode" value="1" checked>все сразу</label>
-                <label class="radio"><input class="bullet" type="radio" name="sound-mode" value="0">по 30</label>
+                <label class="radio" title="Текущая страница"><input class="bullet" type="radio" name="sound-mode" value="page" checked>текущ.</label>
+                <label class="radio" title="Все страницы"><input class="bullet" type="radio" name="sound-mode" value="active">все стр.</label>
+                <label class="radio" title="Выделенные звуки"><input class="bullet" type="radio" name="sound-mode" value="selected">выдел.</label>
             </div>
             <div class="option columns is-gapless">
                 <div class="column">
-                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">1</strong></span>
+                    <span class="icon fa-stack" title="Коробка №1"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">1</strong></span>
                     <span class="num" id="box-1">0</span>
                 </div>
                 <div class="column">
-                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">2</strong></span>
+                    <span class="icon fa-stack" title="Коробка №2"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">2</strong></span>
                     <span class="num" id="box-2">0</span>
                 </div>
                 <div class="column">
-                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">3</strong></span>
+                    <span class="icon fa-stack" title="Коробка №3"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">3</strong></span>
                     <span class="num" id="box-3">0</span>
                 </div>
                 <div class="column">
-                    <span class="icon fa-stack"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">4</strong></span>
+                    <span class="icon fa-stack" title="Коробка №4"><i class="fa fa-square fa-stack-2x"></i><strong class="fa-stack-1x">4</strong></span>
                     <span class="num" id="box-4">0</span>
                 </div>
             </div>

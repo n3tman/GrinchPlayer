@@ -13502,8 +13502,9 @@ textarea:focus {
   opacity: 0.8;
 }
 .panel.deck .batch .input, .panel.deck .training-mode .input {
-  height: 30px;
+  height: 20px;
   border: 0;
+  padding: 0 2px;
 }
 .panel.deck .batch .input::-webkit-inner-spin-button, .panel.deck .batch .input::-webkit-outer-spin-button, .panel.deck .training-mode .input::-webkit-inner-spin-button, .panel.deck .training-mode .input::-webkit-outer-spin-button {
   -webkit-appearance: none;
@@ -13586,7 +13587,7 @@ textarea:focus {
 .training-mode .input, .training-mode .bullet {
   vertical-align: middle;
 }
-.training-mode .radio {
+.training-mode .radio + .radio {
   margin-left: 0.5rem;
 }
 .training-mode .fa, .training-mode .panel.deck .panel-tabs a::before, .panel.deck .panel-tabs .training-mode a::before, .training-mode .option .column + .column::before {

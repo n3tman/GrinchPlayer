@@ -992,8 +992,9 @@ textarea:focus {
 
     .batch .input, .training-mode .input {
         & {
-            height: 30px;
+            height: 20px;
             border: 0;
+            padding: 0 2px;
         }
 
         &::-webkit-inner-spin-button,
@@ -1104,7 +1105,7 @@ textarea:focus {
         vertical-align: middle;
     }
 
-    .radio {
+    .radio + .radio {
         margin-left: 0.5rem;
     }
 

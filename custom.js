@@ -61,9 +61,10 @@ let infoGradientActive = false;
 
 let trainDb = {};
 let $trainButton;
-let currentBox = 1;
-const training = {active: false, hash: ''};
-const trainPlayTime = 3000;
+let $trainMode;
+let currentBox;
+let training = {active: false, hash: ''};
+let trainPlayTime;
 
 window.$ = require('jquery');
 window.jQuery = require('jquery');
@@ -108,7 +109,11 @@ function confirmAction(text, buttons) {
 function toggleEditMode() {
     const $blocks = $('.main .sound-block');
     isEditMode = !isEditMode;
-    $('body').toggleClass(editClass).removeClass(trainingClass);
+    $('body').toggleClass(editClass);
+
+    if (isTrainingMode) {
+        toggleTrainingMode();
+    }
 
     actionWithLoading(function () {
         if (isEditMode) {
@@ -150,6 +155,10 @@ function toggleEditMode() {
 function toggleTrainingMode() {
     isTrainingMode = !isTrainingMode;
     $('body').toggleClass(trainingClass);
+
+    if (training.active) {
+        resetTrainingMode();
+    }
 }
 
 // Initialize draggable/resizable block
@@ -835,23 +844,25 @@ function initNewPageBlocks(hash, isSaved) {
 
     $mainSelector.on('click', '.sound-block', function (e) {
         const hash = this.dataset.hash;
-        let maxTime;
 
         if (!isEditMode && !e.ctrlKey) {
-            if (training.active && training.hash === hash) {
-                $trainButton.addClass('bg-green');
-                howlDb[hash].off('end').off('stop');
-                clearTrainTimers();
-                maxTime = trainPlayTime;
-                howlSounds.success.play();
-            } else if (training.active) {
-                howlSounds.fail.play();
-            } else {
+            if (!training.active) {
                 allPages[currentTab].blocks[hash].lastDate = new Date().toISOString();
                 allPages[currentTab].blocks[hash].counter += 1;
-            }
+                playSound(this);
+            } else if (training.active && training.hash === hash) {
+                howlDb[hash].off('end').off('stop');
+                clearTrainTimers();
 
-            playSound(this, maxTime);
+                howlSounds.success.play();
+                if (training.inTime) {
+                    $trainButton.addClass('bg-green');
+                }
+
+                playSound(this, trainPlayTime);
+            } else if (training.active) {
+                howlSounds.fail.play();
+            }
         }
 
         if (e.ctrlKey) {
@@ -2276,12 +2287,14 @@ function processJsonFiles(files, json) {
     return counter;
 }
 
+// Close quick search input
 function closeQuickSearch() {
     $quickSearch.removeClass('active');
     document.activeElement.blur();
     $('.is-searched, .is-found').removeClass('is-searched is-found');
 }
 
+// Get hashes that match one or more boxes
 function getfilteredHashesByBox(trainDb, box, exact) {
     return _.keys(_.pickBy(trainDb, function (num) {
         if (exact) {
@@ -2292,6 +2305,7 @@ function getfilteredHashesByBox(trainDb, box, exact) {
     }));
 }
 
+// Extract random hash from currentBox recursively
 function getRandomHashFromBox(trainDb) {
     const picked = getfilteredHashesByBox(trainDb, currentBox);
 
@@ -2308,6 +2322,7 @@ function getRandomHashFromBox(trainDb) {
     return false;
 }
 
+// Update number of items in boxes
 function updateBoxNumbers(trainDb) {
     for (let i = 1; i < 5; i++) {
         const picked = getfilteredHashesByBox(trainDb, i, true);
@@ -2315,20 +2330,36 @@ function updateBoxNumbers(trainDb) {
     }
 }
 
+// Timer function for training mode
 function updateTrainCounter(offset) {
     const startTime = Date.now();
-    clearInterval(training.timer);
     training.timer = setInterval(function () {
         const elapsedTime = Date.now() - startTime - offset;
         $trainButton[0].textContent = (elapsedTime / 1000).toFixed(1);
     }, 100);
 }
 
+// Clear all training timers
 function clearTrainTimers() {
     clearInterval(training.timer);
     clearInterval(training.sound);
     clearTimeout(training.class);
     clearTimeout(training.maxTime);
+}
+
+// Reset initial state of training mode
+function resetTrainingMode() {
+    if (training.hash) {
+        howlDb[training.hash].off('end').off('stop');
+    }
+
+    stopCurrentSound();
+    clearTrainTimers();
+    $trainButton.removeClass('bg-green bg-pink').text('Начать');
+    $trainMode.find('.num').text('0');
+    $trainMode.find('.html').html('');
+    training = {active: false, hash: ''};
+    trainDb = {};
 }
 
 // ================== //
@@ -2354,6 +2385,7 @@ $(function () {
     $quickSearch = $('#quick-search');
     $tabList = $('#tabs > ul');
     $wrapper = $('.wrapper');
+    $trainMode = $('#training-mode');
     $trainButton = $('#start-training');
 
     // Set moment.js locale globally
@@ -3193,69 +3225,6 @@ $(function () {
         }
     });
 
-    // Toggle training mode button
-    $('#toggle-training').click(function () {
-        toggleTrainingMode();
-    });
-
-    // Start training button
-    $trainButton.click(function () {
-        if (!training.active) {
-            const secNum = parseInt($('#train-secs').val(), 10);
-            const pageMode = $('input[name="page-mode"]:checked').val();
-            // 1const soundMode = $('input[name="sound-mode"]:checked').val();
-
-            training.active = true;
-
-            if (pageMode) {
-                _.keys(allPages[currentTab].blocks).forEach(function (hash) {
-                    if (allPages[currentTab].added.includes(hash)) {
-                        trainDb[hash] = 1;
-                    }
-                });
-            }
-
-            updateBoxNumbers(trainDb);
-            $trainButton.text('');
-
-            // Pick hash from DB randomly
-            const hash = getRandomHashFromBox(trainDb);
-            if (!hash) {
-                return;
-            }
-
-            training.hash = hash;
-            training.inTime = true;
-
-            // Copy sound block to area
-            const $block = $('.sound-block[data-hash="' + hash + '"]').first().clone(true);
-            $('.training-mode > .html').html($block);
-
-            // Play sound
-            playSound($block[0], trainPlayTime, function () {
-                // When playing is finished
-                $trainButton.removeClass('bg-pink').addClass('bg-green');
-
-                updateTrainCounter(1000);
-
-                let counter = 1;
-                howlSounds.tick1.play();
-                training.sound = setInterval(function () {
-                    counter++;
-                    howlSounds['tick' + counter].play();
-                    if (counter === 8) {
-                        clearInterval(training.sound);
-                    }
-                }, 1000);
-
-                training.class = setTimeout(function () {
-                    $trainButton.removeClass('bg-green').addClass('bg-pink');
-                    training.inTime = false;
-                }, (secNum + 1) * 1000);
-            });
-        }
-    });
-
     // --------------- //
     //  Set device ID  //
     // --------------- //
@@ -3646,5 +3615,87 @@ $(function () {
             html5: true,
             sinkId: deviceId
         });
+    });
+
+    // Toggle training mode button
+    $('#toggle-training').click(function () {
+        toggleTrainingMode();
+    });
+
+    // Start training button
+    $trainButton.click(function () {
+        if (!training.active) {
+            const $trainSecs = $('#train-secs');
+            const $playSecs = $('#play-secs');
+
+            let trainSecs = parseInt($trainSecs.val(), 10);
+            trainPlayTime = parseInt($playSecs.val(), 10) * 1000;
+
+            if (trainSecs < 1) {
+                trainSecs = 2;
+                $trainSecs.val('2');
+            }
+
+            if (trainPlayTime < 1) {
+                trainPlayTime = 3000;
+                $playSecs.val('3');
+            }
+
+            const pageMode = $('input[name="sound-mode"]:checked').val();
+
+            training.active = true;
+
+            if (pageMode === 'page') {
+                _.keys(allPages[currentTab].blocks).forEach(function (hash) {
+                    if (allPages[currentTab].added.includes(hash)) {
+                        trainDb[hash] = 1;
+                    }
+                });
+            }
+
+            currentBox = 1;
+            updateBoxNumbers(trainDb);
+
+            // Pick hash from DB randomly
+            const hash = getRandomHashFromBox(trainDb);
+            if (!hash) {
+                return;
+            }
+
+            training.hash = hash;
+            training.inTime = true;
+            $trainButton.text('🔊');
+
+            // Copy sound block to area
+            const $block = $('.sound-block[data-hash="' + hash + '"]').first().clone(true);
+            $trainMode.find('.html').html($block);
+
+            // Play sound
+            playSound($block[0], trainPlayTime, function () {
+                // When playing is finished
+                $trainButton.removeClass('bg-pink').addClass('bg-green');
+
+                updateTrainCounter(1000);
+
+                let counter = 1;
+                howlSounds.tick1.play();
+                training.sound = setInterval(function () {
+                    counter++;
+                    howlSounds['tick' + counter].play();
+                    if (counter === 8) {
+                        clearInterval(training.sound);
+                    }
+                }, 1000);
+
+                training.class = setTimeout(function () {
+                    $trainButton.removeClass('bg-green').addClass('bg-pink');
+                    training.inTime = false;
+                }, (trainSecs + 1) * 1000);
+            });
+        }
+    });
+
+    $trainMode.find('input').on('input', function () {
+        resetTrainingMode();
     });
 });
