@@ -3696,7 +3696,7 @@ $(function () {
     //  Training mode  //
     // --------------- //
 
-    const sounds = getAudioFilesInFolder('sounds');
+    const sounds = getAudioFilesInFolder(path.dirname(__dirname) + path.sep + 'sounds');
     sounds.forEach(function (file) {
         const name = path.basename(file, path.extname(file));
         const filePath = path.normalize(file);
