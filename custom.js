@@ -60,6 +60,7 @@ let infoTipsActive = false;
 let infoGradientActive = false;
 
 let trainDb = {};
+let customTrain = {};
 let $trainButton;
 let $trainMode;
 let currentBox;
@@ -456,7 +457,6 @@ function addDeckItemFromFile(soundPath) {
         const selector = '[data-hash="' + hash + '"]';
 
         allPages[currentTab].blocks[hash] = {
-            hash: hash,
             text: text,
             path: path.normalize(soundPath)
         };
@@ -870,6 +870,7 @@ function initNewPageBlocks(hash, isSaved) {
 
                 playSound(this, trainPlayTime, function () {
                     clearTimeout(training.maxTime);
+                    $trainMode.find('.html').html('');
 
                     training.next = setTimeout(function () {
                         $trainButton.removeClass('bg-green bg-pink');
@@ -1310,6 +1311,30 @@ function selectedBlocksAction(message, callback) {
         }
 
         showNotification(message + ': <b>' + counter + '</b>', false, 2000);
+    }
+}
+
+// Add selected blocks to custom training
+function addToCustomTraining(replace) {
+    const $selected = $main.find('.ui-selected');
+    if (isEditMode && $selected.length > 0) {
+        if (replace) {
+            customTrain = {};
+        }
+
+        const oldSize = _.size(customTrain);
+
+        $selected.each(function () {
+            const hash = this.dataset.hash;
+            customTrain[hash] = true;
+        });
+
+        const newSize = _.size(customTrain);
+
+        unselectBlocks();
+
+        showNotification('Для тренировки добавлено: <b>' + (newSize - oldSize) +
+            '</b>. Всего: <b>' + newSize + '</b>');
     }
 }
 
@@ -3553,7 +3578,9 @@ $(function () {
 
     // Apply color to blocks hotkey
     addHotkey('ctrl+d', function () {
-        applySelectedBlockColor();
+        if (isEditMode) {
+            applySelectedBlockColor();
+        }
     });
 
     // Toggle left sidebar
@@ -3687,7 +3714,7 @@ $(function () {
 
     // Start training button
     $trainButton.click(function () {
-        if (!training.active) {
+        if (!training.active && _.size(activePages) > 0) {
             const $trainSecs = $('#train-secs');
             const $playSecs = $('#play-secs');
 
@@ -3714,6 +3741,23 @@ $(function () {
                         trainDb[hash] = 1;
                     }
                 });
+            } else if (pageMode === 'active') {
+                _.keys(activePages).forEach(function (page) {
+                    _.keys(allPages[page].blocks).forEach(function (hash) {
+                        if (allPages[page].added.includes(hash)) {
+                            trainDb[hash] = 1;
+                        }
+                    });
+                });
+            } else if (pageMode === 'selected') {
+                if (_.size(customTrain) > 0) {
+                    _.keys(customTrain).forEach(function (hash) {
+                        trainDb[hash] = 1;
+                    });
+                } else {
+                    showNotification('Нужно добавить блоки через <b>Shift+C</b> или <b>Shift+D</b>', true);
+                    return;
+                }
             }
 
             currentBox = 1;
@@ -3725,5 +3769,13 @@ $(function () {
 
     $trainMode.find('input').on('input', function () {
         resetTrainingMode();
+    });
+
+    addHotkey('shift+c', function () {
+        addToCustomTraining(true);
+    });
+
+    addHotkey('shift+d', function () {
+        addToCustomTraining(false);
     });
 });
