@@ -13,7 +13,7 @@
 		"test": "npm run lint",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --win",
+		"dist": "electron-builder --macos --linux --windows",
 		"release": "np",
 		"sass": "node-sass index.scss index.css"
 	},
