@@ -13,7 +13,9 @@
 		"test": "npm run lint",
 		"start": "electron .",
 		"pack": "electron-builder --dir",
-		"dist": "electron-builder --macos --linux --windows",
+		"dist": "electron-builder --macos --linux",
+		"win": "electron-builder --x64 --windows",
+		"win32": "electron-builder --ia32 --windows",
 		"release": "np",
 		"sass": "node-sass index.scss index.css"
 	},
@@ -88,10 +90,12 @@
 			"target": "portable"
 		},
 		"mac": {
-			"target": "zip"
+			"target": "zip",
+            "category": "public.app-category.utilities"
 		},
 		"linux": {
-			"target": "AppImage"
+			"target": "AppImage",
+            "category": "Utility"
 		}
 	}
 }

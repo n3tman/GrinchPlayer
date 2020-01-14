@@ -5,3 +5,11 @@ node_js: '12'
 script:
   - npm test
   - npm run dist
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: dist/GrinchPlayer*
+  skip_cleanup: true
+  on:
+    tags: true
