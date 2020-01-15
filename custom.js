@@ -65,6 +65,7 @@ let $trainButton;
 let $trainMode;
 let currentBox;
 let training = {active: false, hash: ''};
+let trainingMode;
 let trainFindTime;
 let trainPlayTime;
 
@@ -851,10 +852,11 @@ function initNewPageBlocks(hash, isSaved) {
                 allPages[currentTab].blocks[hash].lastDate = new Date().toISOString();
                 allPages[currentTab].blocks[hash].counter += 1;
                 playSound(this);
-            } else if (training.active && training.hash === hash) {
+            } else if (training.active && !training.clicked && training.hash === hash) {
+                training.clicked = true;
                 howlDb[hash].off('end').off('stop');
                 clearTrainTimers();
-                $(this).removeClass('is-outline');
+                $('.is-outline').removeClass('is-outline');
 
                 howlSounds.success.play();
                 if (training.inTime) {
@@ -888,7 +890,7 @@ function initNewPageBlocks(hash, isSaved) {
         }
     }).on('contextmenu', function (e) {
         // Pause/play already playing sound
-        if (!e.target.classList.contains('ui-resizable-handle')) {
+        if (!e.target.classList.contains('ui-resizable-handle') && !training.active) {
             const sound = howlDb[lastPlayedHash];
 
             if (sound) {
@@ -2416,13 +2418,24 @@ function pickNextTrainingSound() {
         return;
     }
 
+    training.clicked = false;
     training.hash = hash;
     training.inTime = true;
     $trainButton.text('🔊');
 
     // Copy sound block to area
-    const $original = $('.sound-block[data-hash="' + hash + '"]').first();
-    const $block = $original.clone(true);
+    const blockSelector = '.sound-block[data-hash="' + hash + '"]';
+    const pageSelector = '.main[data-page="' + training.page + '"]';
+    const $currentBlocks = $(pageSelector).find(blockSelector);
+    const $allBlocks = $(blockSelector);
+    let $block;
+
+    if (trainingMode === 'page') {
+        $block = $currentBlocks.first().clone();
+    } else {
+        $block = $allBlocks.first().clone();
+    }
+
     $trainMode.find('.html').html($block);
 
     // Play sound
@@ -2438,13 +2451,22 @@ function pickNextTrainingSound() {
             counter++;
             howlSounds['tick' + counter].play();
             if (counter === 8) {
-                $original.addClass('is-outline');
-                clearInterval(training.sound);
+                counter--;
             }
         }, 1000);
 
         training.class = setTimeout(function () {
             $trainButton.removeClass('bg-green').addClass('bg-pink');
+            clearInterval(training.sound);
+            if (trainingMode === 'page') {
+                $currentBlocks.addClass('is-outline');
+            } else {
+                $allBlocks.addClass('is-outline').each(function () {
+                    const page = this.parentElement.dataset.page;
+                    $tabList.find('[data-page="' + page + '"]').addClass('is-outline');
+                });
+            }
+
             training.inTime = false;
         }, trainFindTime + 1000);
     });
@@ -3141,6 +3163,7 @@ $(function () {
         if (isEditMode) {
             const $parent = $(this).parent();
             const hash = $parent.attr('data-page');
+            const cachePath = path.join(remote.app.getPath('userData'), 'pages', hash + '.json');
 
             if (confirmAction('Удалить страницу ' + allPages[hash].name.toUpperCase() + ' из базы?') === 1) {
                 actionWithLoading(function () {
@@ -3152,6 +3175,11 @@ $(function () {
                     updatePageSearch();
 
                     delete allPages[hash];
+
+                    // Remove cached file if it exists
+                    if (fs.existsSync(cachePath)) {
+                        fs.unlinkSync(cachePath);
+                    }
 
                     // Remove page from all projects
                     _.keys(allProjects).forEach(function (proj) {
@@ -3199,7 +3227,9 @@ $(function () {
     // -------------- //
 
     $('#deck').on('contextmenu', '.deck-items .panel-block', function () {
-        playSound(this);
+        if (!training.active) {
+            playSound(this);
+        }
     }).on('click', '.deck-items .panel-block', function (e) {
         if (e.ctrlKey) {
             const path = allPages[currentTab].blocks[this.dataset.hash].path;
@@ -3696,7 +3726,16 @@ $(function () {
     //  Training mode  //
     // --------------- //
 
-    const sounds = getAudioFilesInFolder(path.dirname(__dirname) + path.sep + 'sounds');
+    let howlSoundPath = path.join(process.resourcesPath, 'sounds');
+    if (!fs.existsSync(howlSoundPath)) {
+        howlSoundPath = path.join(path.dirname(__dirname), 'sounds');
+    }
+
+    if (!fs.existsSync(howlSoundPath)) {
+        howlSoundPath = path.join(remote.app.getAppPath(), 'sounds');
+    }
+
+    const sounds = getAudioFilesInFolder(howlSoundPath);
     sounds.forEach(function (file) {
         const name = path.basename(file, path.extname(file));
         const filePath = path.normalize(file);
@@ -3731,17 +3770,18 @@ $(function () {
                 $playSecs.val('3');
             }
 
-            const pageMode = $('input[name="sound-mode"]:checked').val();
+            trainingMode = $('input[name="sound-mode"]:checked').val();
 
             training.active = true;
 
-            if (pageMode === 'page') {
+            if (trainingMode === 'page') {
+                training.page = currentTab;
                 _.keys(allPages[currentTab].blocks).forEach(function (hash) {
                     if (allPages[currentTab].added.includes(hash)) {
                         trainDb[hash] = 1;
                     }
                 });
-            } else if (pageMode === 'active') {
+            } else if (trainingMode === 'active') {
                 _.keys(activePages).forEach(function (page) {
                     _.keys(allPages[page].blocks).forEach(function (hash) {
                         if (allPages[page].added.includes(hash)) {
@@ -3749,7 +3789,7 @@ $(function () {
                         }
                     });
                 });
-            } else if (pageMode === 'selected') {
+            } else if (trainingMode === 'selected') {
                 if (_.size(customTrain) > 0) {
                     _.keys(customTrain).forEach(function (hash) {
                         trainDb[hash] = 1;
