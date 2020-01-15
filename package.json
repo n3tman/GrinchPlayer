@@ -85,7 +85,7 @@
 	},
 	"build": {
 		"appId": "com.Nik.GrinchPlayer",
-		"extraResources": "sounds/*.mp3",
+		"extraResources": "sounds/*.ogg",
 		"win": {
 			"target": "portable"
 		},
