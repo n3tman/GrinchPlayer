@@ -1,7 +1,7 @@
 {
 	"name": "grinch-player",
 	"productName": "GrinchPlayer",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"description": "Технопранк-плеер",
 	"license": "MIT",
 	"author": {
@@ -85,17 +85,17 @@
 	},
 	"build": {
 		"appId": "com.Nik.GrinchPlayer",
-        "extraResources": "sounds/*.mp3",
+		"extraResources": "sounds/*.mp3",
 		"win": {
 			"target": "portable"
 		},
 		"mac": {
 			"target": "zip",
-            "category": "public.app-category.utilities"
+			"category": "public.app-category.utilities"
 		},
 		"linux": {
 			"target": "AppImage",
-            "category": "Utility"
+			"category": "Utility"
 		}
 	}
 }
