@@ -16,7 +16,7 @@ app.setAppUserModelId('com.Nik.GrinchPlayer');
 app.disableHardwareAcceleration();
 
 // Set userData to current folder (portable app)
-// app.setPath('userData', process.env.PORTABLE_EXECUTABLE_DIR + '/' + app.getName());
+app.setPath('userData', process.env.PORTABLE_EXECUTABLE_DIR + '/' + app.getName());
 
 // Prevent variables from being garbage collected
 let mainWindow;
