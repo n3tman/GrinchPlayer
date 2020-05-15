@@ -23,8 +23,8 @@ const moment = require('moment');
 const hp = require('./vendor/howler');
 const config = require('./config');
 
-const keyboardArray = ['q', 'w', 'e', 'r', 't', 'a', 's', 'd', 'f', 'g', 'z', 'x', 'c', 'v', 'b'];
-const russianArray = ['й', 'ц', 'у', 'к', 'е', 'ф', 'ы', 'в', 'а', 'п', 'я', 'ч', 'с', 'м', 'и'];
+const keyboardArray = ['q', 'w', 'e', 'r', 't', 'y', 'u', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'z', 'x', 'c', 'v', 'b', 'n', 'm'];
+const russianArray = ['й', 'ц', 'у', 'к', 'е', 'н', 'г', 'ф', 'ы', 'в', 'а', 'п', 'р', 'о', 'я', 'ч', 'с', 'м', 'и', 'т', 'ь'];
 const editClass = 'has-bottom';
 const trainingClass = 'has-training';
 const audioExtensions = ['mp3', 'mpeg', 'opus', 'ogg', 'oga', 'wav', 'aac', 'caf', 'm4a', 'mp4', 'weba', 'webm', 'dolby', 'flac'];
@@ -1237,10 +1237,10 @@ function initEditableProject($item) {
 // Update numbers in tabs
 function reorderTabs() {
     $('#tabs .tab').each(function (index) {
-        if (index < 5 || index > 19) {
+        if (index < 7 || index > 27) {
             $(this).find('strong').text(index + 1);
         } else {
-            $(this).find('strong').text(russianArray[index - 5].toUpperCase());
+            $(this).find('strong').text(russianArray[index - 7].toUpperCase());
         }
     });
 }
@@ -3488,17 +3488,17 @@ $(function () {
         }
     });
 
-    // Quick switch keys 1-10
-    [1, 2, 3, 4, 5].forEach(function (val, i) {
+    // Quick switch keys 1-7
+    [1, 2, 3, 4, 5, 6, 7].forEach(function (val, i) {
         addHotkey(val.toString(), function () {
             $tabList.find('li').eq(i).click();
         });
     });
 
-    // Quick switch keys 11-20
+    // Quick switch keys 8-28
     keyboardArray.forEach(function (val, i) {
         addHotkey(val, function () {
-            $tabList.find('li').eq(i + 5).click();
+            $tabList.find('li').eq(i + 7).click();
         });
     });
 
